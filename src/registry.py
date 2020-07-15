@@ -51,7 +51,9 @@ class Registry:
         return format_str        
 
     def add(self, category, clazz=None):
-        self.categories[category] = Category(category)
+        if category not in self.categories:
+            self.categories[category] = Category(category)
+
         if clazz is not None:
             self.categories[category].add(clazz)
 

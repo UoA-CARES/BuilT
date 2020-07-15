@@ -14,11 +14,21 @@ class TestRegistry(unittest.TestCase):
             def __call__(self):
                 pass
 
+        class myclass2():
+            def __call__(self):
+                pass
+
         registry = Registry()
         cat_name = 'category_1'
         registry.add(cat_name, myclass)
-        self.assertEqual(cat_name, registry.categories[cat_name].name)
-        print(registry)
+        self.assertEqual(cat_name, registry.categories[cat_name].name)        
+
+        registry.add(cat_name, myclass2)
+
+        self.assertEqual(len(registry.categories), 1) 
+        self.assertEqual(len(registry.categories[cat_name].class_dict), 2)
+        self.assertIn(myclass.__name__, registry.categories[cat_name].class_dict.keys())
+        self.assertIn(myclass2.__name__, registry.categories[cat_name].class_dict.keys())
 
     def test_build_from_config(self):
         class myclass():
