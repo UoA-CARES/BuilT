@@ -39,7 +39,7 @@ class Category:
         self._class_dict[class_name] = clazz
         return clazz
 
-
+@SingletonDecorator
 class Registry:
     def __init__(self):
         self.categories = dict()
@@ -85,4 +85,4 @@ class Registry:
             args.update(config['params'])
         return clazz(**args)
 
-registry = SingletonDecorator(Registry)()
+registry = Registry()

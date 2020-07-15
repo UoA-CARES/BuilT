@@ -1,7 +1,13 @@
 import unittest
+from registry import Registry
 from registry import registry as r
 
 class TestRegistry(unittest.TestCase):
+    def test_singleton(self):
+        r1 = Registry()
+        r2 = Registry()
+        self.assertEqual(r1, r2)
+        
     def test_add_category(self):
         r.clear()
 
