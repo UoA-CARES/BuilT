@@ -1,7 +1,5 @@
 from __future__ import print_function
 
-from easydict import EasyDict as edict
-
 
 class Category:
     def __init__(self, name):
@@ -43,7 +41,7 @@ class Category:
 
 class Registry:
     def __init__(self):
-        self.categories = edict()
+        self.categories = dict()
 
     def __repr__(self):
         format_str = self.__class__.__name__
@@ -61,8 +59,8 @@ class Registry:
         """Build a callable object from configuation dict.
 
         Args:
-            config (dict): Configuration dict. It should contain the key "name".
-            category (:obj:`Registry`): The registry to search the name from.
+            category: The name of category to search the name from.
+            config (dict): Configuration dict. It should contain the key "name".            
             default_args (dict, optional): Default initialization argments.
         """
         assert isinstance(config, dict) and 'name' in config
@@ -70,7 +68,7 @@ class Registry:
         
         name = config['name']
         name = name.replace('-', '_')
-        clazz = self.categories.category.get(name)
+        clazz = self.categories[category].get(name)
         if clazz is None:
             raise KeyError(f'{name} is not in the {category} registry')
 
