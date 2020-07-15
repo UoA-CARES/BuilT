@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+from singleton_decorator import SingletonDecorator
 
 class Category:
     def __init__(self, name):
@@ -48,7 +49,10 @@ class Registry:
         for k, v in self.categories.items():
             format_str += f'(category[{k}]: {v})'
 
-        return format_str        
+        return format_str
+
+    def clear(self):
+        self.categories.clear()
 
     def add(self, category, clazz=None):
         if category not in self.categories:
@@ -80,3 +84,5 @@ class Registry:
         if 'params' in config:
             args.update(config['params'])
         return clazz(**args)
+
+registry = SingletonDecorator(Registry)()
