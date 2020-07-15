@@ -29,7 +29,6 @@ def main(_run, _config):
 def train(_run, _config):
     config = edict(_config)    
     pprint.PrettyPrinter(indent=2).pprint(config)
-    #run_train(config)
 
 
 if __name__ == '__main__':
