@@ -85,4 +85,17 @@ class Registry:
             args.update(config['params'])
         return clazz(**args)
 
+    def build_model(self, config, **kwargs):
+        return self.build_from_config('model', config.model, kwargs)
+
+    def build_loss(self, config, **kwargs):
+        return self.build_from_config('loss', config.loss, kwargs)
+
+    def build_optimizer(self, config, **kwargs):
+        return self.build_from_config('optimizer', config.optimizer, kwargs)
+
+    def build_scheduler(self, config, **kwargs):
+        return self.build_from_config('scheduler', config.scheduler, kwargs)
+
+
 registry = Registry()
