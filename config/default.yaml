@@ -2,7 +2,7 @@ dataset:
   name: "DefaultDataset"
   params:
     idx_fold: 0
-    data_dir: "data"    
+    data_dir: "data"
 
   splits:
     - mode: "train"
@@ -52,12 +52,6 @@ scheduler:
 hooks:
   metric:
     name: "DefaultMetricHook"
-
-  loss:
-    name: "DefaultLossHook"
-
-  build_model:
-    name: "DefaultModelBuilderHook"
 
   post_forward:
     name: "DefaultPostForwardHook"
