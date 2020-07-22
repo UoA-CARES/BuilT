@@ -6,6 +6,8 @@ from utils import group_weight
 def prepare_directories(config):
     os.makedirs(os.path.join(config.train.dir, 'checkpoint'), exist_ok=True)
 
+def train_single_epoch():
+    pass
 
 def train(config, model, loss, optimizer, scheduler):
     pass
