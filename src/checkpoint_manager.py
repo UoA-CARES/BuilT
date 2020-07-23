@@ -6,15 +6,22 @@ import torch
 
 
 class CheckpointManager:
-    def __init__(self, config, prefix='epoch_', ext='.pth'):
-        self.root_dir = os.path.join(config.train.dir, 'checkpoint')
+    def __init__(self, train_dir, prefix='epoch_', ext='.pth'):
+        assert(train_dir is not None)
+        if not os.path.exists(train_dir):
+            os.makedirs(train_dir)
+
+        self.root_dir = os.path.join(train_dir, 'checkpoint')
+        if not os.path.exists(self.root_dir):
+            os.makedirs(self.root_dir)
+
         self.prefix = prefix
         self.ext = ext
 
     def list_cp(self, sort=False):
         checkpoints = [checkpoint
                        for checkpoint in os.listdir(self.root_dir)
-                       if checkpoint.startswith(self.prefix) and checkpoint.endswith(ext)]
+                       if checkpoint.startswith(self.prefix) and checkpoint.endswith(self.ext)]
         if(sort):
             checkpoints = sorted(checkpoints)
         return checkpoints
