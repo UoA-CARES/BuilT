@@ -2,6 +2,7 @@ from __future__ import print_function
 
 from singleton_decorator import SingletonDecorator
 
+
 class Category:
     def __init__(self, name):
         self._name = name
@@ -33,11 +34,13 @@ class Category:
             raise ValueError(f'object must be callable')
 
         class_name = clazz.__name__
-        if class_name in self._class_dict:            
-            raise KeyError(f'{class_name} is already registered in {self.name}')
+        if class_name in self._class_dict:
+            raise KeyError(
+                f'{class_name} is already registered in {self.name}')
 
         self._class_dict[class_name] = clazz
         return clazz
+
 
 @SingletonDecorator
 class Registry:
@@ -71,7 +74,7 @@ class Registry:
         """
         assert isinstance(config, dict) and 'name' in config
         assert isinstance(default_args, dict) or default_args is None
-        
+
         name = config['name']
         name = name.replace('-', '_')
         clazz = self.categories[category].get(name)
@@ -88,7 +91,7 @@ class Registry:
     def build_model(self, config, **kwargs):
         return self.build_from_config('model', config.model, kwargs)
 
-    def build_loss(self, config, **kwargs):
+    def build_loss_fn(self, config, **kwargs):
         return self.build_from_config('loss', config.loss, kwargs)
 
     def build_optimizer(self, config, **kwargs):
@@ -96,6 +99,12 @@ class Registry:
 
     def build_scheduler(self, config, **kwargs):
         return self.build_from_config('scheduler', config.scheduler, kwargs)
+
+    def build_hooks(self):
+        pass
+    
+    def build_dataloaders(self):
+        pass
 
 
 registry = Registry()
