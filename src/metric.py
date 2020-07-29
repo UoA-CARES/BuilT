@@ -4,6 +4,7 @@ from __future__ import print_function
 
 
 import abc
+import logging
 
 import numpy as np
 import torch
@@ -19,6 +20,7 @@ class MetricBase(object):
 
 class DefaultMetric(MetricBase):
     def __call__(self, outputs, labels, is_train, split):
+        logging.debug("Default metric is called")
         if isinstance(outputs, dict):
             logits = outputs['logits']
         else:

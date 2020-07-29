@@ -4,6 +4,7 @@ from __future__ import print_function
 
 
 import abc
+import logging
 
 
 class ForwardHookBase(object):
@@ -16,6 +17,7 @@ class ForwardHookBase(object):
 
 class DefaultForwardHook(ForwardHookBase):
     def __call__(self, model, images, labels=None, data=None, is_train=False):
+        logging.debug("Default forward hook is called")
         return model(images)
 
 
@@ -29,4 +31,5 @@ class PostForwardHookBase(object):
 
 class DefaultPostForwardHook(PostForwardHookBase):
     def __call__(self, outputs, images=None, labels=None, data=None, is_train=False):
+        logging.debug("Default post forward hook is called")
         return outputs

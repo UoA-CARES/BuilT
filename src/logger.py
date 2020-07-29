@@ -4,6 +4,7 @@ from __future__ import print_function
 
 
 import abc
+import logging
 
 
 class LoggerBase(object):
@@ -18,6 +19,8 @@ class LoggerBase(object):
 class DefaultLogger(LoggerBase):
     def __call__(self, writer, split, outputs, labels, log_dict,
                  epoch, step=None, num_steps_in_epoch=None):
+        logging.debug("Default logger is called")
+
         if step is not None:
             assert num_steps_in_epoch is not None
             log_step = epoch * 10000 + (step / num_steps_in_epoch) * 10000
