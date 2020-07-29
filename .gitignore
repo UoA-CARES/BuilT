@@ -1,3 +1,9 @@
+# training data
+data/
+
+# checkpoint
+train_dirs/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "/home/anyone/miniconda3/envs/orsum/bin/python"
+    "python.pythonPath": "/home/anyone/miniconda3/envs/orsum/bin/python",
+    "python.linting.enabled": false
 }

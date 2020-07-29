@@ -1,6 +1,16 @@
 from __future__ import print_function
 
+import logging
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+from torch.utils.data import DataLoader
+from easydict import EasyDict as edict
+from collections import defaultdict
+from torchvision import datasets, transforms
 from singleton_decorator import SingletonDecorator
+
 
 class Category:
     def __init__(self, name):
@@ -23,21 +33,23 @@ class Category:
     def get(self, key: str):
         return self._class_dict.get(key, None)
 
-    def add(self, clazz):
+    def add(self, klass):
         """add a callable class.
 
         Args:
-            clazz: callable class to be registered
+            klass: callable class to be registered
         """
-        if not callable(clazz):
+        if not callable(klass):
             raise ValueError(f'object must be callable')
 
-        class_name = clazz.__name__
-        if class_name in self._class_dict:            
-            raise KeyError(f'{class_name} is already registered in {self.name}')
+        class_name = klass.__name__
+        if class_name in self._class_dict:
+            raise KeyError(
+                f'{class_name} is already registered in {self.name}')
 
-        self._class_dict[class_name] = clazz
-        return clazz
+        self._class_dict[class_name] = klass
+        return klass
+
 
 @SingletonDecorator
 class Registry:
@@ -54,12 +66,17 @@ class Registry:
     def clear(self):
         self.categories.clear()
 
-    def add(self, category, clazz=None):
+    def add(self, category, klass=None):
         if category not in self.categories:
             self.categories[category] = Category(category)
 
-        if clazz is not None:
-            self.categories[category].add(clazz)
+        if klass is not None:
+            self.categories[category].add(klass)
+
+    def register(self, category=''):
+        def _register(klass):
+            return self.add(category, klass)
+        return _register
 
     def build_from_config(self, category, config, default_args=None):
         """Build a callable object from configuation dict.
@@ -71,11 +88,12 @@ class Registry:
         """
         assert isinstance(config, dict) and 'name' in config
         assert isinstance(default_args, dict) or default_args is None
-        
+
         name = config['name']
         name = name.replace('-', '_')
-        clazz = self.categories[category].get(name)
-        if clazz is None:
+        self.add(category)
+        klass = self.categories[category].get(name)
+        if klass is None:
             raise KeyError(f'{name} is not in the {category} registry')
 
         args = dict()
@@ -83,12 +101,12 @@ class Registry:
             args.update(default_args)
         if 'params' in config:
             args.update(config['params'])
-        return clazz(**args)
+        return klass(**args)
 
     def build_model(self, config, **kwargs):
         return self.build_from_config('model', config.model, kwargs)
 
-    def build_loss(self, config, **kwargs):
+    def build_loss_fn(self, config, **kwargs):
         return self.build_from_config('loss', config.loss, kwargs)
 
     def build_optimizer(self, config, **kwargs):
@@ -97,5 +115,46 @@ class Registry:
     def build_scheduler(self, config, **kwargs):
         return self.build_from_config('scheduler', config.scheduler, kwargs)
 
+    def build_hooks(self, config):
+        pass
+
+    def build_dataloaders(self, config, **kwargs):
+        dataloaders = []
+        for split_config in config.dataset.splits:
+            dataset_config = edict({'name': config.dataset.name,
+                                    'params': config.dataset.params})
+            dataset_config.params.update(split_config)
+
+
+
+            transform=transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize((0.1307,), (0.3081,))
+                ])
+
+            dataset = self.build_from_config('dataset', config.dataset, default_args={'transform': transform})
+
+            is_train = dataset_config.params.train
+            if is_train:
+                batch_size = config.train.batch_size
+            else:
+                batch_size = config.evaluation.batch_size
+            dataloader = DataLoader(dataset,
+                                    shuffle=is_train,
+                                    batch_size=batch_size,
+                                    drop_last=is_train,
+                                    num_workers=config.transform.num_preprocessor,
+                                    pin_memory=True)
+
+            dataloaders.append({'mode': is_train,'dataloader': dataloader})
+        return dataloaders
+
+        return 
+
 
 registry = Registry()
+
+registry.add('loss', nn.NLLLoss)
+registry.add('optimizer', optim.Adadelta)
+registry.add('scheduler', optim.lr_scheduler.StepLR)
+registry.add('dataset', datasets.MNIST)
