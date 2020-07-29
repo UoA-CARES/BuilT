@@ -13,7 +13,7 @@ from early_stopper import EarlyStopper
 class Trainer(object):
     def __init__(self, config):
         self.config = config
-        self.batch_size = self.config.train.batch_size
+        
         self.es = EarlyStopper(mode='max')
         self.cm = CheckpointManager(self.config.train.dir)
 
@@ -24,8 +24,9 @@ class Trainer(object):
     def evaluate_single_epoch(self, dataloader, epoch):
         self.model.eval()
 
+        batch_size = self.config.evaluation.batch_size
         total_size = len(dataloader.dataset)
-        total_step = math.ceil(total_size / self.batch_size)
+        total_step = math.ceil(total_size / batch_size)
 
         correct = 0
         with torch.no_grad():
@@ -74,8 +75,9 @@ class Trainer(object):
     def train_single_epoch(self, dataloader, epoch):
         self.model.train()
 
+        batch_size = self.config.train.batch_size
         total_size = len(dataloader.dataset)
-        total_step = math.ceil(total_size / self.batch_size)
+        total_step = math.ceil(total_size / batch_size)
 
         tbar = tqdm.tqdm(enumerate(dataloader), total=total_step)
         for i, (data, target) in tbar:
