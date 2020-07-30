@@ -1,3 +1,6 @@
+# vscode settings
+.vscode/
+
 # training data
 data/
 
