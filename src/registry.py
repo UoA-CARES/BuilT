@@ -13,6 +13,7 @@ from singleton_decorator import SingletonDecorator
 
 from forward_hook import DefaultPostForwardHook
 from metric import DefaultMetric
+from logger import DefaultLogger
 
 
 class Category:
@@ -124,6 +125,9 @@ class Registry:
     def build_metric_fn(self, config, **kwargs):
         return self.build_from_config('hooks', config.metric_hook, kwargs)
 
+    def build_logger_fn(self, config, **kwargs):
+        return self.build_from_config('hooks', config.logger_hook, kwargs)
+
     def build_transforms(self, config, **kwargs):
         if config.transforms.name == 'Compose':
             transfms = []
@@ -171,3 +175,4 @@ registry.add('transform', transforms.ToTensor)
 registry.add('transform', transforms.Normalize)
 registry.add('hooks', DefaultPostForwardHook)
 registry.add('hooks', DefaultMetric)
+registry.add('hooks', DefaultLogger)

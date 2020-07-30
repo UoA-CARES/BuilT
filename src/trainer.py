@@ -5,6 +5,7 @@ import torch
 import tqdm
 import numpy as np
 
+from torch.utils.tensorboard import SummaryWriter
 from collections import defaultdict
 from registry import registry as r
 from utils import group_weight
@@ -18,6 +19,7 @@ class Trainer(object):
         
         self.es = EarlyStopper(mode='max')
         self.cm = CheckpointManager(self.config.train.dir)
+        self.writer = SummaryWriter(log_dir=config.train.dir)
 
     def prepare_directories(self):
         os.makedirs(os.path.join(self.config.train.dir,
@@ -64,8 +66,8 @@ class Trainer(object):
                 tbar.set_postfix(
                     lr=self.optimizer.param_groups[0]['lr'], loss=loss.item())
                 
-                # self.hooks.logger_fn(split=split, outputs=outputs, labels=labels,
-                #                      log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
+                self.logger_fn(self.writer, split='test', outputs=output, labels=labels,
+                                     log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
             
             metric_dict = {key:np.mean(value) for key, value in aggregated_metric_dict.items()}
 
@@ -117,8 +119,8 @@ class Trainer(object):
             tbar.set_postfix(
                 lr=self.optimizer.param_groups[0]['lr'], loss=loss.item())
 
-            # self.hooks.logger_fn(split=split, outputs=outputs, labels=labels,
-            #                      log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
+            self.logger_fn(self.writer, split='train', outputs=output, labels=labels,
+                                 log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
 
     def train(self, last_epoch):
 
@@ -175,6 +177,9 @@ class Trainer(object):
 
         # build metric
         self.metric_fn = r.build_metric_fn(self.config)
+
+        # build logger
+        self.logger_fn = r.build_logger_fn(self.config)
 
         # build optimizer
         if 'no_bias_decay' in self.config.train and self.config.train.no_bias_decay:

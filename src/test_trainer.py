@@ -64,6 +64,9 @@ post_forward_hook:
 
 metric_hook:
   name: "DefaultMetric"
+
+logger_hook:
+  name: "DefaultLogger"
 """
 
 
