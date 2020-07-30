@@ -118,6 +118,16 @@ class Registry:
     def build_hooks(self, config):
         pass
 
+    def build_transforms(self, config, **kwargs):
+        if config.transforms.name == 'Compose':
+            transfms = []
+            for t in config.transforms.params:
+                transfms.append(self.build_from_config('transform', t))
+
+            return transforms.Compose(transfms)
+        else:
+            return self.build_from_config('transform', config.transforms),
+
     def build_dataloaders(self, config, **kwargs):
         dataloaders = []
         for split_config in config.dataset.splits:
@@ -125,12 +135,7 @@ class Registry:
                                     'params': config.dataset.params})
             dataset_config.params.update(split_config)
 
-
-
-            transform=transforms.Compose([
-                transforms.ToTensor(),
-                transforms.Normalize((0.1307,), (0.3081,))
-                ])
+            transform = self.build_transforms(config)
 
             dataset = self.build_from_config('dataset', config.dataset, default_args={'transform': transform})
 
@@ -143,13 +148,11 @@ class Registry:
                                     shuffle=is_train,
                                     batch_size=batch_size,
                                     drop_last=is_train,
-                                    num_workers=config.transform.num_preprocessor,
+                                    num_workers=config.transforms.num_preprocessor,
                                     pin_memory=True)
 
             dataloaders.append({'mode': is_train,'dataloader': dataloader})
         return dataloaders
-
-        return 
 
 
 registry = Registry()
@@ -158,3 +161,5 @@ registry.add('loss', nn.NLLLoss)
 registry.add('optimizer', optim.Adadelta)
 registry.add('scheduler', optim.lr_scheduler.StepLR)
 registry.add('dataset', datasets.MNIST)
+registry.add('transform', transforms.ToTensor)
+registry.add('transform', transforms.Normalize)

@@ -18,11 +18,18 @@ dataset:
     - train: True
     - train: False      
 
-transform:
-  name: "DefaultTransform"
+transforms:
+  name: "Compose"
   num_preprocessor: 8
   params:
-    resize_to: (224, 224)
+    - ToTensor:
+      name: "ToTensor"
+    - Normalize:
+      name: "Normalize"
+      params:
+        mean: !!python/tuple [0.1307, ]
+        std: !!python/tuple [0.3081, ]
+
 
 model:
   name: "Mnist"
