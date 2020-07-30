@@ -11,6 +11,9 @@ from collections import defaultdict
 from torchvision import datasets, transforms
 from singleton_decorator import SingletonDecorator
 
+from forward_hook import DefaultPostForwardHook
+from metric import DefaultMetric
+
 
 class Category:
     def __init__(self, name):
@@ -115,8 +118,11 @@ class Registry:
     def build_scheduler(self, config, **kwargs):
         return self.build_from_config('scheduler', config.scheduler, kwargs)
 
-    def build_hooks(self, config):
-        pass
+    def build_post_forward_hook(self, config, **kwargs):
+        return self.build_from_config('hooks', config.post_forward_hook, kwargs)
+
+    def build_metric_fn(self, config, **kwargs):
+        return self.build_from_config('hooks', config.metric_hook, kwargs)
 
     def build_transforms(self, config, **kwargs):
         if config.transforms.name == 'Compose':
@@ -163,3 +169,5 @@ registry.add('scheduler', optim.lr_scheduler.StepLR)
 registry.add('dataset', datasets.MNIST)
 registry.add('transform', transforms.ToTensor)
 registry.add('transform', transforms.Normalize)
+registry.add('hooks', DefaultPostForwardHook)
+registry.add('hooks', DefaultMetric)

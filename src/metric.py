@@ -26,20 +26,16 @@ class DefaultMetric(MetricBase):
         else:
             logits = outputs
 
-        if isinstance(logits, np.ndarray):
-            assert isinstance(labels, np.ndarray)
-            assert len(logits.shape) == 2
-            predicts = np.argmax(logits, axis=1)
-            correct = np.sum((predicts == labels).astype(int))
-            total = predicts.shape[0]
-            accuracy = correct / total
-        else:
-            assert isinstance(logits, torch.Tensor)
-            assert isinstance(labels, torch.Tensor)
-            assert logits.ndim == 2
-            predicts = torch.argmax(logits, dim=1)
-            correct = torch.sum(predicts == labels)
-            total = predicts.size(0)
-            accuracy = correct / total
+        if isinstance(logits, torch.Tensor):
+            logits = logits.cpu().detach().numpy()
+
+        if isinstance(labels, torch.Tensor):
+            labels = labels.cpu().detach().numpy()            
+
+        assert len(logits.shape) == 2
+        predicts = np.argmax(logits, axis=1)
+        correct = np.sum((predicts == labels).astype(int))
+        total = predicts.shape[0]
+        accuracy = 100. * correct / total
 
         return {'score': accuracy, 'accuracy': accuracy}

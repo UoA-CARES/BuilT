@@ -39,7 +39,8 @@ model:
 train:
   dir: "train_dirs/default"
   batch_size: 64
-  num_epochs: 14
+  num_epochs: 30
+  gradient_accumulation_step: 1
 
 evaluation:
   batch_size: 64
@@ -58,9 +59,11 @@ scheduler:
     step_size: 1
     gamma: 0.7
 
-hooks:
-  post_forward:
-    name: "DefaultPostForwardHook"
+post_forward_hook:
+  name: "DefaultPostForwardHook"
+
+metric_hook:
+  name: "DefaultMetric"
 """
 
 

@@ -31,5 +31,5 @@ class PostForwardHookBase(object):
 
 class DefaultPostForwardHook(PostForwardHookBase):
     def __call__(self, outputs, images=None, labels=None, data=None, is_train=False):
-        logging.debug("Default post forward hook is called")
+        logging.info("Default post forward hook is called")
         return outputs

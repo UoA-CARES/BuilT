@@ -3,7 +3,9 @@ import math
 import logging
 import torch
 import tqdm
+import numpy as np
 
+from collections import defaultdict
 from registry import registry as r
 from utils import group_weight
 from checkpoint_manager import CheckpointManager
@@ -28,24 +30,24 @@ class Trainer(object):
         total_size = len(dataloader.dataset)
         total_step = math.ceil(total_size / batch_size)
 
-        correct = 0
         with torch.no_grad():
+            aggregated_metric_dict = defaultdict(list)
             tbar = tqdm.tqdm(enumerate(dataloader), total=total_step)
             for i, (data, target) in tbar:
                 images = data.cuda()
                 labels = target.cuda()
 
-                # outputs = self.hooks.forward_fn(
-                #     model=self.model, images=images, labels=labels, data=data, is_train=True)
-                # outputs = self.hooks.post_forward_fn(
-                #     outputs=outputs, images=images, labels=labels, data=data, is_train=True)
-
                 output = self.model(images)
+                output = self.post_forward_hook(
+                    outputs=output, images=images, labels=labels, data=None, is_train=False)
+
                 loss = self.loss_fn(output, labels)
-                # loss = self.loss_fn(outputs=outputs, labels=labels.float(),
-                #                     data=data, is_train=True)
-                # metric_dict = self.hooks.metric_fn(
-                #     outputs=outputs, labels=labels, data=data, is_train=True, split=split)
+
+                metric_dict = self.metric_fn(
+                    outputs=output, labels=labels, is_train=True, split=None)
+
+                for key, value in metric_dict.items():
+                    aggregated_metric_dict[key].append(value)
 
                 if isinstance(loss, dict):
                     loss_dict = loss
@@ -55,22 +57,20 @@ class Trainer(object):
 
                 log_dict = {key: value.item() for key, value in loss_dict.items()}
                 log_dict['lr'] = self.optimizer.param_groups[0]['lr']
-                # log_dict.update(metric_dict)
+                log_dict.update(metric_dict)
 
                 f_epoch = epoch + i / total_step
                 tbar.set_description(f'{f_epoch:.2f} epoch')
                 tbar.set_postfix(
                     lr=self.optimizer.param_groups[0]['lr'], loss=loss.item())
-
-                pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
-                correct += pred.eq(labels.view_as(pred)).sum().item()
-
+                
                 # self.hooks.logger_fn(split=split, outputs=outputs, labels=labels,
                 #                      log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
             
-            score = 100. * correct / total_size
-            print(score)
-            return score
+            metric_dict = {key:np.mean(value) for key, value in aggregated_metric_dict.items()}
+
+            print(metric_dict['score'])
+            return metric_dict['score']
 
     def train_single_epoch(self, dataloader, epoch):
         self.model.train()
@@ -84,17 +84,14 @@ class Trainer(object):
             images = data.cuda()
             labels = target.cuda()
 
-            # outputs = self.hooks.forward_fn(
-            #     model=self.model, images=images, labels=labels, data=data, is_train=True)
-            # outputs = self.hooks.post_forward_fn(
-            #     outputs=outputs, images=images, labels=labels, data=data, is_train=True)
-
             output = self.model(images)
+            output = self.post_forward_hook(
+                outputs=output, images=images, labels=labels, data=None, is_train=True)
+
             loss = self.loss_fn(output, labels)
-            # loss = self.loss_fn(outputs=outputs, labels=labels.float(),
-            #                     data=data, is_train=True)
-            # metric_dict = self.hooks.metric_fn(
-            #     outputs=outputs, labels=labels, data=data, is_train=True, split=split)
+
+            metric_dict = self.metric_fn(
+                outputs=output, labels=labels, is_train=True, split=None)
 
             if isinstance(loss, dict):
                 loss_dict = loss
@@ -103,18 +100,17 @@ class Trainer(object):
                 loss_dict = {'loss': loss}
 
             loss.backward()
-            self.optimizer.step()
-            self.optimizer.zero_grad()
-            # if self.config.train.gradient_accumulation_step is None:
-            #     self.optimizer.step()
-            #     self.optimizer.zero_grad()
-            # elif (i+1) % self.config.train.gradient_accumulation_step == 0:
-            #     self.optimizer.step()
-            #     self.optimizer.zero_grad()
+
+            if self.config.train.gradient_accumulation_step is None:
+                self.optimizer.step()
+                self.optimizer.zero_grad()
+            elif (i+1) % self.config.train.gradient_accumulation_step == 0:
+                self.optimizer.step()
+                self.optimizer.zero_grad()
 
             log_dict = {key: value.item() for key, value in loss_dict.items()}
             log_dict['lr'] = self.optimizer.param_groups[0]['lr']
-            # log_dict.update(metric_dict)
+            log_dict.update(metric_dict)
 
             f_epoch = epoch + i / total_step
             tbar.set_description(f'{f_epoch:.2f} epoch')
@@ -175,7 +171,10 @@ class Trainer(object):
         self.loss_fn = r.build_loss_fn(self.config)
 
         # build hooks
-        self.hooks = r.build_hooks(self.config)
+        self.post_forward_hook = r.build_post_forward_hook(self.config)
+
+        # build metric
+        self.metric_fn = r.build_metric_fn(self.config)
 
         # build optimizer
         if 'no_bias_decay' in self.config.train and self.config.train.no_bias_decay:
