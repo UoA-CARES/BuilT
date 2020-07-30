@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from registry import registry
+from ..registry import registry
 
 
 @registry.register(category='model')

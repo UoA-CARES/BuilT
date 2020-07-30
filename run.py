@@ -10,6 +10,9 @@ from easydict import EasyDict as edict
 from sacred import Experiment
 from sacred.utils import apply_backspaces_and_linefeeds
 
+from src.models.mnist import Mnist
+from src.trainer import Trainer
+
 
 ex = Experiment('orsum')
 ex.captured_out_filter = apply_backspaces_and_linefeeds
@@ -29,6 +32,8 @@ def main(_run, _config):
 def train(_run, _config):
     config = edict(_config)    
     pprint.PrettyPrinter(indent=2).pprint(config)
+    tr = Trainer(config)
+    tr.run()
 
 
 if __name__ == '__main__':

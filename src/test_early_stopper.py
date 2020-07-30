@@ -1,5 +1,5 @@
 import unittest
-from early_stopper import EarlyStopper
+from .early_stopper import EarlyStopper
 
 
 class TestEarlyStopper(unittest.TestCase):

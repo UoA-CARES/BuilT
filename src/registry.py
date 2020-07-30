@@ -9,11 +9,11 @@ from torch.utils.data import DataLoader
 from easydict import EasyDict as edict
 from collections import defaultdict
 from torchvision import datasets, transforms
-from singleton_decorator import SingletonDecorator
 
-from forward_hook import DefaultPostForwardHook
-from metric import DefaultMetric
-from logger import DefaultLogger
+from .singleton_decorator import SingletonDecorator
+from .forward_hook import DefaultPostForwardHook
+from .metric import DefaultMetric
+from .logger import DefaultLogger
 
 
 class Category:

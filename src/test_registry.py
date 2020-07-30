@@ -1,6 +1,6 @@
 import unittest
-from registry import Registry
-from registry import registry as r
+from .registry import Registry
+from .registry import registry as r
 
 class TestRegistry(unittest.TestCase):
     def test_singleton(self):

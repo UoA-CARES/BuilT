@@ -7,10 +7,11 @@ import numpy as np
 
 from torch.utils.tensorboard import SummaryWriter
 from collections import defaultdict
-from registry import registry as r
-from utils import group_weight
-from checkpoint_manager import CheckpointManager
-from early_stopper import EarlyStopper
+
+from .registry import registry as r
+from .utils import group_weight
+from .checkpoint_manager import CheckpointManager
+from .early_stopper import EarlyStopper
 
 
 class Trainer(object):

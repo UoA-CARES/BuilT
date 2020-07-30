@@ -1,13 +1,3 @@
-import unittest
-import yaml
-
-from easydict import EasyDict as edict
-from sacred import Experiment
-
-from .trainer import Trainer
-from .models.mnist import Mnist
-
-yaml_config = """
 dataset:
   name: "MNIST"
   params:
@@ -16,7 +6,7 @@ dataset:
 
   splits:
     - train: True
-    - train: False      
+    - train: False
 
 transforms:
   name: "Compose"
@@ -27,9 +17,8 @@ transforms:
     - Normalize:
       name: "Normalize"
       params:
-        mean: !!python/tuple [0.1307, ]
-        std: !!python/tuple [0.3081, ]
-
+        mean: !!python/tuple [0.1307]
+        std: !!python/tuple [0.3081]
 
 model:
   name: "Mnist"
@@ -67,16 +56,3 @@ metric_hook:
 
 logger_hook:
   name: "DefaultLogger"
-"""
-
-
-class TestTrainer(unittest.TestCase):
-
-    def test_train(self):
-        config = edict(yaml.load(yaml_config))
-        tr = Trainer(config)
-        tr.run()
-
-
-if __name__ == '__main__':
-    unittest.main()
