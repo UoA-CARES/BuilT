@@ -103,7 +103,7 @@ class TestTrainer(unittest.TestCase):
 
         config = edict(yaml.load(yaml_config))
         tr = Trainer(config)
-        tr.run()
+        # tr.run()
 
 
 if __name__ == '__main__':
