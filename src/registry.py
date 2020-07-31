@@ -14,7 +14,7 @@ from .singleton_decorator import SingletonDecorator
 from .forward_hook import DefaultPostForwardHook
 from .metric import DefaultMetric
 from .logger import DefaultLogger
-
+from .models.mnist import Mnist
 
 class Category:
     def __init__(self, name):
@@ -176,3 +176,5 @@ registry.add('transform', transforms.Normalize)
 registry.add('hooks', DefaultPostForwardHook)
 registry.add('hooks', DefaultMetric)
 registry.add('hooks', DefaultLogger)
+registry.add('model', Mnist)
+print(registry)

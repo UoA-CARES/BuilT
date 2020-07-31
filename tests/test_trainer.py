@@ -4,8 +4,21 @@ import yaml
 from easydict import EasyDict as edict
 from sacred import Experiment
 
-from .trainer import Trainer
-from .models.mnist import Mnist
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
+
+from src.singleton_decorator import SingletonDecorator
+from src.forward_hook import DefaultPostForwardHook
+from src.metric import DefaultMetric
+from src.logger import DefaultLogger
+from src.registry import registry
+
+from src.trainer import Trainer
+from src.models.mnist import Mnist
 
 yaml_config = """
 dataset:
@@ -73,6 +86,21 @@ logger_hook:
 class TestTrainer(unittest.TestCase):
 
     def test_train(self):
+        print('--------------------------------------------------------------------')
+        registry.clear()
+        registry.add('loss', nn.NLLLoss)
+        registry.add('optimizer', optim.Adadelta)
+        registry.add('scheduler', optim.lr_scheduler.StepLR)
+        registry.add('dataset', datasets.MNIST)
+        registry.add('transform', transforms.ToTensor)
+        registry.add('transform', transforms.Normalize)
+        registry.add('hooks', DefaultPostForwardHook)
+        registry.add('hooks', DefaultMetric)
+        registry.add('hooks', DefaultLogger)
+        registry.add('model', Mnist)
+
+        print(registry)
+
         config = edict(yaml.load(yaml_config))
         tr = Trainer(config)
         tr.run()

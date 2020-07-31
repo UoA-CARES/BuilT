@@ -4,10 +4,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ..registry import registry
+# from ..registry import registry
 
 
-@registry.register(category='model')
+# @registry.register(category='model')
 class Mnist(nn.Module):
     def __init__(self, num_classes):
         super().__init__()

@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 import shutil
-from checkpoint_manager import CheckpointManager
+from src.checkpoint_manager import CheckpointManager
 
 import torch
 import torch.nn as nn
