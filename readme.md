@@ -8,7 +8,7 @@ Easily build the training function for DNNs and quickly do experiments for them.
 ```
 conda create -n conda_BuilT python=3.7
 conda activate conda_BuilT
-pip install requirements.txt
+pip install requirements-gpu.txt
 ```
 
 ## How to run MNIST example
