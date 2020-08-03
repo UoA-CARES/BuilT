@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.8.2/js-yaml.min.js"></script>
+    <title>Training configuration yaml builder</title>
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="col-md-6 col-lg-6 col-sm-12">
+        <h3>Training configuration yaml builder</h3>
+        <div id="app">
+          <div class="panel panel-primary">
+            <div class="panel-heading">
+              <h4>Dataset</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="datasetName">Name:</label>
+                <input
+                  class="form-control"
+                  id="datasetName"                  
+                />
+              </div>
+              <div class="form-group">
+                <label for="selTorchVisionDatasetType">TorchVision Dataset:</label>
+                <select
+                  class="form-control"
+                  id="selTorchVisionDatasetType"
+                  style="min-width: 100px;"
+                >
+                  <option value="None">None</option>
+                  <option value="MNIST">MNIST</option>
+                  <option value="COCO">COCO</option>
+                  <option value="ImageNet">ImageNet</option>
+                  <option value="CIFAR">CIFAR</option>
+                  <option value="CelebA">CelebA</option>
+                </select>
+              </div>
+              <div class="panel panel-primary">
+                <div class="panel-body">
+                  <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-6">
+                      <div class="input-group">
+                        <span class="input-group-addon">
+                          data_dir
+                        </span>
+                        <input
+                          type="text"
+                          class="form-control"
+                          style="min-width: 50px;"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-6 col-sm-12">
+        <h4>Generated YAML</h4>
+        <pre>
+{{ConfigurationYaml}}
+        </template>
+        </pre>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      var app = new Vue({
+        el: "#app",
+        data: {
+          Dataset: "",          
+          Splits: [],
+        },
+        computed: {        
+          ConfigurationYaml: function () {            
+            var configObj = {              
+              testkey: 'test'
+            };
+            return jsyaml.dump(configObj);
+          },          
+        },
+        methods: {
+          addSplit: function () {
+            var newSplit = {
+              mode: "train",
+              split: "train",
+            };
+
+            this.Splits.push(newSplit);
+          },
+          deleteSplit: function (split) {
+            var splitIndex = this.Splits.indexOf(split);
+            if (splitIndex > -1) {
+              this.Splits.splice(splitIndex, 1);
+            }
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
