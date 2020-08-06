@@ -24,27 +24,105 @@
             </div>
             <div class="panel-body">
               <div class="form-group">
-                <label for="datasetName">Name:</label>
+                
+                <label for="datasetName">Custum dataset name:</label>
                 <input
                   class="form-control"
                   id="datasetName"                  
+                  :disabled="UseTorchVisionDataset"
+                />                
+
+                <input type="checkbox" v-model="UseTorchVisionDataset">
+                <label for="useTorchvisionDataset"> Use Torchvision Dataset</label><br>
+
+              </div>
+
+              <div class="panel panel-primary" v-show="UseTorchVisionDataset">
+                <div class="panel-body">
+                  <div class="form-group">
+                    <label for="selTorchVisionDatasetType">TorchVision Dataset:</label>
+                    <select
+                      class="form-control"
+                      id="selTorchVisionDatasetType"
+                      v-model="TorchVisionDatasetType"
+                      style="min-width: 100px;"
+                    >
+                      <option value="MNIST">MNIST</option>
+                      <option value="COCO">COCO</option>
+                      <option value="ImageNet">ImageNet</option>
+                      <option value="CIFAR">CIFAR</option>
+                      <option value="CelebA">CelebA</option>
+                    </select>
+                    <div v-if="TorchVisionDatasetType === 'MNIST'" class="alert alert-primary">
+                      <strong><a href="https://pytorch.org/docs/stable/torchvision/datasets.html#mnist" target="_blank">MNIST dataset details</a></strong> 
+                    </div>
+
+                  </div>
+                  <div>Add options</div>
+                  <button class="btn btn-primary" v-on:click="addDatasetOption"><span class="glyphicon glyphicon-plus"></span>Add Option</button>
+                  <div v-for="datasetOption in DatasetOptions">                    
+                    <div class="row">                      
+                      <div class="ml-5 mr-5">
+                        <div class="input-group">
+                          <span class="input-group-addon">
+                            Name
+                          </span>
+                          <input
+                            type="text"
+                            class="form-control"
+                            style="min-width: 50px;"
+                          />                          
+                          <span class="input-group-addon" style=" padding:0 15px;"><button v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span>
+                        </div>
+                      </div>
+                    </div>                    
+                  </div>
+                </div>
+              </div>
+
+
+              
+            </div>
+
+            <div>&nbsp;</div>
+
+            <div class="panel-heading">
+              <h4>Transform</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="transformName">Name:</label>
+                <input
+                  class="form-control"
+                  id="transformName"                  
                 />
               </div>
               <div class="form-group">
-                <label for="selTorchVisionDatasetType">TorchVision Dataset:</label>
+                <label for="selTorchVisionTransformType">TorchVision transforms:</label>
                 <select
                   class="form-control"
-                  id="selTorchVisionDatasetType"
+                  id="selTorchVisionTransformType"
                   style="min-width: 100px;"
                 >
                   <option value="None">None</option>
-                  <option value="MNIST">MNIST</option>
-                  <option value="COCO">COCO</option>
-                  <option value="ImageNet">ImageNet</option>
-                  <option value="CIFAR">CIFAR</option>
-                  <option value="CelebA">CelebA</option>
+                  <option value="Compose">Compose</option>
+                  <option value="Pad">Pad</option>
+                  <option value="RandomCrop">RandomCrop</option>
+                  <option value="Resize">Resize</option>
                 </select>
-              </div>
+              </div>              
+            </div>
+            <div class="panel-heading">
+              <h4>Model</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="modelName">Name:</label>
+                <input
+                  class="form-control"
+                  id="modelName"                  
+                />
+              </div>              
               <div class="panel panel-primary">
                 <div class="panel-body">
                   <div>Add options</div>
@@ -86,6 +164,97 @@
                 </div>
               </div>
             </div>
+
+            <div class="panel-heading">
+              <h4>Train</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="modelName">Name:</label>
+                <input
+                  class="form-control"
+                  id="modelName"                  
+                />
+              </div>              
+              
+            </div>
+
+
+
+            <div class="panel-heading">
+              <h4>Evaluation</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="modelName">Name:</label>
+                <input
+                  class="form-control"
+                  id="modelName"                  
+                />
+              </div>              
+              
+            </div>
+
+
+            <div class="panel-heading">
+              <h4>Loss</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="modelName">Name:</label>
+                <input
+                  class="form-control"
+                  id="modelName"                  
+                />
+              </div>              
+              
+            </div>
+
+
+            <div class="panel-heading">
+              <h4>Optimizer</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="modelName">Name:</label>
+                <input
+                  class="form-control"
+                  id="modelName"                  
+                />
+              </div>              
+              
+            </div>
+
+
+            <div class="panel-heading">
+              <h4>Scheduler</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="modelName">Name:</label>
+                <input
+                  class="form-control"
+                  id="modelName"                  
+                />
+              </div>              
+              
+            </div>
+
+            <div class="panel-heading">
+              <h4>Hooks</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="modelName">Name:</label>
+                <input
+                  class="form-control"
+                  id="modelName"                  
+                />
+              </div>              
+              
+            </div>
+
+
           </div>
         </div>
       </div>
@@ -105,6 +274,8 @@
           Dataset: "",          
           Splits: [],
           DatasetOptions: [],
+          UseTorchVisionDataset: false,
+          TorchVisionDatasetType: 'MNIST',
         },
         computed: {        
           ConfigurationYaml: function () {            
