@@ -52,7 +52,7 @@ model:
 train:
   dir: "train_dirs/default"
   batch_size: 64
-  num_epochs: 30
+  num_epochs: 1
   gradient_accumulation_step: 1
 
 evaluation:
@@ -103,7 +103,7 @@ class TestTrainer(unittest.TestCase):
 
         config = edict(yaml.load(yaml_config))
         tr = Trainer(config)
-        # tr.run()
+        tr.run()
 
 
 if __name__ == '__main__':
