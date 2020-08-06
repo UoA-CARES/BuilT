@@ -17,7 +17,8 @@ from .early_stopper import EarlyStopper
 class Trainer(object):
     def __init__(self, config):
         self.config = config
-        
+
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')        
         self.es = EarlyStopper(mode='max')
         self.cm = CheckpointManager(self.config.train.dir)
         self.writer = SummaryWriter(log_dir=config.train.dir)
@@ -37,8 +38,8 @@ class Trainer(object):
             aggregated_metric_dict = defaultdict(list)
             tbar = tqdm.tqdm(enumerate(dataloader), total=total_step)
             for i, (data, target) in tbar:
-                images = data.cuda()
-                labels = target.cuda()
+                images = data.to(self.device)
+                labels = target.to(self.device)
 
                 output = self.model(images)
                 output = self.post_forward_hook(
@@ -84,8 +85,8 @@ class Trainer(object):
 
         tbar = tqdm.tqdm(enumerate(dataloader), total=total_step)
         for i, (data, target) in tbar:
-            images = data.cuda()
-            labels = target.cuda()
+            images = data.to(self.device)
+            labels = target.to(self.device)
 
             output = self.model(images)
             output = self.post_forward_hook(
@@ -168,7 +169,7 @@ class Trainer(object):
 
         # build model
         self.model = r.build_model(self.config)
-        self.model = self.model.cuda()
+        self.model = self.model.to(self.device)
 
         # build loss
         self.loss_fn = r.build_loss_fn(self.config)
