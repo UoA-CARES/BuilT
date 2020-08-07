@@ -4,6 +4,7 @@ import logging
 import torch
 import tqdm
 import numpy as np
+import wandb
 
 from torch.utils.tensorboard import SummaryWriter
 from collections import defaultdict
@@ -14,14 +15,18 @@ from .checkpoint_manager import CheckpointManager
 from .early_stopper import EarlyStopper
 
 
+
+
 class Trainer(object):
     def __init__(self, config):
         self.config = config
-
+        self.wandb = wandb.init(project="BuilT")
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')        
         self.es = EarlyStopper(mode='max')
         self.cm = CheckpointManager(self.config.train.dir)
         self.writer = SummaryWriter(log_dir=config.train.dir)
+
+        
 
     def prepare_directories(self):
         os.makedirs(os.path.join(self.config.train.dir,
@@ -47,21 +52,21 @@ class Trainer(object):
 
                 loss = self.loss_fn(output, labels)
 
-                metric_dict = self.metric_fn(
-                    outputs=output, labels=labels, is_train=True, split=None)
-
-                for key, value in metric_dict.items():
-                    aggregated_metric_dict[key].append(value)
-
                 if isinstance(loss, dict):
                     loss_dict = loss
                     loss = loss_dict['loss']
                 else:
                     loss_dict = {'loss': loss}
 
+                metric_dict = self.metric_fn(
+                    outputs=output, labels=labels, is_train=True, split=None)                
+
                 log_dict = {key: value.item() for key, value in loss_dict.items()}
                 log_dict['lr'] = self.optimizer.param_groups[0]['lr']
                 log_dict.update(metric_dict)
+
+                for key, value in log_dict.items():
+                    aggregated_metric_dict[key].append(value)
 
                 f_epoch = epoch + i / total_step
                 tbar.set_description(f'{f_epoch:.2f} epoch')
@@ -71,10 +76,11 @@ class Trainer(object):
                 self.logger_fn(self.writer, split='test', outputs=output, labels=labels,
                                      log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
             
-            metric_dict = {key:np.mean(value) for key, value in aggregated_metric_dict.items()}
-
-            print(metric_dict['score'])
-            return metric_dict['score']
+            aggregated_metric_dict = {f'avg_{key}':np.mean(value) for key, value in aggregated_metric_dict.items()}
+            aggregated_metric_dict.update({'epoch': epoch, 'mode':'test'})
+            self.wandb.log(aggregated_metric_dict)
+            print(aggregated_metric_dict['avg_score'])
+            return aggregated_metric_dict['avg_score']
 
     def train_single_epoch(self, dataloader, epoch):
         self.model.train()
@@ -115,6 +121,7 @@ class Trainer(object):
             log_dict = {key: value.item() for key, value in loss_dict.items()}
             log_dict['lr'] = self.optimizer.param_groups[0]['lr']
             log_dict.update(metric_dict)
+            log_dict.update({'epoch': epoch})
 
             f_epoch = epoch + i / total_step
             tbar.set_description(f'{f_epoch:.2f} epoch')
@@ -123,6 +130,9 @@ class Trainer(object):
 
             self.logger_fn(self.writer, split='train', outputs=output, labels=labels,
                                  log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
+
+            
+            self.wandb.log(log_dict)
 
     def train(self, last_epoch):
 
