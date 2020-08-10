@@ -52,7 +52,7 @@ model:
 train:
   dir: "train_dirs/default"
   batch_size: 64
-  num_epochs: 1
+  num_epochs: 15
   gradient_accumulation_step: 1
 
 evaluation:
@@ -80,6 +80,9 @@ metric_hook:
 
 logger_hook:
   name: "DefaultLogger"
+  params:
+    use_tensorboard: True
+    use_wandb: False
 """
 
 

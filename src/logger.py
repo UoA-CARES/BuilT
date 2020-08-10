@@ -10,11 +10,16 @@ import logging
 class LoggerBase(object):
     __metaclass__ = abc.ABCMeta
 
+    def __init__(self, use_tensorboard=None, use_wandb=None):
+        print(use_tensorboard)
+        print(use_wandb)
+        self.use_tensorboard = use_tensorboard
+        self.use_wandb = use_wandb
+
     @abc.abstractmethod
     def __call__(self, writer, split, outputs, labels, log_dict,
                  epoch, step=None, num_steps_in_epoch=None):
         pass
-
 
 class DefaultLogger(LoggerBase):
     def __call__(self, writer, split, outputs, labels, log_dict,
@@ -29,4 +34,9 @@ class DefaultLogger(LoggerBase):
             log_step = epoch
 
         for key, value in log_dict.items():
-            writer.add_scalar(f'{split}/{key}', log_dict[key], log_step)
+            if self.use_tensorboard:
+                writer['tensorboard'].add_scalar(f'{split}/{key}', value, log_step)
+                
+        if self.use_wandb:
+            log_dict.update({'epoch': epoch, 'mode':split})
+            writer['wandb'].log(log_dict)
