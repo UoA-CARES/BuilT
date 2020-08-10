@@ -11,8 +11,6 @@ class LoggerBase(object):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, use_tensorboard=None, use_wandb=None):
-        print(use_tensorboard)
-        print(use_wandb)
         self.use_tensorboard = use_tensorboard
         self.use_wandb = use_wandb
 
