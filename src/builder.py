@@ -1,13 +1,34 @@
 
+import torch.nn as nn
+import torch.optim as optim
+
 from easydict import EasyDict as edict
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
 from .registry import Registry
 
+from .forward_hook import DefaultPostForwardHook
+from .metric import DefaultMetric
+from .logger import DefaultLogger
+from .models.mnist import Mnist
+
 class Builder(object):
     def __init__(self):
         self.r = Registry()
+        self.regist_defaults()
+
+    def regist_defaults(self):
+        self.r.add('loss', nn.NLLLoss)
+        self.r.add('optimizer', optim.Adadelta)
+        self.r.add('scheduler', optim.lr_scheduler.StepLR)
+        self.r.add('dataset', datasets.MNIST)
+        self.r.add('transform', transforms.ToTensor)
+        self.r.add('transform', transforms.Normalize)
+        self.r.add('hooks', DefaultPostForwardHook)
+        self.r.add('hooks', DefaultMetric)
+        self.r.add('hooks', DefaultLogger)
+        self.r.add('model', Mnist)
 
     def build_model(self, config, **kwargs):
         return self.r.build_from_config('model', config.model, kwargs)

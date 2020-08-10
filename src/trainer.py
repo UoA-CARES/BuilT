@@ -9,7 +9,6 @@ import wandb
 from torch.utils.tensorboard import SummaryWriter
 from collections import defaultdict
 
-from .registry import registry as r
 from .builder import Builder
 from .utils import group_weight
 from .checkpoint_manager import CheckpointManager
