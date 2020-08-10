@@ -10,6 +10,14 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/vue"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.8.2/js-yaml.min.js"></script>
+    <style>
+      .param {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        margin-right: 20px;
+        margin-left: 20px;
+      }
+    </style>
     <title>Training configuration yaml builder</title>
   </head>
 
@@ -58,21 +66,34 @@
                     </div>
 
                   </div>
-                  <div>Add options</div>
-                  <button class="btn btn-primary" v-on:click="addDatasetOption"><span class="glyphicon glyphicon-plus"></span>Add Option</button>
-                  <div v-for="datasetOption in DatasetOptions">                    
+                  <div>Parameters</div>
+                  <!-- <button class="btn btn-primary" v-on:click="addDatasetOption"><span class="glyphicon glyphicon-plus"></span>Add Option</button> -->
+                  <div v-for="param in MnistDatasetParam">                    
                     <div class="row">                      
-                      <div class="ml-5 mr-5">
+                      <div class="param">
                         <div class="input-group">
-                          <span class="input-group-addon">
-                            Name
+                          <span class="input-group-addon" style="text-align:right; min-width: 300px;">
+                            {{param[0]}}{{param[1]}}
                           </span>
-                          <input
+                          
+                          <div v-if="param[1].includes('bool')">
+                            <select
+                              class="form-control"
+                              id="'datasetParam_' + param[0]"                              
+                            >
+                              <option value="True">True</option>
+                              <option value="False">False</option>                              
+                            </select>
+                          </div>
+                          <div v-else>
+                            <input
                             type="text"
                             class="form-control"
                             style="min-width: 50px;"
-                          />                          
-                          <span class="input-group-addon" style=" padding:0 15px;"><button v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span>
+                            :value="param[2]"
+                            />
+                          </div>                          
+                          <!-- <span class="input-group-addon" style=" padding:0 15px;"><button v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span> -->
                         </div>
                       </div>
                     </div>                    
@@ -276,6 +297,7 @@
           DatasetOptions: [],
           UseTorchVisionDataset: false,
           TorchVisionDatasetType: 'MNIST',
+          MnistDatasetParam: [['root', '(string)'], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']]
         },
         computed: {        
           ConfigurationYaml: function () {            
