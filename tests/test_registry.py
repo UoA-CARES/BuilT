@@ -1,6 +1,5 @@
 import unittest
 from src.registry import Registry
-from src.registry import registry as r
 
 class TestRegistry(unittest.TestCase):
     def test_singleton(self):
@@ -9,6 +8,7 @@ class TestRegistry(unittest.TestCase):
         self.assertEqual(r1, r2)
         
     def test_add_category(self):
+        r = Registry()
         r.clear()
 
         cat_name = 'category_1'
@@ -24,7 +24,7 @@ class TestRegistry(unittest.TestCase):
         class myclass2():
             def __call__(self):
                 pass
-
+        r = Registry()
         r.clear() 
 
         cat_name = 'category_1'
@@ -45,7 +45,7 @@ class TestRegistry(unittest.TestCase):
                 self.b = b
             def __call__(self):
                 pass
-
+        r = Registry()
         r.clear()
 
         cat_name = 'category_1'

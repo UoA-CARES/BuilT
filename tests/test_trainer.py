@@ -15,7 +15,7 @@ from src.singleton_decorator import SingletonDecorator
 from src.forward_hook import DefaultPostForwardHook
 from src.metric import DefaultMetric
 from src.logger import DefaultLogger
-from src.registry import registry
+from src.registry import Registry
 
 from src.trainer import Trainer
 from src.models.mnist import Mnist
@@ -80,6 +80,9 @@ metric_hook:
 
 logger_hook:
   name: "DefaultLogger"
+  params:
+    use_tensorboard: True
+    use_wandb: False
 """
 
 
@@ -87,20 +90,6 @@ class TestTrainer(unittest.TestCase):
 
     def test_train(self):
         print('--------------------------------------------------------------------')
-        registry.clear()
-        registry.add('loss', nn.NLLLoss)
-        registry.add('optimizer', optim.Adadelta)
-        registry.add('scheduler', optim.lr_scheduler.StepLR)
-        registry.add('dataset', datasets.MNIST)
-        registry.add('transform', transforms.ToTensor)
-        registry.add('transform', transforms.Normalize)
-        registry.add('hooks', DefaultPostForwardHook)
-        registry.add('hooks', DefaultMetric)
-        registry.add('hooks', DefaultLogger)
-        registry.add('model', Mnist)
-
-        print(registry)
-
         config = edict(yaml.load(yaml_config))
         tr = Trainer(config)
         tr.run()

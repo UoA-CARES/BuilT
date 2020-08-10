@@ -165,16 +165,16 @@ class Registry:
         return dataloaders
 
 
-registry = Registry()
+# registry = Registry()
 
-registry.add('loss', nn.NLLLoss)
-registry.add('optimizer', optim.Adadelta)
-registry.add('scheduler', optim.lr_scheduler.StepLR)
-registry.add('dataset', datasets.MNIST)
-registry.add('transform', transforms.ToTensor)
-registry.add('transform', transforms.Normalize)
-registry.add('hooks', DefaultPostForwardHook)
-registry.add('hooks', DefaultMetric)
-registry.add('hooks', DefaultLogger)
-registry.add('model', Mnist)
-print(registry)
+# registry.add('loss', nn.NLLLoss)
+# registry.add('optimizer', optim.Adadelta)
+# registry.add('scheduler', optim.lr_scheduler.StepLR)
+# registry.add('dataset', datasets.MNIST)
+# registry.add('transform', transforms.ToTensor)
+# registry.add('transform', transforms.Normalize)
+# registry.add('hooks', DefaultPostForwardHook)
+# registry.add('hooks', DefaultMetric)
+# registry.add('hooks', DefaultLogger)
+# registry.add('model', Mnist)
+# print(registry)

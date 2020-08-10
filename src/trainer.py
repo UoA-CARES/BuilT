@@ -4,11 +4,12 @@ import logging
 import torch
 import tqdm
 import numpy as np
+import wandb
 
 from torch.utils.tensorboard import SummaryWriter
 from collections import defaultdict
 
-from .registry import registry as r
+from .builder import Builder
 from .utils import group_weight
 from .checkpoint_manager import CheckpointManager
 from .early_stopper import EarlyStopper
@@ -16,12 +17,15 @@ from .early_stopper import EarlyStopper
 
 class Trainer(object):
     def __init__(self, config):
-        self.config = config
-
+        self.config = config        
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')        
         self.es = EarlyStopper(mode='max')
         self.cm = CheckpointManager(self.config.train.dir)
-        self.writer = SummaryWriter(log_dir=config.train.dir)
+        self.writer = {}
+        if config.logger_hook.params.use_tensorboard:
+            self.writer['tensorboard'] = SummaryWriter(log_dir=config.train.dir)
+        if config.logger_hook.params.use_wandb:
+            self.writer['wandb'] = wandb.init(project="BuilT")
 
     def prepare_directories(self):
         os.makedirs(os.path.join(self.config.train.dir,
@@ -47,21 +51,21 @@ class Trainer(object):
 
                 loss = self.loss_fn(output, labels)
 
-                metric_dict = self.metric_fn(
-                    outputs=output, labels=labels, is_train=True, split=None)
-
-                for key, value in metric_dict.items():
-                    aggregated_metric_dict[key].append(value)
-
                 if isinstance(loss, dict):
                     loss_dict = loss
                     loss = loss_dict['loss']
                 else:
                     loss_dict = {'loss': loss}
 
+                metric_dict = self.metric_fn(
+                    outputs=output, labels=labels, is_train=True, split=None)                
+
                 log_dict = {key: value.item() for key, value in loss_dict.items()}
                 log_dict['lr'] = self.optimizer.param_groups[0]['lr']
                 log_dict.update(metric_dict)
+
+                for key, value in log_dict.items():
+                    aggregated_metric_dict[key].append(value)
 
                 f_epoch = epoch + i / total_step
                 tbar.set_description(f'{f_epoch:.2f} epoch')
@@ -71,10 +75,10 @@ class Trainer(object):
                 self.logger_fn(self.writer, split='test', outputs=output, labels=labels,
                                      log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
             
-            metric_dict = {key:np.mean(value) for key, value in aggregated_metric_dict.items()}
-
-            print(metric_dict['score'])
-            return metric_dict['score']
+            aggregated_metric_dict = {f'avg_{key}':np.mean(value) for key, value in aggregated_metric_dict.items()}
+            self.logger_fn(self.writer, split='test', outputs=None, labels=None,
+                                     log_dict=aggregated_metric_dict, epoch=epoch)
+            return aggregated_metric_dict['avg_score']
 
     def train_single_epoch(self, dataloader, epoch):
         self.model.train()
@@ -115,6 +119,7 @@ class Trainer(object):
             log_dict = {key: value.item() for key, value in loss_dict.items()}
             log_dict['lr'] = self.optimizer.param_groups[0]['lr']
             log_dict.update(metric_dict)
+            log_dict.update({'epoch': epoch})
 
             f_epoch = epoch + i / total_step
             tbar.set_description(f'{f_epoch:.2f} epoch')
@@ -123,6 +128,7 @@ class Trainer(object):
 
             self.logger_fn(self.writer, split='train', outputs=output, labels=labels,
                                  log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
+
 
     def train(self, last_epoch):
 
@@ -164,24 +170,25 @@ class Trainer(object):
         # prepare directories
         self.prepare_directories()
 
+        builder = Builder()
         # build dataloaders
-        self.dataloaders = r.build_dataloaders(self.config)
+        self.dataloaders = builder.build_dataloaders(self.config)
 
         # build model
-        self.model = r.build_model(self.config)
+        self.model = builder.build_model(self.config)
         self.model = self.model.to(self.device)
 
         # build loss
-        self.loss_fn = r.build_loss_fn(self.config)
+        self.loss_fn = builder.build_loss_fn(self.config)
 
         # build hooks
-        self.post_forward_hook = r.build_post_forward_hook(self.config)
+        self.post_forward_hook = builder.build_post_forward_hook(self.config)
 
         # build metric
-        self.metric_fn = r.build_metric_fn(self.config)
+        self.metric_fn = builder.build_metric_fn(self.config)
 
         # build logger
-        self.logger_fn = r.build_logger_fn(self.config)
+        self.logger_fn = builder.build_logger_fn(self.config)
 
         # build optimizer
         if 'no_bias_decay' in self.config.train and self.config.train.no_bias_decay:
@@ -190,7 +197,7 @@ class Trainer(object):
                 'params': group_no_decay, 'weight_decay': 0.0}]
         else:
             params = self.model.parameters()
-        self.optimizer = r.build_optimizer(self.config, params=params)
+        self.optimizer = builder.build_optimizer(self.config, params=params)
 
         # load checkpoint
         ckpt = self.cm.latest()
@@ -201,7 +208,7 @@ class Trainer(object):
             last_epoch, step = -1, -1
 
         # build scheduler
-        self.scheduler = r.build_scheduler(
+        self.scheduler = builder.build_scheduler(
             self.config, optimizer=self.optimizer, last_epoch=last_epoch)
 
         # train loop
