@@ -52,7 +52,7 @@ model:
 train:
   dir: "train_dirs/default"
   batch_size: 64
-  num_epochs: 15
+  num_epochs: 1
   gradient_accumulation_step: 1
 
 evaluation:
