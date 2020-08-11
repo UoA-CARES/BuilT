@@ -38,9 +38,41 @@
                   class="form-control"
                   id="datasetName"                  
                   :disabled="UseTorchVisionDataset"
+                  v-model="DatasetName"
                 />                
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addDatasetOption"><span class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
+                
+                    <div v-for="datasetOption in DatasetOptions">
+                      <!-- <div class="panel panel-primary">
+                        <div class="panel-body"> -->
+                          <div class="row">
+                            <div class="param">
+                              <div class="input-group">
+                                <span class="input-group-addon">
+                                  Name
+                                </span>
+                                <input type="text" class="form-control" v-model="datasetOption['name']" style="min-width: 50px;" :disabled="UseTorchVisionDataset"/>
+                                <span class="input-group-addon">
+                                  Value
+                                </span>
+                                <input type="text" class="form-control" v-model="datasetOption['value']" style="min-width: 50px;" :disabled="UseTorchVisionDataset"/>
+                                <span class="input-group-addon" style=" padding:0 15px;"><button
+                                    v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span>
+                              </div>
+                            </div>
+                          </div>
+                        <!-- </div>
+                      </div> -->
+                    </div>                
+                  </div>
+                </div>
 
-                <input type="checkbox" v-model="UseTorchVisionDataset">
+                <input type="checkbox" v-model="UseTorchVisionDataset" v-on:click="initDatasetParams">
                 <label for="useTorchvisionDataset"> Use Torchvision Dataset</label><br>
 
               </div>
@@ -79,7 +111,8 @@
                           <div v-if="param[1].includes('bool')">
                             <select
                               class="form-control"
-                              id="'datasetParam_' + param[0]"                              
+                              id="'datasetParam_' + param[0]"
+                              v-model="MnistDatasetParamValue[param[0]]"
                             >
                               <option value="True">True</option>
                               <option value="False">False</option>                              
@@ -89,8 +122,10 @@
                             <input
                             type="text"
                             class="form-control"
+                            id="'datasetParam_' + param[0]"
                             style="min-width: 50px;"
                             :value="param[2]"
+                            v-model="MnistDatasetParamValue[param[0]]"
                             />
                           </div>                          
                           <!-- <span class="input-group-addon" style=" padding:0 15px;"><button v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span> -->
@@ -292,17 +327,42 @@
       var app = new Vue({
         el: "#app",
         data: {
-          Dataset: "",          
+          DatasetName: "",          
           Splits: [],
           DatasetOptions: [],
           UseTorchVisionDataset: false,
           TorchVisionDatasetType: 'MNIST',
-          MnistDatasetParam: [['root', '(string)'], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']]
+          MnistDatasetParam: [['root', '(string)',''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
+          MnistDatasetParamValue: { 'root':'', 'train':'', 'download':'', 'transform':'', 'target_transform':''},
         },
         computed: {        
-          ConfigurationYaml: function () {            
+          ConfigurationYaml: function () { 
+            datasetParams = {}
+            
+            if(this.UseTorchVisionDataset) {
+              datasetName = this.TorchVisionDatasetType
+              for (var i = 0; i < this.MnistDatasetParam.length; i++) {
+                v = this.MnistDatasetParamValue[this.MnistDatasetParam[i][0]]
+                if (v == '')
+                  continue;
+                if (v == 'True')
+                  v = true;
+                if (v == 'False')
+                  v = false;
+                datasetParams[this.MnistDatasetParam[i][0]] = v
+              }
+            } else {
+              datasetName = this.DatasetName
+              for (var i = 0; i< this.DatasetOptions.length; i++) {
+                datasetParams[this.DatasetOptions[i]['name']] = this.DatasetOptions[i]['value']
+              }
+            }
             var configObj = {              
-              testkey: 'test'
+              'dataset': {
+                  'use_torchvision_dataset': this.UseTorchVisionDataset,
+                  'name': datasetName, 
+                  'params': datasetParams
+                }
             };
             return jsyaml.dump(configObj);
           },          
@@ -310,8 +370,8 @@
         methods: {
           addDatasetOption: function () {
             var option = {
-              name: "name",
-              value: "value",
+              name: "",
+              value: "",
             };
 
             this.DatasetOptions.push(option);
@@ -336,6 +396,9 @@
               this.Splits.splice(splitIndex, 1);
             }
           },
+          initDatasetParams: function () {
+            this.MnistDatasetParamValue = { 'root': '', 'train': '', 'download': '', 'transform': '', 'target_transform': '' };
+          }
         },
       });
     </script>
