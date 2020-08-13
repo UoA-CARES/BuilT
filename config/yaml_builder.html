@@ -88,9 +88,10 @@
                       id="selTorchVisionDatasetType"
                       v-model="TorchVisionDatasetType"
                       style="min-width: 100px;"
+                      v-on:change="onDatasetChange($event)"
                     >
                       <option value="MNIST">MNIST</option>
-                      <option value="COCO">COCO</option>
+                      <option value="KMNIST">KMNIST</option>
                       <option value="ImageNet">ImageNet</option>
                       <option value="CIFAR">CIFAR</option>
                       <option value="CelebA">CelebA</option>
@@ -102,7 +103,7 @@
                   </div>
                   <div>Parameters</div>
                   <!-- <button class="btn btn-primary" v-on:click="addDatasetOption"><span class="glyphicon glyphicon-plus"></span>Add Option</button> -->
-                  <div v-for="param in MnistDatasetParam">                    
+                  <div v-for="param in TVDParamInfo">                    
                     <div class="row">                      
                       <div class="param">
                         <div class="input-group">
@@ -114,7 +115,7 @@
                             <select
                               class="form-control"
                               id="'datasetParam_' + param[0]"
-                              v-model="MnistDatasetParamValue[param[0]]"
+                              v-model="TVDParamValue[param[0]]"
                             >
                               <option value="True">True</option>
                               <option value="False">False</option>                              
@@ -126,8 +127,8 @@
                             class="form-control"
                             id="'datasetParam_' + param[0]"
                             style="min-width: 50px;"
-                            :value="param[2]"
-                            v-model="MnistDatasetParamValue[param[0]]"
+                            
+                            v-model="TVDParamValue[param[0]]"
                             />
                           </div>                          
                           <!-- <span class="input-group-addon" style=" padding:0 15px;"><button v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span> -->
@@ -326,6 +327,18 @@
     </div>
 
     <script type="text/javascript">
+      const TVDParamInfos = {
+        'MNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']], 
+        'KMNIST': [['kroot', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']], 
+        }
+      initTVDParams = function(type) {
+        params = {}
+        info = TVDParamInfos[type]
+        for (i = 0; i < info.length; i++) {
+          params[info[i][0]] = '';
+        }
+        return params
+      }
       var app = new Vue({
         el: "#app",
         data: {
@@ -334,8 +347,12 @@
           DatasetOptions: [],
           UseTorchVisionDataset: false,
           TorchVisionDatasetType: 'MNIST',
-          MnistDatasetParam: [['root', '(string)',''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
-          MnistDatasetParamValue: {},
+          TVDParamInfo: [],
+          TVDParamValue: {},
+        },
+        mounted: function() {
+          this.TVDParamInfo = TVDParamInfos[this.TorchVisionDatasetType] 
+          this.TVDParamValue = initTVDParams(this.TorchVisionDatasetType)
         },
         computed: {        
           ConfigurationYaml: function () { 
@@ -343,15 +360,15 @@
             
             if(this.UseTorchVisionDataset) {
               datasetName = this.TorchVisionDatasetType
-              for (var i = 0; i < this.MnistDatasetParam.length; i++) {
-                v = this.MnistDatasetParamValue[this.MnistDatasetParam[i][0]]
+              for (var i = 0; i < this.TVDParamInfo.length; i++) {
+                v = this.TVDParamValue[this.TVDParamInfo[i][0]]
                 if (v == '')
                   continue;
                 if (v == 'True')
                   v = true;
                 if (v == 'False')
                   v = false;
-                datasetParams[this.MnistDatasetParam[i][0]] = v
+                datasetParams[this.TVDParamInfo[i][0]] = v
               }
             } else {
               datasetName = this.DatasetName
@@ -399,7 +416,14 @@
             }
           },
           initDatasetParams: function () {
-            this.MnistDatasetParamValue = { 'root': '', 'train': '', 'download': '', 'transform': '', 'target_transform': '' };
+            this.TVDParamInfo = TVDParamInfos[this.TorchVisionDatasetType]
+            this.TVDParamValue = initTVDParams(this.TorchVisionDatasetType)
+            console.log(this.TVDParamValue)
+          },
+          onDatasetChange: function (event) {
+            console.log(event.target.value)
+            this.TVDParamInfo = TVDParamInfos[event.target.value]
+            this.TVDParamValue = initTVDParams(event.target.value)
           }
         },
       });
