@@ -91,10 +91,11 @@
                       v-on:change="onDatasetChange($event)"
                     >
                       <option value="MNIST">MNIST</option>
+                      <option value="Fashion-MNIST">Fashion-MNIST</option>
                       <option value="KMNIST">KMNIST</option>
-                      <option value="ImageNet">ImageNet</option>
-                      <option value="CIFAR">CIFAR</option>
-                      <option value="CelebA">CelebA</option>
+                      <option value="EMNIST">EMNIST</option>
+                      <option value="QMNIST">QMNIST</option>
+                      <option value="FakeData">FakeData</option>
                     </select>
                     <div v-if="TorchVisionDatasetType === 'MNIST'" class="alert alert-primary">
                       <strong><a href="https://pytorch.org/docs/stable/torchvision/datasets.html#mnist" target="_blank">MNIST dataset details</a></strong> 
@@ -127,7 +128,6 @@
                             class="form-control"
                             id="'datasetParam_' + param[0]"
                             style="min-width: 50px;"
-                            
                             v-model="TVDParamValue[param[0]]"
                             />
                           </div>                          
@@ -329,13 +329,17 @@
     <script type="text/javascript">
       const TVDParamInfos = {
         'MNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']], 
+        'Fashion-MNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']], 
         'KMNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']], 
+        'EMNIST': [['root', '(string)', ''], ['split', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']], 
+        'QMNIST': [['root', '(string)', ''], ['what', '(string, optional)', 'None'], ['compat', '(bool,optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None'], ['train', '(bool, optional,compatibility)', 'True']], 
+        'FakeData': [['size', '(int, optional)', '1000'], ['image_size', '(tuple, optional)', '(3, 224, 224)'], ['num_classes', '(int, optional)', '10'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None'], ['random_offset', '(int)', '0']], 
         }
       initTVDParams = function(type) {
         params = {}
         info = TVDParamInfos[type]
         for (i = 0; i < info.length; i++) {
-          params[info[i][0]] = '';
+          params[info[i][0]] = info[i][2];
         }
         return params
       }
