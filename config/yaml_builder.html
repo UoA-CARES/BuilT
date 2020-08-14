@@ -366,12 +366,7 @@
               datasetName = this.TorchVisionDatasetType
               for (var i = 0; i < this.TVDParamInfo.length; i++) {
                 v = this.TVDParamValue[this.TVDParamInfo[i][0]]
-                if (v == '')
-                  continue;
-                if (v == 'True')
-                  v = true;
-                if (v == 'False')
-                  v = false;
+                v = this.correctType(this.TVDParamInfo[i][1], v)
                 datasetParams[this.TVDParamInfo[i][0]] = v
               }
             } else {
@@ -391,6 +386,32 @@
           },          
         },
         methods: {
+          correctType: function(type, v) {
+            if (type.includes('bool'))
+              type = 'bool'
+            else if (type.includes('int'))
+              type = 'int'
+            else if (type.includes('tuple'))
+              type = 'tuple'
+            else
+              type = 'string'
+            
+            if (type == 'bool') {
+              if (v == 'True')
+                v = true;
+              if (v == 'False')
+                v = false;
+            } else if (type == 'int') {
+              v = parseInt(v)
+            } else if (type == 'tuple') {
+              v = v.replace(/[()]/g, '')
+              console.log(v)
+              v = '[' + (v.split(',').map(Number)).toString() + ']'
+              v = '!!python/tuple ' + v
+            }
+            console.log(v)
+            return v
+          },
           addDatasetOption: function () {
             var option = {
               name: "",
