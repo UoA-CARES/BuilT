@@ -215,45 +215,37 @@
                   id="modelName"                  
                 />
               </div>              
-              <div class="panel panel-primary">
-                <div class="panel-body">
-                  <div>Add options</div>
-                  <button class="btn btn-primary" v-on:click="addDatasetOption"><span class="glyphicon glyphicon-plus"></span>Add Option</button>
-                  <div>&nbsp;</div>
-
-                  <div v-for="datasetOption in DatasetOptions">
-                    <div class="panel panel-primary">
-                      <div class="panel-body">
-                        <div class="row">
-                          <div class="col-lg-6 col-md-6 col-sm-6">
-                            <div class="input-group">
-                              <span class="input-group-addon">
-                                Name
-                              </span>
-                              <input
-                                type="text"
-                                class="form-control"
-                                style="min-width: 50px;"
-                              />
-                              <span class="input-group-addon">
-                                Value
-                              </span>
-                              <input
-                                type="text"
-                                class="form-control"
-                                style="min-width: 50px;"
-                              />
-                              <span class="input-group-addon" style=" padding:0 15px;"><button v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span>
-                            </div>
+              <div class="form-group">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addDatasetOption" :disabled="UseTorchVisionDataset"><span
+                        class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
+              
+                    <div v-for="datasetOption in DatasetOptions">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon">
+                              Name
+                            </span>
+                            <input type="text" class="form-control" v-model="datasetOption['name']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon">
+                              Value
+                            </span>
+                            <input type="text" class="form-control" v-model="datasetOption['value']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon" style=" padding:0 15px;"><button
+                                v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span>
                           </div>
                         </div>
                       </div>
-
                     </div>
-                    
                   </div>
-                  
-                </div>
+                </div>              
               </div>
             </div>
 
@@ -268,7 +260,38 @@
                   id="modelName"                  
                 />
               </div>              
+              <div class="form-group">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addDatasetOption" :disabled="UseTorchVisionDataset"><span
+                        class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
               
+                    <div v-for="datasetOption in DatasetOptions">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon">
+                              Name
+                            </span>
+                            <input type="text" class="form-control" v-model="datasetOption['name']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon">
+                              Value
+                            </span>
+                            <input type="text" class="form-control" v-model="datasetOption['value']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon" style=" padding:0 15px;"><button
+                                v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
 
@@ -284,7 +307,38 @@
                   id="modelName"                  
                 />
               </div>              
+              <div class="form-group">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addDatasetOption" :disabled="UseTorchVisionDataset"><span
+                        class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
               
+                    <div v-for="datasetOption in DatasetOptions">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon">
+                              Name
+                            </span>
+                            <input type="text" class="form-control" v-model="datasetOption['name']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon">
+                              Value
+                            </span>
+                            <input type="text" class="form-control" v-model="datasetOption['value']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon" style=" padding:0 15px;"><button
+                                v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
 
@@ -299,7 +353,38 @@
                   id="modelName"                  
                 />
               </div>              
+              <div class="form-group">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addDatasetOption" :disabled="UseTorchVisionDataset"><span
+                        class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
               
+                    <div v-for="datasetOption in DatasetOptions">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon">
+                              Name
+                            </span>
+                            <input type="text" class="form-control" v-model="datasetOption['name']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon">
+                              Value
+                            </span>
+                            <input type="text" class="form-control" v-model="datasetOption['value']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon" style=" padding:0 15px;"><button
+                                v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
 
@@ -314,7 +399,38 @@
                   id="modelName"                  
                 />
               </div>              
+              <div class="form-group">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addDatasetOption" :disabled="UseTorchVisionDataset"><span
+                        class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
               
+                    <div v-for="datasetOption in DatasetOptions">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon">
+                              Name
+                            </span>
+                            <input type="text" class="form-control" v-model="datasetOption['name']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon">
+                              Value
+                            </span>
+                            <input type="text" class="form-control" v-model="datasetOption['value']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon" style=" padding:0 15px;"><button
+                                v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
 
@@ -329,7 +445,38 @@
                   id="modelName"                  
                 />
               </div>              
+              <div class="form-group">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addDatasetOption" :disabled="UseTorchVisionDataset"><span
+                        class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
               
+                    <div v-for="datasetOption in DatasetOptions">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon">
+                              Name
+                            </span>
+                            <input type="text" class="form-control" v-model="datasetOption['name']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon">
+                              Value
+                            </span>
+                            <input type="text" class="form-control" v-model="datasetOption['value']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon" style=" padding:0 15px;"><button
+                                v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="panel-heading">
@@ -343,7 +490,38 @@
                   id="modelName"                  
                 />
               </div>              
+              <div class="form-group">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addDatasetOption" :disabled="UseTorchVisionDataset"><span
+                        class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
               
+                    <div v-for="datasetOption in DatasetOptions">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon">
+                              Name
+                            </span>
+                            <input type="text" class="form-control" v-model="datasetOption['name']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon">
+                              Value
+                            </span>
+                            <input type="text" class="form-control" v-model="datasetOption['value']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon" style=" padding:0 15px;"><button
+                                v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
 
