@@ -138,9 +138,6 @@
                   </div>
                 </div>
               </div>
-
-
-              
             </div>
 
             <div>&nbsp;</div>
@@ -156,20 +153,56 @@
                   id="transformName"                  
                 />
               </div>
-              <div class="form-group">
-                <label for="selTorchVisionTransformType">TorchVision transforms:</label>
-                <select
-                  class="form-control"
-                  id="selTorchVisionTransformType"
-                  style="min-width: 100px;"
-                >
-                  <option value="None">None</option>
-                  <option value="Compose">Compose</option>
-                  <option value="Pad">Pad</option>
-                  <option value="RandomCrop">RandomCrop</option>
-                  <option value="Resize">Resize</option>
-                </select>
-              </div>              
+              <div class="panel panel-primary">
+                <div class="panel-body">
+                  <div class="form-group">
+                    <label for="selTorchVisionTransformType">TorchVision Transform:</label>
+                    <select class="form-control" id="selTorchVisionTransformType" v-model="TorchVisionTransformType"
+                      style="min-width: 100px;" v-on:change="onTransformChange($event)">
+                      <option value="Pad">Pad</option>
+                      <option value="RandomCrop">RandomCrop</option>
+                      <option value="Resize">Resize</option>
+                    </select>
+                    <div v-if="TorchVisionTransformType === 'Resize'" class="alert alert-primary">
+                      <strong><a href="https://pytorch.org/docs/stable/torchvision/transforms.html#torchvision.transforms.Resize" target="_blank">Resize transform
+                          details</a></strong>
+                    </div>
+              
+                  </div>
+                  <div>Parameters</div>
+                  <!-- <button class="btn btn-primary" v-on:click="addDatasetOption"><span class="glyphicon glyphicon-plus"></span>Add Option</button> -->
+                  <div v-for="param in TVTParamInfo">
+                    <div class="row">
+                      <div class="param">
+                        <div class="input-group">
+                          <span class="input-group-addon" style="text-align:right; min-width: 300px;">
+                            {{param[0]}}{{param[1]}}
+                          </span>
+              
+                          <div v-if="param[1].includes('bool')">
+                            <select class="form-control" id="transformParam" v-model="TVTParamValue[param[0]]">
+                              <option value="True">True</option>
+                              <option value="False">False</option>
+                            </select>
+                          </div>
+                          <div v-else>
+                            <input type="text" class="form-control" id="transformParam" style="min-width: 50px;"
+                              v-model="TVTParamValue[param[0]]" />
+                          </div>
+                          <!-- <span class="input-group-addon" style=" padding:0 15px;"><button v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span> -->
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button class="btn btn-primary" v-on:click="addTransformOption"><span
+                      class="glyphicon glyphicon-plus"></span>Add
+                    Option</button>
+                  <button class="btn btn-primary" v-on:click="addTransformOption"><span
+                      class="glyphicon glyphicon-trash"></span>Delete
+                    Option</button>
+                </div>
+              </div>
             </div>
             <div class="panel-heading">
               <h4>Model</h4>
@@ -335,6 +368,9 @@
         'QMNIST': [['root', '(string)', ''], ['what', '(string, optional)', 'None'], ['compat', '(bool,optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None'], ['train', '(bool, optional,compatibility)', 'True']], 
         'FakeData': [['size', '(int, optional)', '1000'], ['image_size', '(tuple, optional)', '(3, 224, 224)'], ['num_classes', '(int, optional)', '10'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None'], ['random_offset', '(int)', '0']], 
         }
+      const TVTParamInfos = {
+        'Resize': [['size', '(sequence or int)', ''], ['interpolation', '(int, optional)', '2']]
+      }
       initTVDParams = function(type) {
         params = {}
         info = TVDParamInfos[type]
@@ -343,6 +379,14 @@
         }
         return params
       }
+      initTVTParams = function (type) {
+          params = {}
+          info = TVTParamInfos[type]
+          for (i = 0; i < info.length; i++) {
+            params[info[i][0]] = info[i][2];
+          }
+          return params
+        }
       var app = new Vue({
         el: "#app",
         data: {
@@ -351,12 +395,18 @@
           DatasetOptions: [],
           UseTorchVisionDataset: false,
           TorchVisionDatasetType: 'MNIST',
+          TorchVisionTransformType: 'Resize',
           TVDParamInfo: [],
           TVDParamValue: {},
+          TVTParamInfo: [],
+          TVTParamValue: {},
         },
         mounted: function() {
           this.TVDParamInfo = TVDParamInfos[this.TorchVisionDatasetType] 
           this.TVDParamValue = initTVDParams(this.TorchVisionDatasetType)
+
+          this.TVTParamInfo = TVTParamInfos[this.TorchVisionTransformType]
+          this.TVTParamValue = initTVTParams(this.TorchVisionTransformType)
         },
         computed: {        
           ConfigurationYaml: function () { 
