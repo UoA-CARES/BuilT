@@ -21,6 +21,12 @@ from src.trainer import Trainer
 from src.models.mnist import Mnist
 
 yaml_config = """
+wandb:
+  sweep:
+    name: "Sweep"
+    use: True
+    yaml: "sweep.yaml"
+    
 dataset:
   name: "MNIST"
   params:

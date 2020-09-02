@@ -16,7 +16,7 @@ from .early_stopper import EarlyStopper
 
 
 class Trainer(object):
-    def __init__(self, config):
+    def __init__(self, config, wandb_conf=None):
         self.config = config        
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')        
         self.es = EarlyStopper(mode='max')
@@ -25,7 +25,8 @@ class Trainer(object):
         if config.logger_hook.params.use_tensorboard:
             self.writer['tensorboard'] = SummaryWriter(log_dir=config.train.dir)
         if config.logger_hook.params.use_wandb:
-            self.writer['wandb'] = wandb.init(project="BuilT")
+            self.writer['wandb'] = wandb.init(
+                config=wandb_conf, project="BuilT")
 
     def prepare_directories(self):
         os.makedirs(os.path.join(self.config.train.dir,

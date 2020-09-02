@@ -1,6 +1,7 @@
 
 import torch.nn as nn
 import torch.optim as optim
+import yaml
 
 from easydict import EasyDict as edict
 from torch.utils.data import DataLoader
@@ -86,4 +87,9 @@ class Builder(object):
 
             dataloaders.append({'mode': is_train,'dataloader': dataloader})
         return dataloaders        
+    
+    def build_sweep(self, config):
+        with open(r'config.wandb.sweep.yaml') as file:
+            hyperparam = yaml.load(file, Loader=yaml.FullLoader)
+            
     

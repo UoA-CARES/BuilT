@@ -1,9 +1,23 @@
+import sys
+import os
+import yaml
+
+from easydict import EasyDict as edict
+
+PACKAGE_PARENT = '..'
+SCRIPT_DIR = os.path.dirname(os.path.realpath(
+    os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
+
+from src.trainer import Trainer
+
+yaml_config = """
 wandb:
   sweep:
     name: "Sweep"
     use: True
     yaml: "sweep.yaml"
-
+    
 dataset:
   name: "MNIST"
   params:
@@ -65,4 +79,19 @@ logger_hook:
   name: "DefaultLogger"
   params:
     use_tensorboard: True
-    use_wandb: False
+    use_wandb: True
+"""
+
+hyperparameter_defaults = dict(
+    batch_size=1,
+    learning_rate=0.001,
+    epochs=2,
+)
+
+config = edict(yaml.load(yaml_config))
+config.train.batch_size = hyperparameter_defaults['batch_size']
+config.optimizer.params.lr = hyperparameter_defaults['learning_rate']
+config.train.num_epochs = hyperparameter_defaults['epochs']
+
+trainer = Trainer(config, hyperparameter_defaults)
+trainer.run()
