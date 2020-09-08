@@ -33,7 +33,7 @@
             <div class="panel-body">
               <div class="form-group">
                 
-                <label for="datasetName">Custum dataset name:</label>
+                <label for="datasetName">Custom dataset name:</label>
                 <input
                   class="form-control"
                   id="datasetName"                  
@@ -147,63 +147,134 @@
             </div>
             <div class="panel-body">
               <div class="form-group">
-                <label for="transformName">Name:</label>
+                <!-- <label for="transformName">Name:</label>
                 <input
                   class="form-control"
                   id="transformName"                  
-                />
+                /> -->
+                <button class="btn btn-primary" v-on:click="addTransformCustom">
+                  <span class="glyphicon glyphicon-plus"></span>
+                  Add Custom
+                </button>
+                <button class="btn btn-primary" v-on:click="addTransform">
+                  <span class="glyphicon glyphicon-plus"></span>
+                  Add TorchVisionTransform
+                </button>
               </div>
-              <div class="panel panel-primary">
-                <div class="panel-body">
-                  <div class="form-group">
-                    <label for="selTorchVisionTransformType">TorchVision Transform:</label>
-                    <select class="form-control" id="selTorchVisionTransformType" v-model="TorchVisionTransformType"
-                      style="min-width: 100px;" v-on:change="onTransformChange($event)">
-                      <option value="Pad">Pad</option>
-                      <option value="RandomCrop">RandomCrop</option>
-                      <option value="Resize">Resize</option>
-                    </select>
-                    <div v-if="TorchVisionTransformType === 'Resize'" class="alert alert-primary">
-                      <strong><a href="https://pytorch.org/docs/stable/torchvision/transforms.html#torchvision.transforms.Resize" target="_blank">Resize transform
-                          details</a></strong>
-                    </div>
-              
-                  </div>
-                  <div>Parameters</div>
-                  <!-- <button class="btn btn-primary" v-on:click="addDatasetOption"><span class="glyphicon glyphicon-plus"></span>Add Option</button> -->
-                  <div v-for="param in TVTParamInfo">
-                    <div class="row">
-                      <div class="param">
-                        <div class="input-group">
-                          <span class="input-group-addon" style="text-align:right; min-width: 300px;">
-                            {{param[0]}}{{param[1]}}
-                          </span>
-              
-                          <div v-if="param[1].includes('bool')">
-                            <select class="form-control" id="transformParam" v-model="TVTParamValue[param[0]]">
-                              <option value="True">True</option>
-                              <option value="False">False</option>
-                            </select>
+
+
+              <div v-for="c in TransformCustoms" >
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div class="form-group">
+                      <label for="modelName">Name:</label>
+                      <input
+                        class="form-control"
+                        id="modelName"                  
+                        v-model="ModelName"
+                      />
+                    </div>              
+                    <div class="form-group">
+                      <div class="panel panel-primary">
+                        <div class="panel-body">
+                          <div>Add options</div>
+                          <button class="btn btn-primary" v-on:click="addOption(ModelOptions)">
+                            <span class="glyphicon glyphicon-plus"></span>
+                            Add Option
+                          </button>
+                          <div>&nbsp;</div>
+                    
+                          <div v-for="modelOption in ModelOptions">
+                            <div class="row">
+                              <div class="param">
+                                <div class="input-group">
+                                  <span class="input-group-addon">
+                                    Name
+                                  </span>
+                                  <input type="text" class="form-control" v-model="modelOption['name']" style="min-width: 50px;" />
+                                  <span class="input-group-addon">
+                                    Value
+                                  </span>
+                                  <input type="text" class="form-control" v-model="modelOption['value']" style="min-width: 50px;" />
+                                  <span class="input-group-addon" style=" padding:0 15px;"><button
+                                      v-on:click="deleteOption(modelOption, ModelOptions)"><span class="glyphicon glyphicon-trash"></span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <div v-else>
-                            <input type="text" class="form-control" id="transformParam" style="min-width: 50px;"
-                              v-model="TVTParamValue[param[0]]" />
-                          </div>
-                          <!-- <span class="input-group-addon" style=" padding:0 15px;"><button v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span> -->
                         </div>
                       </div>
                     </div>
                   </div>
                   
-                  <!-- <button class="btn btn-primary" v-on:click="addTransformOption"><span
-                      class="glyphicon glyphicon-plus"></span>Add
-                    Option</button>
-                  <button class="btn btn-primary" v-on:click="addTransformOption"><span
-                      class="glyphicon glyphicon-trash"></span>Delete
-                    Option</button> -->
+                  <div class="panel-body">
+                    <button class="btn btn-primary" v-on:click="deleteOption(c, TransformCustoms)">
+                      <span class="glyphicon glyphicon-trash"></span>
+                      Delete Custom
+                    </button>
+                  </div>
+                  
+                
+                </div>
+              </div>
+
+              <div v-for="c in Transforms" >
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div class="form-group">
+                      <label for="selTorchVisionTransformType">TorchVision Transform:</label>
+                      <select class="form-control" id="selTorchVisionTransformType" v-model="TorchVisionTransformType"
+                        style="min-width: 100px;" v-on:change="onTransformChange($event)">
+                        <option value="Pad">Pad</option>
+                        <option value="RandomCrop">RandomCrop</option>
+                        <option value="Resize">Resize</option>
+                      </select>
+                      <div v-if="TorchVisionTransformType === 'Resize'" class="alert alert-primary">
+                        <strong><a href="https://pytorch.org/docs/stable/torchvision/transforms.html#torchvision.transforms.Resize" target="_blank">Resize transform
+                            details</a></strong>
+                      </div>
+                
+                    </div>
+                    <div>Parameters</div>
+
+                    <div v-for="param in TVTParamInfo">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon" style="text-align:right; min-width: 300px;">
+                              {{param[0]}}{{param[1]}}
+                            </span>
+                
+                            <div v-if="param[1].includes('bool')">
+                              <select class="form-control" id="transformParam" v-model="TVTParamValue[param[0]]">
+                                <option value="True">True</option>
+                                <option value="False">False</option>
+                              </select>
+                            </div>
+                            <div v-else>
+                              <input type="text" class="form-control" id="transformParam" style="min-width: 50px;"
+                                v-model="TVTParamValue[param[0]]" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="panel-body">
+                    <button class="btn btn-primary" v-on:click="deleteOption(c, Transforms)">
+                      <span class="glyphicon glyphicon-trash"></span>
+                      Delete Transform
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
+
+
+
+
+
             <div class="panel-heading">
               <h4>Model</h4>
             </div>
@@ -492,7 +563,7 @@
                 <input
                   class="form-control"
                   id="hooksName" 
-                  v-model="HooksName"                 
+                  v-model="HooksOptions"                 
                 />
               </div>              
               <div class="form-group">
@@ -589,6 +660,8 @@
           SchedulerName: "",     
           Splits: [],
           DatasetOptions: [],
+          TransformCustoms: [],
+          Transforms: [],
           ModelOptions: [],
           TrainOptions: [],
           EvaluationOptions: [],
@@ -729,6 +802,12 @@
           },
           onTransformChange: function(event) {
 
+          },
+          addTransformCustom: function() {
+            this.TransformCustoms.push('')
+          },
+          addTransform: function() {
+            this.Transforms.push('')
           }
         },
       });
