@@ -103,7 +103,7 @@
 
                   </div>
                   <div>Parameters</div>
-                  <!-- <button class="btn btn-primary" v-on:click="addDatasetOption"><span class="glyphicon glyphicon-plus"></span>Add Option</button> -->
+
                   <div v-for="param in TVDParamInfo">                    
                     <div class="row">                      
                       <div class="param">
@@ -131,7 +131,6 @@
                             v-model="TVDParamValue[param[0]]"
                             />
                           </div>                          
-                          <!-- <span class="input-group-addon" style=" padding:0 15px;"><button v-on:click="deleteDatasetOption(datasetOption)"><span class="glyphicon glyphicon-trash"></span> -->
                         </div>
                       </div>
                     </div>                    
@@ -147,57 +146,55 @@
             </div>
             <div class="panel-body">
               <div class="form-group">
-                <!-- <label for="transformName">Name:</label>
-                <input
-                  class="form-control"
-                  id="transformName"                  
-                /> -->
                 <button class="btn btn-primary" v-on:click="addTransformCustom">
                   <span class="glyphicon glyphicon-plus"></span>
                   Add Custom
                 </button>
-                <button class="btn btn-primary" v-on:click="addTransform">
+                <button class="btn btn-primary" v-on:click="addTransform('Resize')">
                   <span class="glyphicon glyphicon-plus"></span>
                   Add TorchVisionTransform
                 </button>
               </div>
 
 
+              
+
+
               <div v-for="c in TransformCustoms" >
                 <div class="panel panel-primary">
                   <div class="panel-body">
                     <div class="form-group">
-                      <label for="modelName">Name:</label>
+                      <label for="customTransformName">Name:</label>
                       <input
                         class="form-control"
-                        id="modelName"                  
-                        v-model="ModelName"
+                        id="customTransformName"                  
+                        v-model="c.name"
                       />
                     </div>              
                     <div class="form-group">
                       <div class="panel panel-primary">
                         <div class="panel-body">
                           <div>Add options</div>
-                          <button class="btn btn-primary" v-on:click="addOption(ModelOptions)">
+                          <button class="btn btn-primary" v-on:click="addOption(c.options)">
                             <span class="glyphicon glyphicon-plus"></span>
                             Add Option
                           </button>
                           <div>&nbsp;</div>
                     
-                          <div v-for="modelOption in ModelOptions">
+                          <div v-for="option in c.options">
                             <div class="row">
                               <div class="param">
                                 <div class="input-group">
                                   <span class="input-group-addon">
                                     Name
                                   </span>
-                                  <input type="text" class="form-control" v-model="modelOption['name']" style="min-width: 50px;" />
+                                  <input type="text" class="form-control" v-model="option['name']" style="min-width: 50px;" />
                                   <span class="input-group-addon">
                                     Value
                                   </span>
-                                  <input type="text" class="form-control" v-model="modelOption['value']" style="min-width: 50px;" />
+                                  <input type="text" class="form-control" v-model="option['value']" style="min-width: 50px;" />
                                   <span class="input-group-addon" style=" padding:0 15px;"><button
-                                      v-on:click="deleteOption(modelOption, ModelOptions)"><span class="glyphicon glyphicon-trash"></span>
+                                      v-on:click="deleteOption(option, c.options)"><span class="glyphicon glyphicon-trash"></span>
                                 </div>
                               </div>
                             </div>
@@ -223,7 +220,7 @@
                   <div class="panel-body">
                     <div class="form-group">
                       <label for="selTorchVisionTransformType">TorchVision Transform:</label>
-                      <select class="form-control" id="selTorchVisionTransformType" v-model="TorchVisionTransformType"
+                      <select class="form-control" id="selTorchVisionTransformType" v-model="c.transformType"
                         style="min-width: 100px;" v-on:change="onTransformChange($event)">
                         <option value="Pad">Pad</option>
                         <option value="RandomCrop">RandomCrop</option>
@@ -246,14 +243,14 @@
                             </span>
                 
                             <div v-if="param[1].includes('bool')">
-                              <select class="form-control" id="transformParam" v-model="TVTParamValue[param[0]]">
+                              <select class="form-control" id="transformParam" v-model="c.paramValues[param[0]]">
                                 <option value="True">True</option>
                                 <option value="False">False</option>
                               </select>
                             </div>
                             <div v-else>
                               <input type="text" class="form-control" id="transformParam" style="min-width: 50px;"
-                                v-model="TVTParamValue[param[0]]" />
+                                v-model="c.paramValues[param[0]]" />
                             </div>
                           </div>
                         </div>
@@ -625,6 +622,32 @@
       const TVTParamInfos = {
         'Resize': [['size', '(sequence or int)', ''], ['interpolation', '(int, optional)', '2']]
       }
+      correctType = function(type, v) {
+      if (type.includes('bool'))
+        type = 'bool'
+      else if (type.includes('int'))
+        type = 'int'
+      else if (type.includes('tuple'))
+        type = 'tuple'
+      else
+        type = 'string'
+      
+      if (type == 'bool') {
+        if (v == 'True')
+          v = true;
+        if (v == 'False')
+          v = false;
+      } else if (type == 'int') {
+        v = parseInt(v)
+      } else if (type == 'tuple') {
+        v = v.replace(/[()]/g, '')
+        console.log(v)
+        v = '[' + (v.split(',').map(Number)).toString() + ']'
+        v = '!!python/tuple ' + v
+      }
+      console.log(v)
+      return v
+    }
       initTVDParams = function(type) {
         params = {}
         info = TVDParamInfos[type]
@@ -647,6 +670,26 @@
           datasetParams[options[i]['name']] = options[i]['value']
         }
         return datasetParams
+      }
+      transformsToList = function (transforms) {
+        rtn = []
+        for (var i = 0; i< transforms.length; i++) {
+          
+          t = transforms[i]
+          params = {}
+          paramInfo = TVTParamInfos[t.transformType]
+          for (var j = 0; j < paramInfo.length; j++) {
+            v = t.paramValues[paramInfo[j][0]]
+            v = this.correctType(paramInfo[j][1], v)
+            params[paramInfo[j][0]] = v
+          }
+
+          cur = {}
+          cur['name'] = t.transformType
+          cur['params'] = params
+          rtn.push(cur)
+        }
+        return rtn
       }
       var app = new Vue({
         el: "#app",
@@ -692,7 +735,7 @@
               datasetName = this.TorchVisionDatasetType
               for (var i = 0; i < this.TVDParamInfo.length; i++) {
                 v = this.TVDParamValue[this.TVDParamInfo[i][0]]
-                v = this.correctType(this.TVDParamInfo[i][1], v)
+                v = correctType(this.TVDParamInfo[i][1], v)
                 datasetParams[this.TVDParamInfo[i][0]] = v
               }
             } else {
@@ -707,6 +750,9 @@
                   'name': datasetName, 
                   'params': datasetParams
                 },
+              'transform': {
+                't': transformsToList(this.Transforms)
+              },
               'model': {
                 'name': this.ModelName,
                 'params': optionsToParams(this.ModelOptions)
@@ -737,32 +783,7 @@
           },          
         },
         methods: {
-          correctType: function(type, v) {
-            if (type.includes('bool'))
-              type = 'bool'
-            else if (type.includes('int'))
-              type = 'int'
-            else if (type.includes('tuple'))
-              type = 'tuple'
-            else
-              type = 'string'
-            
-            if (type == 'bool') {
-              if (v == 'True')
-                v = true;
-              if (v == 'False')
-                v = false;
-            } else if (type == 'int') {
-              v = parseInt(v)
-            } else if (type == 'tuple') {
-              v = v.replace(/[()]/g, '')
-              console.log(v)
-              v = '[' + (v.split(',').map(Number)).toString() + ']'
-              v = '!!python/tuple ' + v
-            }
-            console.log(v)
-            return v
-          },
+          
           addOption: function(options) {
             var option = {
               name: "",
@@ -804,10 +825,19 @@
 
           },
           addTransformCustom: function() {
-            this.TransformCustoms.push('')
+            var newSplit = {
+              name: "",
+              type: "",
+              options: []
+            }
+            this.TransformCustoms.push(newSplit)
           },
-          addTransform: function() {
-            this.Transforms.push('')
+          addTransform: function(type) {
+            var newSplit = {
+              transformType: type,
+              paramValues: initTVTParams(type)
+            }
+            this.Transforms.push(newSplit)
           }
         },
       });
