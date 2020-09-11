@@ -556,43 +556,64 @@
             </div>
             <div class="panel-body">
               <div class="form-group">
-                <label for="hooksName">Name:</label>
-                <input
-                  class="form-control"
-                  id="hooksName" 
-                  v-model="HooksOptions"                 
-                />
-              </div>              
-              <div class="form-group">
+                <button class="btn btn-primary" v-on:click="addHookCustom">
+                  <span class="glyphicon glyphicon-plus"></span>
+                  Add Hook
+                </button>
+              </div>
+
+              <div v-for="c in HookCustoms" >
                 <div class="panel panel-primary">
                   <div class="panel-body">
-                    <div>Add options</div>
-                    <button class="btn btn-primary" v-on:click="addOption(HooksOptions)" :disabled="UseTorchVisionDataset"><span
-                        class="glyphicon glyphicon-plus"></span>Add
-                      Option</button>
-                    <div>&nbsp;</div>
-              
-                    <div v-for="hooksOption in HooksOptions">
-                      <div class="row">
-                        <div class="param">
-                          <div class="input-group">
-                            <span class="input-group-addon">
-                              Name
-                            </span>
-                            <input type="text" class="form-control" v-model="hooksOption['name']" style="min-width: 50px;"
-                              :disabled="UseTorchVisionDataset" />
-                            <span class="input-group-addon">
-                              Value
-                            </span>
-                            <input type="text" class="form-control" v-model="hooksOption['value']" style="min-width: 50px;"
-                              :disabled="UseTorchVisionDataset" />
-                            <span class="input-group-addon" style=" padding:0 15px;"><button
-                                v-on:click="deleteOption(hooksOption, HooksOptions)"><span class="glyphicon glyphicon-trash"></span>
+                    <div class="form-group">
+                      <label for="customTransformName">Name:</label>
+                      <input
+                        class="form-control"
+                        id="customHookName"                  
+                        v-model="c.name"
+                      />
+                    </div>              
+                    <div class="form-group">
+                      <div class="panel panel-primary">
+                        <div class="panel-body">
+                          <div>Add options</div>
+                          <button class="btn btn-primary" v-on:click="addOption(c.options)">
+                            <span class="glyphicon glyphicon-plus"></span>
+                            Add Option
+                          </button>
+                          <div>&nbsp;</div>
+                    
+                          <div v-for="option in c.options">
+                            <div class="row">
+                              <div class="param">
+                                <div class="input-group">
+                                  <span class="input-group-addon">
+                                    Name
+                                  </span>
+                                  <input type="text" class="form-control" v-model="option['name']" style="min-width: 50px;" />
+                                  <span class="input-group-addon">
+                                    Value
+                                  </span>
+                                  <input type="text" class="form-control" v-model="option['value']" style="min-width: 50px;" />
+                                  <span class="input-group-addon" style=" padding:0 15px;"><button
+                                      v-on:click="deleteOption(option, c.options)"><span class="glyphicon glyphicon-trash"></span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                  
+                  <div class="panel-body">
+                    <button class="btn btn-primary" v-on:click="deleteOption(c, HookCustoms)">
+                      <span class="glyphicon glyphicon-trash"></span>
+                      Delete Custom
+                    </button>
+                  </div>
+                  
+                
                 </div>
               </div>
             </div>
@@ -712,6 +733,7 @@
           OptimizerOptions: [],
           SchedulerOptions: [],
           HooksOptions: [],
+          HookCustoms: [],
           UseTorchVisionDataset: false,
           TorchVisionDatasetType: 'MNIST',
           TorchVisionTransformType: 'Resize',
@@ -838,7 +860,15 @@
               paramValues: initTVTParams(type)
             }
             this.Transforms.push(newSplit)
-          }
+          },
+          addHookCustom: function() {
+            var newSplit = {
+              name: "",
+              type: "",
+              options: []
+            }
+            this.HookCustoms.push(newSplit)
+          },
         },
       });
     </script>
