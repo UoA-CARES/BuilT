@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.8.2/js-yaml.min.js"></script>
+    <style>
+      .param {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        margin-right: 20px;
+        margin-left: 20px;
+      }
+    </style>
+    <title>Training configuration yaml builder</title>
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="col-md-6 col-lg-6 col-sm-12">
+        <h3>Training configuration yaml builder</h3>
+        <div id="app">
+          <div class="panel panel-primary">
+            <div class="panel-heading">
+              <h4>Dataset</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                
+                <label for="datasetName">Custom dataset name:</label>
+                <input
+                  class="form-control"
+                  id="datasetName"                  
+                  :disabled="UseTorchVisionDataset"
+                  v-model="DatasetName"
+                />                
+              </div>
+              <div class="form-group">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addOption(DatasetOptions)" :disabled="UseTorchVisionDataset"><span class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
+                
+                    <div v-for="datasetOption in DatasetOptions">
+                      <!-- <div class="panel panel-primary">
+                        <div class="panel-body"> -->
+                          <div class="row">
+                            <div class="param">
+                              <div class="input-group">
+                                <span class="input-group-addon">
+                                  Name
+                                </span>
+                                <input type="text" class="form-control" v-model="datasetOption['name']" style="min-width: 50px;" :disabled="UseTorchVisionDataset"/>
+                                <span class="input-group-addon">
+                                  Value
+                                </span>
+                                <input type="text" class="form-control" v-model="datasetOption['value']" style="min-width: 50px;" :disabled="UseTorchVisionDataset"/>
+                                <span class="input-group-addon" style=" padding:0 15px;"><button
+                                    v-on:click="deleteOption(datasetOption, DatasetOptions)"><span class="glyphicon glyphicon-trash"></span>
+                              </div>
+                            </div>
+                          </div>
+                        <!-- </div>
+                      </div> -->
+                    </div>                
+                  </div>
+                </div>
+
+                <input type="checkbox" v-model="UseTorchVisionDataset" v-on:click="initDatasetParams">
+                <label for="useTorchvisionDataset"> Use Torchvision Dataset</label><br>
+
+              </div>
+
+              <div class="panel panel-primary" v-show="UseTorchVisionDataset">
+                <div class="panel-body">
+                  <div class="form-group">
+                    <label for="selTorchVisionDatasetType">TorchVision Dataset:</label>
+                    <select
+                      class="form-control"
+                      id="selTorchVisionDatasetType"
+                      v-model="TorchVisionDatasetType"
+                      style="min-width: 100px;"
+                      v-on:change="onDatasetChange($event)"
+                    >
+                      <option value="MNIST">MNIST</option>
+                      <option value="Fashion-MNIST">Fashion-MNIST</option>
+                      <option value="KMNIST">KMNIST</option>
+                      <option value="EMNIST">EMNIST</option>
+                      <option value="QMNIST">QMNIST</option>
+                      <option value="FakeData">FakeData</option>
+                    </select>
+                    <div v-if="TorchVisionDatasetType === 'MNIST'" class="alert alert-primary">
+                      <strong><a href="https://pytorch.org/docs/stable/torchvision/datasets.html#mnist" target="_blank">MNIST dataset details</a></strong> 
+                    </div>
+
+                  </div>
+                  <div>Parameters</div>
+
+                  <div v-for="param in TVDParamInfo">                    
+                    <div class="row">                      
+                      <div class="param">
+                        <div class="input-group">
+                          <span class="input-group-addon" style="text-align:right; min-width: 300px;">
+                            {{param[0]}}{{param[1]}}
+                          </span>
+                          
+                          <div v-if="param[1].includes('bool')">
+                            <select
+                              class="form-control"
+                              id="'datasetParam_' + param[0]"
+                              v-model="TVDParamValue[param[0]]"
+                            >
+                              <option value="True">True</option>
+                              <option value="False">False</option>                              
+                            </select>
+                          </div>
+                          <div v-else>
+                            <input
+                            type="text"
+                            class="form-control"
+                            id="'datasetParam_' + param[0]"
+                            style="min-width: 50px;"
+                            v-model="TVDParamValue[param[0]]"
+                            />
+                          </div>                          
+                        </div>
+                      </div>
+                    </div>                    
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>&nbsp;</div>
+
+            <div class="panel-heading">
+              <h4>Transform</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <button class="btn btn-primary" v-on:click="addTransformCustom">
+                  <span class="glyphicon glyphicon-plus"></span>
+                  Add Custom
+                </button>
+                <button class="btn btn-primary" v-on:click="addTransform('Resize')">
+                  <span class="glyphicon glyphicon-plus"></span>
+                  Add TorchVisionTransform
+                </button>
+              </div>
+
+
+              
+
+
+              <div v-for="c in TransformCustoms" >
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div class="form-group">
+                      <label for="customTransformName">Name:</label>
+                      <input
+                        class="form-control"
+                        id="customTransformName"                  
+                        v-model="c.name"
+                      />
+                    </div>              
+                    <div class="form-group">
+                      <div class="panel panel-primary">
+                        <div class="panel-body">
+                          <div>Add options</div>
+                          <button class="btn btn-primary" v-on:click="addOption(c.options)">
+                            <span class="glyphicon glyphicon-plus"></span>
+                            Add Option
+                          </button>
+                          <div>&nbsp;</div>
+                    
+                          <div v-for="option in c.options">
+                            <div class="row">
+                              <div class="param">
+                                <div class="input-group">
+                                  <span class="input-group-addon">
+                                    Name
+                                  </span>
+                                  <input type="text" class="form-control" v-model="option['name']" style="min-width: 50px;" />
+                                  <span class="input-group-addon">
+                                    Value
+                                  </span>
+                                  <input type="text" class="form-control" v-model="option['value']" style="min-width: 50px;" />
+                                  <span class="input-group-addon" style=" padding:0 15px;"><button
+                                      v-on:click="deleteOption(option, c.options)"><span class="glyphicon glyphicon-trash"></span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="panel-body">
+                    <button class="btn btn-primary" v-on:click="deleteOption(c, TransformCustoms)">
+                      <span class="glyphicon glyphicon-trash"></span>
+                      Delete Custom
+                    </button>
+                  </div>
+                  
+                
+                </div>
+              </div>
+
+              <div v-for="c in Transforms" >
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div class="form-group">
+                      <label for="selTorchVisionTransformType">TorchVision Transform:</label>
+                      <select class="form-control" id="selTorchVisionTransformType" v-model="c.transformType"
+                        style="min-width: 100px;" v-on:change="onTransformChange($event)">
+                        <option value="Pad">Pad</option>
+                        <option value="RandomCrop">RandomCrop</option>
+                        <option value="Resize">Resize</option>
+                      </select>
+                      <div v-if="TorchVisionTransformType === 'Resize'" class="alert alert-primary">
+                        <strong><a href="https://pytorch.org/docs/stable/torchvision/transforms.html#torchvision.transforms.Resize" target="_blank">Resize transform
+                            details</a></strong>
+                      </div>
+                
+                    </div>
+                    <div>Parameters</div>
+
+                    <div v-for="param in TVTParamInfo">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon" style="text-align:right; min-width: 300px;">
+                              {{param[0]}}{{param[1]}}
+                            </span>
+                
+                            <div v-if="param[1].includes('bool')">
+                              <select class="form-control" id="transformParam" v-model="c.paramValues[param[0]]">
+                                <option value="True">True</option>
+                                <option value="False">False</option>
+                              </select>
+                            </div>
+                            <div v-else>
+                              <input type="text" class="form-control" id="transformParam" style="min-width: 50px;"
+                                v-model="c.paramValues[param[0]]" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="panel-body">
+                    <button class="btn btn-primary" v-on:click="deleteOption(c, Transforms)">
+                      <span class="glyphicon glyphicon-trash"></span>
+                      Delete Transform
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+            <div class="panel-heading">
+              <h4>Model</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="modelName">Name:</label>
+                <input
+                  class="form-control"
+                  id="modelName"                  
+                  v-model="ModelName"
+                />
+              </div>              
+              <div class="form-group">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addOption(ModelOptions)"><span
+                        class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
+              
+                    <div v-for="modelOption in ModelOptions">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon">
+                              Name
+                            </span>
+                            <input type="text" class="form-control" v-model="modelOption['name']" style="min-width: 50px;" />
+                            <span class="input-group-addon">
+                              Value
+                            </span>
+                            <input type="text" class="form-control" v-model="modelOption['value']" style="min-width: 50px;" />
+                            <span class="input-group-addon" style=" padding:0 15px;"><button
+                                v-on:click="deleteOption(modelOption, ModelOptions)"><span class="glyphicon glyphicon-trash"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>              
+              </div>
+            </div>
+
+            <div class="panel-heading">
+              <h4>Train</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="trainName">Name:</label>
+                <input
+                  class="form-control"
+                  id="trainName" 
+                  v-model="TrainName"                 
+                />
+              </div>              
+              <div class="form-group">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addOption(TrainOptions)" :disabled="UseTorchVisionDataset"><span
+                        class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
+              
+                    <div v-for="trainOption in TrainOptions">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon">
+                              Name
+                            </span>
+                            <input type="text" class="form-control" v-model="trainOption['name']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon">
+                              Value
+                            </span>
+                            <input type="text" class="form-control" v-model="trainOption['value']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon" style=" padding:0 15px;"><button
+                                v-on:click="deleteOption(trainOption, TrainOptions)"><span class="glyphicon glyphicon-trash"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
+            <div class="panel-heading">
+              <h4>Evaluation</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="evaluationName">Name:</label>
+                <input
+                  class="form-control"
+                  id="evaluationName" 
+                  v-model="EvaluationName"                 
+                />
+              </div>              
+              <div class="form-group">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addOption(EvaluationOptions)" :disabled="UseTorchVisionDataset"><span
+                        class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
+              
+                    <div v-for="evaluationOption in EvaluationOptions">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon">
+                              Name
+                            </span>
+                            <input type="text" class="form-control" v-model="evaluationOption['name']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon">
+                              Value
+                            </span>
+                            <input type="text" class="form-control" v-model="evaluationOption['value']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon" style=" padding:0 15px;"><button
+                                v-on:click="deleteOption(evaluationOption, EvaluationOptions)"><span class="glyphicon glyphicon-trash"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="panel-heading">
+              <h4>Loss</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="lossName">Name:</label>
+                <input
+                  class="form-control"
+                  id="lossName" 
+                  v-model="LossName"                 
+                />
+              </div>              
+              <div class="form-group">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addOption(LossOptions)" :disabled="UseTorchVisionDataset"><span
+                        class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
+              
+                    <div v-for="lossOption in LossOptions">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon">
+                              Name
+                            </span>
+                            <input type="text" class="form-control" v-model="lossOption['name']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon">
+                              Value
+                            </span>
+                            <input type="text" class="form-control" v-model="lossOption['value']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon" style=" padding:0 15px;"><button
+                                v-on:click="deleteOption(lossOption, LossOptions)"><span class="glyphicon glyphicon-trash"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="panel-heading">
+              <h4>Optimizer</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="optimizerName">Name:</label>
+                <input
+                  class="form-control"
+                  id="optimizerName"      
+                  v-model="OptimizerName"            
+                />
+              </div>              
+              <div class="form-group">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addOption(OptimizerOptions)" :disabled="UseTorchVisionDataset"><span
+                        class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
+              
+                    <div v-for="optimizerOption in OptimizerOptions">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon">
+                              Name
+                            </span>
+                            <input type="text" class="form-control" v-model="optimizerOption['name']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon">
+                              Value
+                            </span>
+                            <input type="text" class="form-control" v-model="optimizerOption['value']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon" style=" padding:0 15px;"><button
+                                v-on:click="deleteOption(optimizerOption, OptimizerOptions)"><span class="glyphicon glyphicon-trash"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="panel-heading">
+              <h4>Scheduler</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="schedulerName">Name:</label>
+                <input
+                  class="form-control"
+                  id="schedulerName"  
+                  v-model="SchedulerName"
+                />
+              </div>              
+              <div class="form-group">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div>Add options</div>
+                    <button class="btn btn-primary" v-on:click="addOption(SchedulerOptions)" :disabled="UseTorchVisionDataset"><span
+                        class="glyphicon glyphicon-plus"></span>Add
+                      Option</button>
+                    <div>&nbsp;</div>
+              
+                    <div v-for="schedulerOption in SchedulerOptions">
+                      <div class="row">
+                        <div class="param">
+                          <div class="input-group">
+                            <span class="input-group-addon">
+                              Name
+                            </span>
+                            <input type="text" class="form-control" v-model="schedulerOption['name']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon">
+                              Value
+                            </span>
+                            <input type="text" class="form-control" v-model="schedulerOption['value']" style="min-width: 50px;"
+                              :disabled="UseTorchVisionDataset" />
+                            <span class="input-group-addon" style=" padding:0 15px;"><button
+                                v-on:click="deleteOption(schedulerOption, SchedulerOptions)"><span class="glyphicon glyphicon-trash"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-heading">
+              <h4>Hooks</h4>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <button class="btn btn-primary" v-on:click="addHookCustom">
+                  <span class="glyphicon glyphicon-plus"></span>
+                  Add Hook
+                </button>
+              </div>
+
+              <div v-for="c in HookCustoms" >
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div class="form-group">
+                      <label for="customTransformName">Name:</label>
+                      <input
+                        class="form-control"
+                        id="customHookName"                  
+                        v-model="c.name"
+                      />
+                    </div>              
+                    <div class="form-group">
+                      <div class="panel panel-primary">
+                        <div class="panel-body">
+                          <div>Add options</div>
+                          <button class="btn btn-primary" v-on:click="addOption(c.options)">
+                            <span class="glyphicon glyphicon-plus"></span>
+                            Add Option
+                          </button>
+                          <div>&nbsp;</div>
+                    
+                          <div v-for="option in c.options">
+                            <div class="row">
+                              <div class="param">
+                                <div class="input-group">
+                                  <span class="input-group-addon">
+                                    Name
+                                  </span>
+                                  <input type="text" class="form-control" v-model="option['name']" style="min-width: 50px;" />
+                                  <span class="input-group-addon">
+                                    Value
+                                  </span>
+                                  <input type="text" class="form-control" v-model="option['value']" style="min-width: 50px;" />
+                                  <span class="input-group-addon" style=" padding:0 15px;"><button
+                                      v-on:click="deleteOption(option, c.options)"><span class="glyphicon glyphicon-trash"></span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="panel-body">
+                    <button class="btn btn-primary" v-on:click="deleteOption(c, HookCustoms)">
+                      <span class="glyphicon glyphicon-trash"></span>
+                      Delete Custom
+                    </button>
+                  </div>
+                  
+                
+                </div>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-6 col-sm-12">
+        <h4>Generated YAML</h4>
+        <pre>
+{{ConfigurationYaml}}
+        </template>
+        </pre>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      const TVDParamInfos = {
+        'MNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']], 
+        'Fashion-MNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']], 
+        'KMNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']], 
+        'EMNIST': [['root', '(string)', ''], ['split', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']], 
+        'QMNIST': [['root', '(string)', ''], ['what', '(string, optional)', 'None'], ['compat', '(bool,optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None'], ['train', '(bool, optional,compatibility)', 'True']], 
+        'FakeData': [['size', '(int, optional)', '1000'], ['image_size', '(tuple, optional)', '(3, 224, 224)'], ['num_classes', '(int, optional)', '10'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None'], ['random_offset', '(int)', '0']], 
+        }
+      const TVTParamInfos = {
+        'Resize': [['size', '(sequence or int)', ''], ['interpolation', '(int, optional)', '2']]
+      }
+      correctType = function(type, v) {
+      if (type.includes('bool'))
+        type = 'bool'
+      else if (type.includes('int'))
+        type = 'int'
+      else if (type.includes('tuple'))
+        type = 'tuple'
+      else
+        type = 'string'
+      
+      if (type == 'bool') {
+        if (v == 'True')
+          v = true;
+        if (v == 'False')
+          v = false;
+      } else if (type == 'int') {
+        v = parseInt(v)
+      } else if (type == 'tuple') {
+        v = v.replace(/[()]/g, '')
+        console.log(v)
+        v = '[' + (v.split(',').map(Number)).toString() + ']'
+        v = '!!python/tuple ' + v
+      }
+      console.log(v)
+      return v
+    }
+      initTVDParams = function(type) {
+        params = {}
+        info = TVDParamInfos[type]
+        for (i = 0; i < info.length; i++) {
+          params[info[i][0]] = info[i][2];
+        }
+        return params
+      }
+      initTVTParams = function (type) {
+          params = {}
+          info = TVTParamInfos[type]
+          for (i = 0; i < info.length; i++) {
+            params[info[i][0]] = info[i][2];
+          }
+          return params
+        }
+      optionsToParams = function (options) {
+        datasetParams = {}
+        for (var i = 0; i < options.length; i++) {
+          datasetParams[options[i]['name']] = options[i]['value']
+        }
+        return datasetParams
+      }
+      transformsToList = function (transforms) {
+        rtn = []
+        for (var i = 0; i< transforms.length; i++) {
+          
+          t = transforms[i]
+          params = {}
+          paramInfo = TVTParamInfos[t.transformType]
+          for (var j = 0; j < paramInfo.length; j++) {
+            v = t.paramValues[paramInfo[j][0]]
+            v = this.correctType(paramInfo[j][1], v)
+            params[paramInfo[j][0]] = v
+          }
+
+          cur = {}
+          cur['name'] = t.transformType
+          cur['params'] = params
+          rtn.push(cur)
+        }
+        return rtn
+      }
+      var app = new Vue({
+        el: "#app",
+        data: {
+          DatasetName: "",
+          ModelName: "",
+          TrainName: "",
+          EvaluationName: "",
+          LossName: "",
+          OptimizerName: "",
+          SchedulerName: "",     
+          Splits: [],
+          DatasetOptions: [],
+          TransformCustoms: [],
+          Transforms: [],
+          ModelOptions: [],
+          TrainOptions: [],
+          EvaluationOptions: [],
+          LossOptions: [],
+          OptimizerOptions: [],
+          SchedulerOptions: [],
+          HooksOptions: [],
+          HookCustoms: [],
+          UseTorchVisionDataset: false,
+          TorchVisionDatasetType: 'MNIST',
+          TorchVisionTransformType: 'Resize',
+          TVDParamInfo: [],
+          TVDParamValue: {},
+          TVTParamInfo: [],
+          TVTParamValue: {},
+        },
+        mounted: function() {
+          this.TVDParamInfo = TVDParamInfos[this.TorchVisionDatasetType] 
+          this.TVDParamValue = initTVDParams(this.TorchVisionDatasetType)
+
+          this.TVTParamInfo = TVTParamInfos[this.TorchVisionTransformType]
+          this.TVTParamValue = initTVTParams(this.TorchVisionTransformType)
+        },
+        computed: {        
+          ConfigurationYaml: function () { 
+            datasetParams = {}
+            
+            if(this.UseTorchVisionDataset) {
+              datasetName = this.TorchVisionDatasetType
+              for (var i = 0; i < this.TVDParamInfo.length; i++) {
+                v = this.TVDParamValue[this.TVDParamInfo[i][0]]
+                v = correctType(this.TVDParamInfo[i][1], v)
+                datasetParams[this.TVDParamInfo[i][0]] = v
+              }
+            } else {
+              datasetName = this.DatasetName
+              for (var i = 0; i< this.DatasetOptions.length; i++) {
+                datasetParams[this.DatasetOptions[i]['name']] = this.DatasetOptions[i]['value']
+              }
+            }
+            var configObj = {              
+              'dataset': {
+                  'use_torchvision_dataset': this.UseTorchVisionDataset,
+                  'name': datasetName, 
+                  'params': datasetParams
+                },
+              'transform': {
+                't': transformsToList(this.Transforms)
+              },
+              'model': {
+                'name': this.ModelName,
+                'params': optionsToParams(this.ModelOptions)
+              },
+              'train': {
+                'name': this.TrainName,
+                'params': optionsToParams(this.TrainOptions)
+              },
+              'evaluation': {
+                'name': this.EvaluationName,
+                'params': optionsToParams(this.EvaluationOptions)
+              },
+              'loss': {
+                'name': this.LossName,
+                'params': optionsToParams(this.LossOptions)
+              },
+              'optimizer': {
+                'name': this.OptimizerName,
+                'params': optionsToParams(this.OptimizerOptions)
+              },
+              'scheduler': {
+                'name': this.SchedulerName,
+                'params': optionsToParams(this.SchedulerOptions)
+              }
+
+            };
+            return jsyaml.dump(configObj);
+          },          
+        },
+        methods: {
+          
+          addOption: function(options) {
+            var option = {
+              name: "",
+              value: "",
+            };
+            options.push(option)
+          },
+          deleteOption: function (split, options) {
+            var splitIndex = options.indexOf(split);
+            if (splitIndex > -1) {
+              options.splice(splitIndex, 1);
+            }
+          },
+          addSplit: function () {
+            var newSplit = {
+              mode: "train",
+              split: "train",
+            };
+
+            this.Splits.push(newSplit);
+          },
+          deleteSplit: function (split) {
+            var splitIndex = this.Splits.indexOf(split);
+            if (splitIndex > -1) {
+              this.Splits.splice(splitIndex, 1);
+            }
+          },
+          initDatasetParams: function () {
+            this.TVDParamInfo = TVDParamInfos[this.TorchVisionDatasetType]
+            this.TVDParamValue = initTVDParams(this.TorchVisionDatasetType)
+            console.log(this.TVDParamValue)
+          },
+          onDatasetChange: function (event) {
+            console.log(event.target.value)
+            this.TVDParamInfo = TVDParamInfos[event.target.value]
+            this.TVDParamValue = initTVDParams(event.target.value)
+          },
+          onTransformChange: function(event) {
+
+          },
+          addTransformCustom: function() {
+            var newSplit = {
+              name: "",
+              type: "",
+              options: []
+            }
+            this.TransformCustoms.push(newSplit)
+          },
+          addTransform: function(type) {
+            var newSplit = {
+              transformType: type,
+              paramValues: initTVTParams(type)
+            }
+            this.Transforms.push(newSplit)
+          },
+          addHookCustom: function() {
+            var newSplit = {
+              name: "",
+              type: "",
+              options: []
+            }
+            this.HookCustoms.push(newSplit)
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
