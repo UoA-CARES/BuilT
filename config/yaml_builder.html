@@ -227,7 +227,7 @@
                   </div>
                   <div>Parameters</div>
 
-                  <div v-for="param in TVTParamInfo">
+                  <div v-for="param in TVTParamInfo[c.transformType]">
                     <div class="row">
                       <div class="param">
                         <div class="input-group">
@@ -260,10 +260,6 @@
               </div>
             </div>
           </div>
-
-
-
-
 
           <div class="panel-heading">
             <h4>Model</h4>
@@ -725,14 +721,14 @@
         TorchVisionTransformType: 'Resize',
         TVDParamInfo: [],
         TVDParamValue: {},
-        TVTParamInfo: [],
+        TVTParamInfo: {},
         TVTParamValue: {},
       },
       mounted: function () {
         this.TVDParamInfo = TVDParamInfos[this.TorchVisionDatasetType]
         this.TVDParamValue = initTVDParams(this.TorchVisionDatasetType)
 
-        this.TVTParamInfo = TVTParamInfos[this.TorchVisionTransformType]
+        this.TVTParamInfo[this.TorchVisionTransformType] = TVTParamInfos[this.TorchVisionTransformType]
         this.TVTParamValue = initTVTParams(this.TorchVisionTransformType)
       },
       computed: {
@@ -830,7 +826,9 @@
           this.TVDParamValue = initTVDParams(event.target.value)
         },
         onTransformChange: function (event) {
-
+          this.TorchVisionTransformType = event.target.value
+          this.TVTParamInfo[this.TorchVisionTransformType] = TVTParamInfos[event.target.value]
+          this.TVTParamValue = initTVTParams(event.target.value)
         },
         addTransformCustom: function () {
           var newSplit = {
