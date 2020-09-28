@@ -309,10 +309,6 @@
           </div>
           <div class="panel-body">
             <div class="form-group">
-              <label for="trainName">Name:</label>
-              <input class="form-control" id="trainName" v-model="TrainName" />
-            </div>
-            <div class="form-group">
               <div class="panel panel-primary">
                 <div class="panel-body">
                   <div>Add options</div>
@@ -353,10 +349,6 @@
             <h4>Evaluation</h4>
           </div>
           <div class="panel-body">
-            <div class="form-group">
-              <label for="evaluationName">Name:</label>
-              <input class="form-control" id="evaluationName" v-model="EvaluationName" />
-            </div>
             <div class="form-group">
               <div class="panel panel-primary">
                 <div class="panel-body">
@@ -699,8 +691,6 @@
       data: {
         DatasetName: "",
         ModelName: "",
-        TrainName: "",
-        EvaluationName: "",
         LossName: "",
         OptimizerName: "",
         SchedulerName: "",
@@ -755,7 +745,7 @@
               'params': datasetParams
             },
             'transform': {
-              't': transformsToList(this.Transforms)
+              'transforms': transformsToList(this.Transforms)
             },
             'model': {
               'name': this.ModelName,
