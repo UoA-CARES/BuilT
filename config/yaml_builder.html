@@ -660,6 +660,9 @@
       return params
     }
     optionsToParams = function (options) {
+      if(options.length == 0) {
+        return ''
+      }
       datasetParams = {}
       for (var i = 0; i < options.length; i++) {
         datasetParams[options[i]['name']] = options[i]['value']
