@@ -33,6 +33,7 @@
               <label for="datasetName">Custom dataset name:</label>
               <input class="form-control" id="datasetName" :disabled="UseTorchVisionDataset" v-model="DatasetName" />
             </div>
+            <parameter-options ref="dataset-options"></parameter-options>
             <div class="form-group">
               <div class="panel panel-primary">
                 <div class="panel-body">
@@ -309,37 +310,7 @@
           </div>
           <div class="panel-body">
             <div class="form-group">
-              <div class="panel panel-primary">
-                <div class="panel-body">
-                  <div>Add options</div>
-                  <button class="btn btn-primary" v-on:click="addOption(TrainOptions)"
-                    ><span class="glyphicon glyphicon-plus"></span>Add
-                    Option</button>
-                  <div>&nbsp;</div>
-
-                  <div v-for="trainOption in TrainOptions">
-                    <div class="row">
-                      <div class="param">
-                        <div class="input-group">
-                          <span class="input-group-addon">
-                            Name
-                          </span>
-                          <input type="text" class="form-control" v-model="trainOption['name']" style="min-width: 50px;"
-                             />
-                          <span class="input-group-addon">
-                            Value
-                          </span>
-                          <input type="text" class="form-control" v-model="trainOption['value']"
-                            style="min-width: 50px;" />
-                          <span class="input-group-addon" style=" padding:0 15px;"><button
-                              v-on:click="deleteOption(trainOption, TrainOptions)"><span
-                                class="glyphicon glyphicon-trash"></span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <parameter-options v-model="TrainOptions"></parameter-options>
             </div>
           </div>
 
@@ -350,37 +321,7 @@
           </div>
           <div class="panel-body">
             <div class="form-group">
-              <div class="panel panel-primary">
-                <div class="panel-body">
-                  <div>Add options</div>
-                  <button class="btn btn-primary" v-on:click="addOption(EvaluationOptions)"
-                    ><span class="glyphicon glyphicon-plus"></span>Add
-                    Option</button>
-                  <div>&nbsp;</div>
-
-                  <div v-for="evaluationOption in EvaluationOptions">
-                    <div class="row">
-                      <div class="param">
-                        <div class="input-group">
-                          <span class="input-group-addon">
-                            Name
-                          </span>
-                          <input type="text" class="form-control" v-model="evaluationOption['name']"
-                            style="min-width: 50px;" />
-                          <span class="input-group-addon">
-                            Value
-                          </span>
-                          <input type="text" class="form-control" v-model="evaluationOption['value']"
-                            style="min-width: 50px;" />
-                          <span class="input-group-addon" style=" padding:0 15px;"><button
-                              v-on:click="deleteOption(evaluationOption, EvaluationOptions)"><span
-                                class="glyphicon glyphicon-trash"></span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <parameter-options v-model="EvaluationOptions"></parameter-options>
             </div>
           </div>
 
@@ -394,37 +335,7 @@
               <input class="form-control" id="lossName" v-model="LossName" />
             </div>
             <div class="form-group">
-              <div class="panel panel-primary">
-                <div class="panel-body">
-                  <div>Add options</div>
-                  <button class="btn btn-primary" v-on:click="addOption(LossOptions)"
-                    ><span class="glyphicon glyphicon-plus"></span>Add
-                    Option</button>
-                  <div>&nbsp;</div>
-
-                  <div v-for="lossOption in LossOptions">
-                    <div class="row">
-                      <div class="param">
-                        <div class="input-group">
-                          <span class="input-group-addon">
-                            Name
-                          </span>
-                          <input type="text" class="form-control" v-model="lossOption['name']" style="min-width: 50px;"
-                             />
-                          <span class="input-group-addon">
-                            Value
-                          </span>
-                          <input type="text" class="form-control" v-model="lossOption['value']" style="min-width: 50px;"
-                             />
-                          <span class="input-group-addon" style=" padding:0 15px;"><button
-                              v-on:click="deleteOption(lossOption, LossOptions)"><span
-                                class="glyphicon glyphicon-trash"></span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <parameter-options v-model="LossOptions"></parameter-options>
             </div>
           </div>
 
@@ -438,37 +349,7 @@
               <input class="form-control" id="optimizerName" v-model="OptimizerName" />
             </div>
             <div class="form-group">
-              <div class="panel panel-primary">
-                <div class="panel-body">
-                  <div>Add options</div>
-                  <button class="btn btn-primary" v-on:click="addOption(OptimizerOptions)"
-                    ><span class="glyphicon glyphicon-plus"></span>Add
-                    Option</button>
-                  <div>&nbsp;</div>
-
-                  <div v-for="optimizerOption in OptimizerOptions">
-                    <div class="row">
-                      <div class="param">
-                        <div class="input-group">
-                          <span class="input-group-addon">
-                            Name
-                          </span>
-                          <input type="text" class="form-control" v-model="optimizerOption['name']"
-                            style="min-width: 50px;"  />
-                          <span class="input-group-addon">
-                            Value
-                          </span>
-                          <input type="text" class="form-control" v-model="optimizerOption['value']"
-                            style="min-width: 50px;" />
-                          <span class="input-group-addon" style=" padding:0 15px;"><button
-                              v-on:click="deleteOption(optimizerOption, OptimizerOptions)"><span
-                                class="glyphicon glyphicon-trash"></span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <parameter-options v-model="OptimizerOptions"></parameter-options>
             </div>
           </div>
 
@@ -482,37 +363,7 @@
               <input class="form-control" id="schedulerName" v-model="SchedulerName" />
             </div>
             <div class="form-group">
-              <div class="panel panel-primary">
-                <div class="panel-body">
-                  <div>Add options</div>
-                  <button class="btn btn-primary" v-on:click="addOption(SchedulerOptions)"
-                    ><span class="glyphicon glyphicon-plus"></span>Add
-                    Option</button>
-                  <div>&nbsp;</div>
-
-                  <div v-for="schedulerOption in SchedulerOptions">
-                    <div class="row">
-                      <div class="param">
-                        <div class="input-group">
-                          <span class="input-group-addon">
-                            Name
-                          </span>
-                          <input type="text" class="form-control" v-model="schedulerOption['name']"
-                            style="min-width: 50px;" />
-                          <span class="input-group-addon">
-                            Value
-                          </span>
-                          <input type="text" class="form-control" v-model="schedulerOption['value']"
-                            style="min-width: 50px;" />
-                          <span class="input-group-addon" style=" padding:0 15px;"><button
-                              v-on:click="deleteOption(schedulerOption, SchedulerOptions)"><span
-                                class="glyphicon glyphicon-trash"></span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <parameter-options v-model="SchedulerOptions"></parameter-options>
             </div>
           </div>
 
@@ -596,6 +447,71 @@
   </div>
 
   <script type="text/javascript">
+    // https://stackoverflow.com/questions/40915436/vuejs-update-parent-data-from-child-component
+    Vue.component('parameter-options', {
+      props: ['value'],
+      data: function () {
+        return {
+          options: [],
+          count: 0
+        }
+      },
+      methods: {
+        updateValue: function () {
+          this.$emit('input', this.options);
+        },
+        addOption: function () {
+          var option = {
+            name: "",
+            value: "",
+          };
+          this.options.push(option)
+        },
+        deleteOption: function (split) {
+          var splitIndex = this.options.indexOf(split);
+          if (splitIndex > -1) {
+            this.options.splice(splitIndex, 1);
+          }
+        },
+      },
+      template: `
+        <div class="panel panel-primary">
+          <div class="panel-body">
+            <div>Add options</div>
+            <button class="btn btn-primary" v-on:click="addOption()">
+              <span class="glyphicon glyphicon-plus"></span>
+              Add Option
+            </button>
+
+            <div v-for="option in options">
+              <div class="row">
+                <div class="param">
+                  <div class="input-group">
+                    <span class="input-group-addon">
+                      Name
+                    </span>
+                    <input type="text" class="form-control" v-model="option['name']" v-bind:value="value" v-on:input="updateValue()" style="min-width: 50px;" />
+                    
+                    <span class="input-group-addon">
+                      Value
+                    </span>
+                    <input type="text" class="form-control" v-model="option['value']" v-bind:value="value" v-on:input="updateValue()" style="min-width: 50px;"/>
+                    
+                    <span class="input-group-addon" style=" padding:0 15px;">
+                      <button v-on:click="deleteOption(option)">
+                        <span class="glyphicon glyphicon-trash"></span>
+                      </button>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        `
+    })
+
+
     const TVDParamInfos = {
       'MNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
       'Fashion-MNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
@@ -756,6 +672,7 @@
             },
             'train': {
               'params': optionsToParams(this.TrainOptions)
+              // 'params': optionsToParams(this.$refs.trainoptions.options)
             },
             'evaluation': {
               'params': optionsToParams(this.EvaluationOptions)
