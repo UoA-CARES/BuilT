@@ -33,43 +33,9 @@
               <label for="datasetName">Custom dataset name:</label>
               <input class="form-control" id="datasetName" :disabled="UseTorchVisionDataset" v-model="DatasetName" />
             </div>
-            <parameter-options ref="dataset-options"></parameter-options>
+            
             <div class="form-group">
-              <div class="panel panel-primary">
-                <div class="panel-body">
-                  <div>Add options</div>
-                  <button class="btn btn-primary" v-on:click="addOption(DatasetOptions)"
-                    :disabled="UseTorchVisionDataset"><span class="glyphicon glyphicon-plus"></span>Add
-                    Option</button>
-                  <div>&nbsp;</div>
-
-                  <div v-for="datasetOption in DatasetOptions">
-                    <!-- <div class="panel panel-primary">
-                        <div class="panel-body"> -->
-                    <div class="row">
-                      <div class="param">
-                        <div class="input-group">
-                          <span class="input-group-addon">
-                            Name
-                          </span>
-                          <input type="text" class="form-control" v-model="datasetOption['name']"
-                            style="min-width: 50px;" :disabled="UseTorchVisionDataset" />
-                          <span class="input-group-addon">
-                            Value
-                          </span>
-                          <input type="text" class="form-control" v-model="datasetOption['value']"
-                            style="min-width: 50px;" :disabled="UseTorchVisionDataset" />
-                          <span class="input-group-addon" style=" padding:0 15px;"><button
-                              v-on:click="deleteOption(datasetOption, DatasetOptions)"><span
-                                class="glyphicon glyphicon-trash"></span>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- </div>
-                      </div> -->
-                  </div>
-                </div>
-              </div>
+              <parameter-options v-bind:disable="UseTorchVisionDataset" v-model="DatasetOptions"></parameter-options>
 
               <input type="checkbox" v-model="UseTorchVisionDataset" v-on:click="initDatasetParams">
               <label for="useTorchvisionDataset"> Use Torchvision Dataset</label><br>
@@ -449,7 +415,7 @@
   <script type="text/javascript">
     // https://stackoverflow.com/questions/40915436/vuejs-update-parent-data-from-child-component
     Vue.component('parameter-options', {
-      props: ['value'],
+      props: ['value', 'disable'],
       data: function () {
         return {
           options: [],
@@ -478,7 +444,7 @@
         <div class="panel panel-primary">
           <div class="panel-body">
             <div>Add options</div>
-            <button class="btn btn-primary" v-on:click="addOption()">
+            <button class="btn btn-primary" :disabled="disable" v-on:click="addOption()">
               <span class="glyphicon glyphicon-plus"></span>
               Add Option
             </button>
@@ -490,15 +456,15 @@
                     <span class="input-group-addon">
                       Name
                     </span>
-                    <input type="text" class="form-control" v-model="option['name']" v-bind:value="value" v-on:input="updateValue()" style="min-width: 50px;" />
+                    <input type="text" class="form-control" :disabled="disable" v-model="option['name']" v-on:input="updateValue()" style="min-width: 50px;" />
                     
                     <span class="input-group-addon">
                       Value
                     </span>
-                    <input type="text" class="form-control" v-model="option['value']" v-bind:value="value" v-on:input="updateValue()" style="min-width: 50px;"/>
+                    <input type="text" class="form-control" :disabled="disable" v-model="option['value']" v-on:input="updateValue()" style="min-width: 50px;"/>
                     
                     <span class="input-group-addon" style=" padding:0 15px;">
-                      <button v-on:click="deleteOption(option)">
+                      <button :disabled="disable" v-on:click="deleteOption(option)">
                         <span class="glyphicon glyphicon-trash"></span>
                       </button>
                     </span>
