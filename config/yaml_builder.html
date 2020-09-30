@@ -46,6 +46,11 @@
 
             </div>
 
+
+            
+
+
+
             <div class="panel panel-primary" v-show="UseTorchVisionDataset">
               <div class="panel-body">
                 <div class="form-group">
@@ -131,58 +136,10 @@
               </div>
             </div>
 
-            <div v-for="c in Transforms">
+            <div v-for="(c, idx) in Transforms">
               <div class="panel panel-primary">
-                <div class="panel-body">
-                  <div class="form-group">
-                    <label for="selTorchVisionTransformType">TorchVision Transform:</label>
-                    <select class="form-control" id="selTorchVisionTransformType" v-model="c.transformType"
-                      style="min-width: 100px;" v-on:change="onTransformChange($event)">
-                      <option value="CenterCrop">CenterCrop</option>
-                      <option value="ColorJitter">ColorJitter</option>
-                      <option value="FiveCrop">FiveCrop</option>
-                      <option value="Grayscale">Grayscale</option>
-                      <option value="Pad">Pad</option>
-                      <option value="RandomCrop">RandomCrop</option>
-                      <option value="RandomHorizontalFlip">RandomHorizontalFlip</option>
-                      <option value="RandomVerticalFlip">RandomVerticalFlip</option>
-                      <option value="Resize">Resize</option>
-                      <option value="Normalize">Normalize</option>
-                      <option value="ToTensor">ToTensor</option>
-                    </select>
-                    <div v-if="TorchVisionTransformType === 'Resize'" class="alert alert-primary">
-                      <strong><a
-                          href="https://pytorch.org/docs/stable/torchvision/transforms.html#torchvision.transforms.Resize"
-                          target="_blank">Resize transform
-                          details</a></strong>
-                    </div>
 
-                  </div>
-                  <div>Parameters</div>
-
-                  <div v-for="param in TVTParamInfo[c.transformType]">
-                    <div class="row">
-                      <div class="param">
-                        <div class="input-group">
-                          <span class="input-group-addon" style="text-align:right; min-width: 300px;">
-                            {{param[0]}}{{param[1]}}
-                          </span>
-
-                          <div v-if="param[1].includes('bool')">
-                            <select class="form-control" id="transformParam" v-model="c.paramValues[param[0]]">
-                              <option value="True">True</option>
-                              <option value="False">False</option>
-                            </select>
-                          </div>
-                          <div v-else>
-                            <input type="text" class="form-control" id="transformParam" style="min-width: 50px;"
-                              v-model="c.paramValues[param[0]]" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <torch-predefine v-bind:initial-infos="MyTVTParamInfos" v-model="Transforms[idx]"></torch-predefine>
 
                 <div class="panel-body">
                   <button class="btn btn-primary" v-on:click="deleteOption(c, Transforms)">
@@ -379,6 +336,76 @@
         `
     })
 
+    Vue.component('torch-predefine', {
+      props: ['value', 'initial-infos', 'name'],
+      data: function () {
+        return {
+          infos: this.initialInfos,
+          clsList: [],
+          selectedCls: '', 
+          options: {},
+        }
+      },
+      mounted: function () {
+        this.clsList = Object.keys(this.infos)
+      }, 
+      methods: {
+        updateValue: function () {
+          cur = {
+            transformType: this.selectedCls,
+            paramValues: this.options
+          }
+          this.$emit('input', cur);
+        },
+        getParams: function (clsName) {
+          params = {}
+          info = this.infos[clsName]
+          for (i = 0; i < info.length; i++) {
+            params[info[i][0]] = info[i][2];
+          }
+          return params
+        },
+        onSelectChange: function (event) {
+          this.selectedCls = event.target.value
+          this.options = this.getParams(this.selectedCls)
+          this.updateValue()
+        },
+      },
+      template: `
+        <div class="panel-body">
+          <div class="form-group">
+            <label for="selTorchVisionTransformType"></label>
+            <select class="form-control" style="min-width: 100px;" v-model="selectedCls" v-on:change="onSelectChange($event)">
+              <option v-for="item in clsList" :value="item">{{item}}</option>
+            </select>
+            
+          </div>
+          <div>Parameters</div>
+
+          <div v-for="param in infos[selectedCls]">
+            <div class="row">
+              <div class="param">
+                <div class="input-group">
+                  <span class="input-group-addon" style="text-align:right; min-width: 300px;">
+                    {{param[0]}}{{param[1]}}
+                  </span>
+
+                  <div v-if="param[1].includes('bool')">
+                    <select class="form-control">
+                      <option value="True">True</option>
+                      <option value="False">False</option>
+                    </select>
+                  </div>
+                  <div v-else>
+                    <input type="text" class="form-control" style="min-width: 50px;" v-model="options[param[0]]" v-on:input="updateValue()"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        `
+    })
 
     const TVDParamInfos = {
       'MNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
@@ -500,6 +527,19 @@
         TVDParamValue: {},
         TVTParamInfo: {},
         TVTParamValue: {},
+        MyTVTParamInfos: {
+      'CenterCrop': [['size', '(sequence or int)', '']],
+      'ColorJitter': [['brightness', '(float or tuple of python: float(min, max))', ''], ['contrast', '(float or tuple of python: float(min, max))', ''], ['saturation', '(float or tuple of python: float(min, max))', ''], ['hue', '(float or tuple of python: float(min, max))', '']],
+      'FiveCrop': [['size', '(sequence or int)', '']],
+      'Grayscale': [['num_output_channels', '(int)', '1']],
+      'Pad': [['padding', '(int or tuple)', ''], ['fill', '(int or tuple)', '0'], ['padding_mode', '(str)', 'constant']],
+      'RandomCrop': [['size', '(sequence or int)', ''], ['padding', '(int or sequence, optional)', 'None'], ['pad_if_needed', '(boolean)', 'False'], ['fill', '', '0'], ['padding_mode', '', 'constant']],
+      'RandomHorizontalFlip': [['p', 'float', '0.5']],
+      'RandomVerticalFlip': [['p', 'float', '0.5']],
+      'Resize': [['size', '(sequence or int)', ''], ['interpolation', '(int, optional)', '2']],
+      'Normalize': [['mean', '(sequence)', ''], ['std', '(sequence)', ''], ['inplace', '(bool,optional)', 'False']],
+      'ToTensor': [],
+    }
       },
       mounted: function () {
         this.TVDParamInfo = TVDParamInfos[this.TorchVisionDatasetType]
