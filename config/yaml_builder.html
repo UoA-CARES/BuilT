@@ -41,7 +41,7 @@
             <div class="form-group">
               <parameter-options v-bind:disable="UseTorchVisionDataset" v-model="DatasetOptions"></parameter-options>
 
-              <input type="checkbox" v-model="UseTorchVisionDataset" v-on:click="initDatasetParams">
+              <input type="checkbox" v-model="UseTorchVisionDataset" >
               <label for="useTorchvisionDataset"> Use Torchvision Dataset</label><br>
 
             </div>
@@ -51,7 +51,7 @@
 
 
 
-            <div class="panel panel-primary" v-show="UseTorchVisionDataset">
+            <!-- <div class="panel panel-primary" v-show="UseTorchVisionDataset">
               <div class="panel-body">
                 <div class="form-group">
                   <label for="selTorchVisionDatasetType">TorchVision Dataset:</label>
@@ -96,7 +96,16 @@
                   </div>
                 </div>
               </div>
+            </div> -->
+
+
+
+            <div class="panel panel-primary" v-show="UseTorchVisionDataset">
+              <torch-predefine  v-bind:initial-infos="MyTVDParamInfos" name="TorchVision Dataset:" v-model="TorchDataset"></torch-predefine>
             </div>
+
+
+
           </div>
 
           <div>&nbsp;</div>
@@ -139,7 +148,7 @@
             <div v-for="(c, idx) in Transforms">
               <div class="panel panel-primary">
 
-                <torch-predefine v-bind:initial-infos="MyTVTParamInfos" v-model="Transforms[idx]"></torch-predefine>
+                <torch-predefine v-bind:initial-infos="MyTVTParamInfos" name="TorchVision Transforms:" v-model="Transforms[idx]"></torch-predefine>
 
                 <div class="panel-body">
                   <button class="btn btn-primary" v-on:click="deleteOption(c, Transforms)">
@@ -272,6 +281,7 @@
   </div>
 
   <script type="text/javascript">
+
     // https://stackoverflow.com/questions/40915436/vuejs-update-parent-data-from-child-component
     Vue.component('parameter-options', {
       props: ['value', 'disable'],
@@ -334,7 +344,7 @@
           </div>
         </div>
         `
-    })
+    });
 
     Vue.component('torch-predefine', {
       props: ['value', 'initial-infos', 'name'],
@@ -347,12 +357,16 @@
         }
       },
       mounted: function () {
-        this.clsList = Object.keys(this.infos)
+        if (this.infos == null) {
+          this.clsList = []
+        } else {
+          this.clsList = Object.keys(this.infos)
+        }
       }, 
       methods: {
         updateValue: function () {
           cur = {
-            transformType: this.selectedCls,
+            clsName: this.selectedCls,
             paramValues: this.options
           }
           this.$emit('input', cur);
@@ -361,7 +375,7 @@
           params = {}
           info = this.infos[clsName]
           for (i = 0; i < info.length; i++) {
-            params[info[i][0]] = info[i][2];
+            params[info[i][0]] = {'type': info[i][1], 'value': info[i][2]}; // (type, value)
           }
           return params
         },
@@ -374,7 +388,7 @@
       template: `
         <div class="panel-body">
           <div class="form-group">
-            <label for="selTorchVisionTransformType"></label>
+            <label for="selTorchVisionTransformType">{{name}}</label>
             <select class="form-control" style="min-width: 100px;" v-model="selectedCls" v-on:change="onSelectChange($event)">
               <option v-for="item in clsList" :value="item">{{item}}</option>
             </select>
@@ -397,7 +411,7 @@
                     </select>
                   </div>
                   <div v-else>
-                    <input type="text" class="form-control" style="min-width: 50px;" v-model="options[param[0]]" v-on:input="updateValue()"/>
+                    <input type="text" class="form-control" style="min-width: 50px;" v-model="options[param[0]]['value']" v-on:input="updateValue()"/>
                   </div>
                 </div>
               </div>
@@ -405,29 +419,8 @@
           </div>
         </div>
         `
-    })
+    });
 
-    const TVDParamInfos = {
-      'MNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
-      'Fashion-MNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
-      'KMNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
-      'EMNIST': [['root', '(string)', ''], ['split', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
-      'QMNIST': [['root', '(string)', ''], ['what', '(string, optional)', 'None'], ['compat', '(bool,optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None'], ['train', '(bool, optional,compatibility)', 'True']],
-      'FakeData': [['size', '(int, optional)', '1000'], ['image_size', '(tuple, optional)', '(3, 224, 224)'], ['num_classes', '(int, optional)', '10'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None'], ['random_offset', '(int)', '0']],
-    }
-    const TVTParamInfos = {
-      'CenterCrop': [['size', '(sequence or int)', '']],
-      'ColorJitter': [['brightness', '(float or tuple of python: float(min, max))', ''], ['contrast', '(float or tuple of python: float(min, max))', ''], ['saturation', '(float or tuple of python: float(min, max))', ''], ['hue', '(float or tuple of python: float(min, max))', '']],
-      'FiveCrop': [['size', '(sequence or int)', '']],
-      'Grayscale': [['num_output_channels', '(int)', '1']],
-      'Pad': [['padding', '(int or tuple)', ''], ['fill', '(int or tuple)', '0'], ['padding_mode', '(str)', 'constant']],
-      'RandomCrop': [['size', '(sequence or int)', ''], ['padding', '(int or sequence, optional)', 'None'], ['pad_if_needed', '(boolean)', 'False'], ['fill', '', '0'], ['padding_mode', '', 'constant']],
-      'RandomHorizontalFlip': [['p', 'float', '0.5']],
-      'RandomVerticalFlip': [['p', 'float', '0.5']],
-      'Resize': [['size', '(sequence or int)', ''], ['interpolation', '(int, optional)', '2']],
-      'Normalize': [['mean', '(sequence)', ''], ['std', '(sequence)', ''], ['inplace', '(bool,optional)', 'False']],
-      'ToTensor': [],
-    }
     correctType = function (type, v) {
       if (type.includes('bool'))
         type = 'bool'
@@ -462,14 +455,6 @@
       }
       return params
     }
-    initTVTParams = function (type) {
-      params = {}
-      info = TVTParamInfos[type]
-      for (i = 0; i < info.length; i++) {
-        params[info[i][0]] = info[i][2];
-      }
-      return params
-    }
     optionsToParams = function (options) {
       if(options.length == 0) {
         return ''
@@ -480,22 +465,25 @@
       }
       return datasetParams
     }
+    torchOptionsToParams = function (clsInfo) {
+      params = {}
+      for (var key in clsInfo.paramValues){
+        v = clsInfo.paramValues[key]
+        value = this.correctType(v['type'], v['value'])
+        params[key] = value
+      }
+
+      cur = {}
+      cur['name'] = clsInfo.clsName
+      cur['params'] = params
+      return cur
+    }
     transformsToList = function (transforms) {
       rtn = []
       for (var i = 0; i < transforms.length; i++) {
 
         t = transforms[i]
-        params = {}
-        paramInfo = TVTParamInfos[t.transformType]
-        for (var j = 0; j < paramInfo.length; j++) {
-          v = t.paramValues[paramInfo[j][0]]
-          v = this.correctType(paramInfo[j][1], v)
-          params[paramInfo[j][0]] = v
-        }
-
-        cur = {}
-        cur['name'] = t.transformType
-        cur['params'] = params
+        cur = this.torchOptionsToParams(t)
         rtn.push(cur)
       }
       return rtn
@@ -510,6 +498,10 @@
         SchedulerName: "",
         Splits: [],
         DatasetOptions: [],
+        TorchDataset: {
+            // clsName: "",
+            // paramValues: {}
+        },
         TransformCustoms: [],
         Transforms: [],
         ModelOptions: [],
@@ -523,42 +515,39 @@
         UseTorchVisionDataset: false,
         TorchVisionDatasetType: 'MNIST',
         TorchVisionTransformType: 'Resize',
-        TVDParamInfo: [],
-        TVDParamValue: {},
-        TVTParamInfo: {},
-        TVTParamValue: {},
+
+        MyTVDParamInfos: {
+          'MNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
+          'Fashion-MNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
+          'KMNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
+          'EMNIST': [['root', '(string)', ''], ['split', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
+          'QMNIST': [['root', '(string)', ''], ['what', '(string, optional)', 'None'], ['compat', '(bool,optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None'], ['train', '(bool, optional,compatibility)', 'True']],
+          'FakeData': [['size', '(int, optional)', '1000'], ['image_size', '(tuple, optional)', '(3, 224, 224)'], ['num_classes', '(int, optional)', '10'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None'], ['random_offset', '(int)', '0']],
+        },
         MyTVTParamInfos: {
-      'CenterCrop': [['size', '(sequence or int)', '']],
-      'ColorJitter': [['brightness', '(float or tuple of python: float(min, max))', ''], ['contrast', '(float or tuple of python: float(min, max))', ''], ['saturation', '(float or tuple of python: float(min, max))', ''], ['hue', '(float or tuple of python: float(min, max))', '']],
-      'FiveCrop': [['size', '(sequence or int)', '']],
-      'Grayscale': [['num_output_channels', '(int)', '1']],
-      'Pad': [['padding', '(int or tuple)', ''], ['fill', '(int or tuple)', '0'], ['padding_mode', '(str)', 'constant']],
-      'RandomCrop': [['size', '(sequence or int)', ''], ['padding', '(int or sequence, optional)', 'None'], ['pad_if_needed', '(boolean)', 'False'], ['fill', '', '0'], ['padding_mode', '', 'constant']],
-      'RandomHorizontalFlip': [['p', 'float', '0.5']],
-      'RandomVerticalFlip': [['p', 'float', '0.5']],
-      'Resize': [['size', '(sequence or int)', ''], ['interpolation', '(int, optional)', '2']],
-      'Normalize': [['mean', '(sequence)', ''], ['std', '(sequence)', ''], ['inplace', '(bool,optional)', 'False']],
-      'ToTensor': [],
-    }
+          'CenterCrop': [['size', '(sequence or int)', '']],
+          'ColorJitter': [['brightness', '(float or tuple of python: float(min, max))', ''], ['contrast', '(float or tuple of python: float(min, max))', ''], ['saturation', '(float or tuple of python: float(min, max))', ''], ['hue', '(float or tuple of python: float(min, max))', '']],
+          'FiveCrop': [['size', '(sequence or int)', '']],
+          'Grayscale': [['num_output_channels', '(int)', '1']],
+          'Pad': [['padding', '(int or tuple)', ''], ['fill', '(int or tuple)', '0'], ['padding_mode', '(str)', 'constant']],
+          'RandomCrop': [['size', '(sequence or int)', ''], ['padding', '(int or sequence, optional)', 'None'], ['pad_if_needed', '(boolean)', 'False'], ['fill', '', '0'], ['padding_mode', '', 'constant']],
+          'RandomHorizontalFlip': [['p', 'float', '0.5']],
+          'RandomVerticalFlip': [['p', 'float', '0.5']],
+          'Resize': [['size', '(sequence or int)', ''], ['interpolation', '(int, optional)', '2']],
+          'Normalize': [['mean', '(sequence)', ''], ['std', '(sequence)', ''], ['inplace', '(bool,optional)', 'False']],
+          'ToTensor': [],
+        }
       },
       mounted: function () {
-        this.TVDParamInfo = TVDParamInfos[this.TorchVisionDatasetType]
-        this.TVDParamValue = initTVDParams(this.TorchVisionDatasetType)
-
-        this.TVTParamInfo[this.TorchVisionTransformType] = TVTParamInfos[this.TorchVisionTransformType]
-        this.TVTParamValue = initTVTParams(this.TorchVisionTransformType)
       },
       computed: {
         ConfigurationYaml: function () {
           datasetParams = {}
 
           if (this.UseTorchVisionDataset) {
-            datasetName = this.TorchVisionDatasetType
-            for (var i = 0; i < this.TVDParamInfo.length; i++) {
-              v = this.TVDParamValue[this.TVDParamInfo[i][0]]
-              v = correctType(this.TVDParamInfo[i][1], v)
-              datasetParams[this.TVDParamInfo[i][0]] = v
-            }
+            t = torchOptionsToParams(this.TorchDataset)
+            datasetName = t['name']
+            datasetParams = t['params']
           } else {
             datasetName = this.DatasetName
             for (var i = 0; i < this.DatasetOptions.length; i++) {
@@ -580,7 +569,6 @@
             },
             'train': {
               'params': optionsToParams(this.TrainOptions)
-              // 'params': optionsToParams(this.$refs.trainoptions.options)
             },
             'evaluation': {
               'params': optionsToParams(this.EvaluationOptions)
@@ -631,21 +619,6 @@
             this.Splits.splice(splitIndex, 1);
           }
         },
-        initDatasetParams: function () {
-          this.TVDParamInfo = TVDParamInfos[this.TorchVisionDatasetType]
-          this.TVDParamValue = initTVDParams(this.TorchVisionDatasetType)
-          console.log(this.TVDParamValue)
-        },
-        onDatasetChange: function (event) {
-          console.log(event.target.value)
-          this.TVDParamInfo = TVDParamInfos[event.target.value]
-          this.TVDParamValue = initTVDParams(event.target.value)
-        },
-        onTransformChange: function (event) {
-          this.TorchVisionTransformType = event.target.value
-          this.TVTParamInfo[this.TorchVisionTransformType] = TVTParamInfos[event.target.value]
-          this.TVTParamValue = initTVTParams(event.target.value)
-        },
         addTransformCustom: function () {
           var newSplit = {
             name: "",
@@ -654,10 +627,10 @@
           }
           this.TransformCustoms.push(newSplit)
         },
-        addTransform: function (type) {
+        addTransform: function (name) {
           var newSplit = {
-            transformType: type,
-            paramValues: initTVTParams(type)
+            clsName: "",
+            paramValues: {}
           }
           this.Transforms.push(newSplit)
         },
@@ -671,6 +644,7 @@
         },
       },
     });
+
   </script>
 </body>
 
