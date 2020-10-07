@@ -46,69 +46,11 @@
 
             </div>
 
-
-            
-
-
-
-            <!-- <div class="panel panel-primary" v-show="UseTorchVisionDataset">
-              <div class="panel-body">
-                <div class="form-group">
-                  <label for="selTorchVisionDatasetType">TorchVision Dataset:</label>
-                  <select class="form-control" id="selTorchVisionDatasetType" v-model="TorchVisionDatasetType"
-                    style="min-width: 100px;" v-on:change="onDatasetChange($event)">
-                    <option value="MNIST">MNIST</option>
-                    <option value="Fashion-MNIST">Fashion-MNIST</option>
-                    <option value="KMNIST">KMNIST</option>
-                    <option value="EMNIST">EMNIST</option>
-                    <option value="QMNIST">QMNIST</option>
-                    <option value="FakeData">FakeData</option>
-                  </select>
-                  <div v-if="TorchVisionDatasetType === 'MNIST'" class="alert alert-primary">
-                    <strong><a href="https://pytorch.org/docs/stable/torchvision/datasets.html#mnist"
-                        target="_blank">MNIST dataset details</a></strong>
-                  </div>
-
-                </div>
-                <div>Parameters</div>
-
-                <div v-for="param in TVDParamInfo">
-                  <div class="row">
-                    <div class="param">
-                      <div class="input-group">
-                        <span class="input-group-addon" style="text-align:right; min-width: 300px;">
-                          {{param[0]}}{{param[1]}}
-                        </span>
-
-                        <div v-if="param[1].includes('bool')">
-                          <select class="form-control" id="'datasetParam_' + param[0]"
-                            v-model="TVDParamValue[param[0]]">
-                            <option value="True">True</option>
-                            <option value="False">False</option>
-                          </select>
-                        </div>
-                        <div v-else>
-                          <input type="text" class="form-control" id="'datasetParam_' + param[0]"
-                            style="min-width: 50px;" v-model="TVDParamValue[param[0]]" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div> -->
-
-
-
             <div class="panel panel-primary" v-show="UseTorchVisionDataset">
               <torch-predefine  v-bind:initial-infos="MyTVDParamInfos" name="TorchVision Dataset:" v-model="TorchDataset"></torch-predefine>
             </div>
 
-
-
           </div>
-
-          <div>&nbsp;</div>
 
           <div class="panel-heading">
             <h4>Transform</h4>
@@ -421,7 +363,7 @@
         `
     });
 
-    correctType = function (type, v) {
+    typeConversion = function (type, v) {
       if (type.includes('bool'))
         type = 'bool'
       else if (type.includes('int'))
@@ -447,14 +389,7 @@
       console.log(v)
       return v
     }
-    initTVDParams = function (type) {
-      params = {}
-      info = TVDParamInfos[type]
-      for (i = 0; i < info.length; i++) {
-        params[info[i][0]] = info[i][2];
-      }
-      return params
-    }
+
     optionsToParams = function (options) {
       if(options.length == 0) {
         return ''
@@ -465,29 +400,31 @@
       }
       return datasetParams
     }
-    torchOptionsToParams = function (clsInfo) {
+
+    getParamsFromTorchCls = function (clsInfo) {
       params = {}
       for (var key in clsInfo.paramValues){
         v = clsInfo.paramValues[key]
-        value = this.correctType(v['type'], v['value'])
+        value = this.typeConversion(v['type'], v['value'])
         params[key] = value
       }
 
-      cur = {}
-      cur['name'] = clsInfo.clsName
-      cur['params'] = params
-      return cur
+      return params
     }
+
     transformsToList = function (transforms) {
       rtn = []
       for (var i = 0; i < transforms.length; i++) {
-
         t = transforms[i]
-        cur = this.torchOptionsToParams(t)
+
+        cur = {name: null, params: null}
+        cur.name = t.clsName
+        cur.params = this.getParamsFromTorchCls(t)
         rtn.push(cur)
       }
       return rtn
     }
+
     var app = new Vue({
       el: "#app",
       data: {
@@ -498,10 +435,7 @@
         SchedulerName: "",
         Splits: [],
         DatasetOptions: [],
-        TorchDataset: {
-            // clsName: "",
-            // paramValues: {}
-        },
+        TorchDataset: {},
         TransformCustoms: [],
         Transforms: [],
         ModelOptions: [],
@@ -513,9 +447,6 @@
         HooksOptions: [],
         HookCustoms: [],
         UseTorchVisionDataset: false,
-        TorchVisionDatasetType: 'MNIST',
-        TorchVisionTransformType: 'Resize',
-
         MyTVDParamInfos: {
           'MNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
           'Fashion-MNIST': [['root', '(string)', ''], ['train', '(bool, optional)', 'True'], ['download', '(bool, optional)', 'False'], ['transform', '(callable, optional)', 'None'], ['target_transform', '(callable, optional)', 'None']],
@@ -538,16 +469,17 @@
           'ToTensor': [],
         }
       },
+
       mounted: function () {
       },
+
       computed: {
         ConfigurationYaml: function () {
           datasetParams = {}
 
           if (this.UseTorchVisionDataset) {
-            t = torchOptionsToParams(this.TorchDataset)
-            datasetName = t['name']
-            datasetParams = t['params']
+            datasetName = this.TorchDataset.clsName
+            datasetParams = getParamsFromTorchCls(this.TorchDataset)
           } else {
             datasetName = this.DatasetName
             for (var i = 0; i < this.DatasetOptions.length; i++) {
@@ -590,8 +522,8 @@
           return jsyaml.dump(configObj);
         },
       },
-      methods: {
 
+      methods: {
         addOption: function (options) {
           var option = {
             name: "",
