@@ -381,22 +381,19 @@
       return v
     }
 
-    optionsToParams = function (clsInfo) {
+    getParamsFromCls = function (clsInfo, isCustom) {
       args = clsInfo.paramValues
-      
-      params = {}
-      for (var key in args) {
-        params[args[key]['name']] = args[key]['value']
-      }
-      return params
-    }
 
-    getParamsFromTorchCls = function (clsInfo) {
       params = {}
-      for (var key in clsInfo.paramValues){
-        v = clsInfo.paramValues[key]
-        value = this.typeConversion(v['type'], v['value'])
-        params[key] = value
+      for (var key in args){
+        v = args[key]
+
+        if(isCustom) {
+          params[args[key]['name']] = args[key]['value']
+        } else {
+          value = this.typeConversion(v['type'], v['value'])
+          params[key] = value
+        }
       }
 
       return params
@@ -409,12 +406,7 @@
 
         cur = {name: null, params: null}
         cur.name = t.clsName
-        if(isCustom) {
-          cur.params = this.optionsToParams(t)
-        } else {
-          cur.params = this.getParamsFromTorchCls(t)
-        }
-        
+        cur.params = this.getParamsFromCls(t, isCustom)
         rtn.push(cur)
       }
       return rtn
@@ -473,7 +465,7 @@
 
           if (this.UseTorchVisionDataset) {
             datasetName = this.TorchDataset.clsName
-            datasetParams = getParamsFromTorchCls(this.TorchDataset)
+            datasetParams = getParamsFromCls(this.TorchDataset, false)
           } else {
             datasetName = this.DatasetName
             for (var i = 0; i < this.DatasetOptions.length; i++) {
@@ -491,25 +483,25 @@
             },
             'model': {
               'name': this.ModelCls.clsName,
-              'params': optionsToParams(this.ModelCls)
+              'params': getParamsFromCls(this.ModelCls, true)
             },
             'train': {
-              'params': optionsToParams(this.TrainCls)
+              'params': getParamsFromCls(this.TrainCls, true)
             },
             'evaluation': {
-              'params': optionsToParams(this.EvaluationCls)
+              'params': getParamsFromCls(this.EvaluationCls, true)
             },
             'loss': {
               'name': this.LossCls.clsName,
-              'params': optionsToParams(this.LossCls)
+              'params': getParamsFromCls(this.LossCls, true)
             },
             'optimizer': {
               'name': this.OptimizerCls.clsName,
-              'params': optionsToParams(this.OptimizerCls)
+              'params': getParamsFromCls(this.OptimizerCls, true)
             },
             'scheduler': {
               'name': this.SchedulerCls.clsName,
-              'params': optionsToParams(this.SchedulerCls)
+              'params': getParamsFromCls(this.SchedulerCls, true)
             },
             'hooks': toDump(this.HookCustoms, true)
           };
