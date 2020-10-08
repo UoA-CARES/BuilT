@@ -75,7 +75,7 @@
                   <parameter-options v-model="TransformCustoms[idx]" title="Name"></parameter-options>
                 </div>
                 <div class="panel-body">
-                  <button class="btn btn-primary" v-on:click="deleteOption(c, TransformCustoms)">
+                  <button class="btn btn-danger" v-on:click="deleteOption(c, TransformCustoms)">
                     <span class="glyphicon glyphicon-trash"></span>
                     Delete Custom
                   </button>
@@ -89,7 +89,7 @@
                 <torch-predefine v-bind:initial-infos="MyTVTParamInfos" name="TorchVision Transforms:" v-model="Transforms[idx]"></torch-predefine>
 
                 <div class="panel-body">
-                  <button class="btn btn-primary" v-on:click="deleteOption(c, Transforms)">
+                  <button class="btn btn-danger" v-on:click="deleteOption(c, Transforms)">
                     <span class="glyphicon glyphicon-trash"></span>
                     Delete Transform
                   </button>
@@ -167,7 +167,7 @@
                   <parameter-options v-model="HookCustoms[idx]" title="Name"></parameter-options>
                 </div>
                 <div class="panel-body">
-                  <button class="btn btn-primary" v-on:click="deleteOption(c, HookCustoms)">
+                  <button class="btn btn-danger" v-on:click="deleteOption(c, HookCustoms)">
                     <span class="glyphicon glyphicon-trash"></span>
                     Delete Custom
                   </button>
@@ -264,7 +264,7 @@
                       <input type="text" class="form-control" :disabled="disable" v-model="option['value']" v-on:input="updateValue()" style="min-width: 50px;"/>
                       
                       <span class="input-group-addon" style=" padding:0 15px;">
-                        <button :disabled="disable" v-on:click="deleteOption(option)">
+                        <button class="btn-danger" :disabled="disable" v-on:click="deleteOption(option)">
                           <span class="glyphicon glyphicon-trash"></span>
                         </button>
                       </span>
