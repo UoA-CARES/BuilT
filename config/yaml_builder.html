@@ -67,16 +67,10 @@
               </button>
             </div>
 
-            <div v-for="c in TransformCustoms">
+            <div v-for="(c, idx) in TransformCustoms">
               <div class="panel panel-primary">
                 <div class="panel-body">
-                  <div class="form-group">
-                    <label for="customTransformName">Name:</label>
-                    <input class="form-control" id="customTransformName" v-model="c.name" />
-                  </div>
-                  <div class="form-group">
-                    <parameter-options v-model="c.options"></parameter-options>
-                  </div>
+                  <parameter-options v-model="TransformCustoms[idx]" title="Name"></parameter-options>
                 </div>
                 <div class="panel-body">
                   <button class="btn btn-primary" v-on:click="deleteOption(c, TransformCustoms)">
@@ -106,13 +100,7 @@
             <h4>Model</h4>
           </div>
           <div class="panel-body">
-            <div class="form-group">
-              <label for="modelName">Name:</label>
-              <input class="form-control" id="modelName" v-model="ModelName" />
-            </div>
-            <div class="form-group">
-              <parameter-options v-model="ModelOptions"></parameter-options>
-            </div>
+              <parameter-options v-model="ModelCls" title="Name"></parameter-options>
           </div>
 
           <div class="panel-heading">
@@ -120,7 +108,7 @@
           </div>
           <div class="panel-body">
             <div class="form-group">
-              <parameter-options v-model="TrainOptions"></parameter-options>
+              <parameter-options v-model="TrainCls"></parameter-options>
             </div>
           </div>
 
@@ -131,7 +119,7 @@
           </div>
           <div class="panel-body">
             <div class="form-group">
-              <parameter-options v-model="EvaluationOptions"></parameter-options>
+              <parameter-options v-model="EvaluationCls"></parameter-options>
             </div>
           </div>
 
@@ -140,13 +128,8 @@
             <h4>Loss</h4>
           </div>
           <div class="panel-body">
-            <div class="form-group">
-              <label for="lossName">Name:</label>
-              <input class="form-control" id="lossName" v-model="LossName" />
-            </div>
-            <div class="form-group">
-              <parameter-options v-model="LossOptions"></parameter-options>
-            </div>
+              <parameter-options v-model="LossCls" title="Name"></parameter-options>
+            
           </div>
 
 
@@ -154,13 +137,7 @@
             <h4>Optimizer</h4>
           </div>
           <div class="panel-body">
-            <div class="form-group">
-              <label for="optimizerName">Name:</label>
-              <input class="form-control" id="optimizerName" v-model="OptimizerName" />
-            </div>
-            <div class="form-group">
-              <parameter-options v-model="OptimizerOptions"></parameter-options>
-            </div>
+              <parameter-options v-model="OptimizerCls" title="Name"></parameter-options>
           </div>
 
 
@@ -168,13 +145,7 @@
             <h4>Scheduler</h4>
           </div>
           <div class="panel-body">
-            <div class="form-group">
-              <label for="schedulerName">Name:</label>
-              <input class="form-control" id="schedulerName" v-model="SchedulerName" />
-            </div>
-            <div class="form-group">
-              <parameter-options v-model="SchedulerOptions"></parameter-options>
-            </div>
+              <parameter-options v-model="SchedulerCls" title="Name"></parameter-options>
           </div>
 
           <div class="panel-heading">
@@ -188,16 +159,10 @@
               </button>
             </div>
 
-            <div v-for="c in HookCustoms">
+            <div v-for="(c, idx) in HookCustoms">
               <div class="panel panel-primary">
                 <div class="panel-body">
-                  <div class="form-group">
-                    <label for="customTransformName">Name:</label>
-                    <input class="form-control" id="customHookName" v-model="c.name" />
-                  </div>
-                  <div class="form-group">
-                    <parameter-options v-model="c.options"></parameter-options>
-                  </div>
+                  <parameter-options v-model="HookCustoms[idx]" title="Name"></parameter-options>
                 </div>
                 <div class="panel-body">
                   <button class="btn btn-primary" v-on:click="deleteOption(c, HookCustoms)">
@@ -226,16 +191,32 @@
 
     // https://stackoverflow.com/questions/40915436/vuejs-update-parent-data-from-child-component
     Vue.component('parameter-options', {
-      props: ['value', 'disable'],
+      props: ['value', 'disable', 'title'],
       data: function () {
         return {
+          name: null,
+          clsName: '',
           options: [],
-          count: 0
+          count: 0,
+          showName: false
         }
       },
+      mounted: function () {
+        if (this.title == null) {
+          this.showName = false
+        } else {
+          this.showName = true
+          this.name = this.title
+        }
+      }, 
       methods: {
         updateValue: function () {
-          this.$emit('input', this.options);
+          // this.$emit('input', this.options);
+          cur = {
+            clsName: this.clsName,
+            paramValues: this.options
+          }
+          this.$emit('input', cur);
         },
         addOption: function () {
           var option = {
@@ -252,40 +233,50 @@
         },
       },
       template: `
-        <div class="panel panel-primary">
-          <div class="panel-body">
-            <div>Add options</div>
-            <button class="btn btn-primary" :disabled="disable" v-on:click="addOption()">
-              <span class="glyphicon glyphicon-plus"></span>
-              Add Option
-            </button>
+      <div>
 
-            <div v-for="option in options">
-              <div class="row">
-                <div class="param">
-                  <div class="input-group">
-                    <span class="input-group-addon">
-                      Name
-                    </span>
-                    <input type="text" class="form-control" :disabled="disable" v-model="option['name']" v-on:input="updateValue()" style="min-width: 50px;" />
-                    
-                    <span class="input-group-addon">
-                      Value
-                    </span>
-                    <input type="text" class="form-control" :disabled="disable" v-model="option['value']" v-on:input="updateValue()" style="min-width: 50px;"/>
-                    
-                    <span class="input-group-addon" style=" padding:0 15px;">
-                      <button :disabled="disable" v-on:click="deleteOption(option)">
-                        <span class="glyphicon glyphicon-trash"></span>
-                      </button>
-                    </span>
+        <div class="form-group" v-show="showName">
+          <label for="customName">{{name}}</label>
+          <input class="form-control" id="customName" v-model="clsName" v-on:input="updateValue()" />
+        </div>
+        <div class="form-group">
+          <div class="panel panel-primary">
+            <div class="panel-body">
+              <div>Add options</div>
+              <button class="btn btn-primary" :disabled="disable" v-on:click="addOption()">
+                <span class="glyphicon glyphicon-plus"></span>
+                Add Option
+              </button>
+
+              <div v-for="option in options">
+                <div class="row">
+                  <div class="param">
+                    <div class="input-group">
+                      <span class="input-group-addon">
+                        Name
+                      </span>
+                      <input type="text" class="form-control" :disabled="disable" v-model="option['name']" v-on:input="updateValue()" style="min-width: 50px;" />
+                      
+                      <span class="input-group-addon">
+                        Value
+                      </span>
+                      <input type="text" class="form-control" :disabled="disable" v-model="option['value']" v-on:input="updateValue()" style="min-width: 50px;"/>
+                      
+                      <span class="input-group-addon" style=" padding:0 15px;">
+                        <button :disabled="disable" v-on:click="deleteOption(option)">
+                          <span class="glyphicon glyphicon-trash"></span>
+                        </button>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        `
+
+      </div>
+      `
     });
 
     Vue.component('torch-predefine', {
@@ -390,15 +381,14 @@
       return v
     }
 
-    optionsToParams = function (options) {
-      if(options.length == 0) {
-        return ''
+    optionsToParams = function (clsInfo) {
+      args = clsInfo.paramValues
+      
+      params = {}
+      for (var key in args) {
+        params[args[key]['name']] = args[key]['value']
       }
-      datasetParams = {}
-      for (var i = 0; i < options.length; i++) {
-        datasetParams[options[i]['name']] = options[i]['value']
-      }
-      return datasetParams
+      return params
     }
 
     getParamsFromTorchCls = function (clsInfo) {
@@ -412,14 +402,19 @@
       return params
     }
 
-    transformsToList = function (transforms) {
+    toDump = function (clsList, isCustom) {
       rtn = []
-      for (var i = 0; i < transforms.length; i++) {
-        t = transforms[i]
+      for (var i = 0; i < clsList.length; i++) {
+        t = clsList[i]
 
         cur = {name: null, params: null}
         cur.name = t.clsName
-        cur.params = this.getParamsFromTorchCls(t)
+        if(isCustom) {
+          cur.params = this.optionsToParams(t)
+        } else {
+          cur.params = this.getParamsFromTorchCls(t)
+        }
+        
         rtn.push(cur)
       }
       return rtn
@@ -438,13 +433,12 @@
         TorchDataset: {},
         TransformCustoms: [],
         Transforms: [],
-        ModelOptions: [],
-        TrainOptions: [],
-        EvaluationOptions: [],
-        LossOptions: [],
-        OptimizerOptions: [],
-        SchedulerOptions: [],
-        HooksOptions: [],
+        ModelCls: {},
+        TrainCls: {},
+        EvaluationCls: {},
+        LossCls: {},
+        OptimizerCls: {},
+        SchedulerCls: {},
         HookCustoms: [],
         UseTorchVisionDataset: false,
         MyTVDParamInfos: {
@@ -493,31 +487,31 @@
               'params': datasetParams
             },
             'transform': {
-              'transforms': transformsToList(this.Transforms)
+              'transforms': toDump(this.Transforms, false)
             },
             'model': {
-              'name': this.ModelName,
-              'params': optionsToParams(this.ModelOptions)
+              'name': this.ModelCls.clsName,
+              'params': optionsToParams(this.ModelCls)
             },
             'train': {
-              'params': optionsToParams(this.TrainOptions)
+              'params': optionsToParams(this.TrainCls)
             },
             'evaluation': {
-              'params': optionsToParams(this.EvaluationOptions)
+              'params': optionsToParams(this.EvaluationCls)
             },
             'loss': {
-              'name': this.LossName,
-              'params': optionsToParams(this.LossOptions)
+              'name': this.LossCls.clsName,
+              'params': optionsToParams(this.LossCls)
             },
             'optimizer': {
-              'name': this.OptimizerName,
-              'params': optionsToParams(this.OptimizerOptions)
+              'name': this.OptimizerCls.clsName,
+              'params': optionsToParams(this.OptimizerCls)
             },
             'scheduler': {
-              'name': this.SchedulerName,
-              'params': optionsToParams(this.SchedulerOptions)
-            }
-
+              'name': this.SchedulerCls.clsName,
+              'params': optionsToParams(this.SchedulerCls)
+            },
+            'hooks': toDump(this.HookCustoms, true)
           };
           return jsyaml.dump(configObj);
         },
