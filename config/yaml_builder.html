@@ -185,11 +185,15 @@
       <pre>
 {{ConfigurationYaml}}  
       </pre>
+
+      <button class="btn btn-danger" v-on:click="downloadAsFile('config.json', 'test')">            
+        Download
+      </button>
     </div>
   </div>
 
   <script type="text/javascript">
-
+  
     // https://stackoverflow.com/questions/40915436/vuejs-update-parent-data-from-child-component
     Vue.component('parameter-options', {
       props: ['value', 'disable', 'title'],
@@ -416,6 +420,7 @@
     var app = new Vue({
       el: "#app",
       data: {
+        configJson: "",
         DatasetName: "",
         ModelName: "",
         LossName: "",
@@ -506,6 +511,7 @@
             },
             'hooks': toDump(this.HookCustoms, true)
           };
+          this.configJson = JSON.stringify(configObj)
           return jsyaml.dump(configObj);
         },
       },
@@ -561,6 +567,18 @@
           }
           this.HookCustoms.push(newSplit)
         },
+        downloadAsFile: function (filename, text) {
+          var element = document.createElement('a');
+          element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(this.configJson));
+          element.setAttribute('download', filename);
+
+          element.style.display = 'none';
+          document.body.appendChild(element);
+
+          element.click();
+
+          document.body.removeChild(element);
+        }
       },
     });
 
