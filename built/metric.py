@@ -14,12 +14,12 @@ class MetricBase(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __call__(self, outputs, labels, is_train, split):
+    def __call__(self, outputs, targets, is_train, split):
         pass
 
 
 class DefaultMetric(MetricBase):
-    def __call__(self, outputs, labels, is_train, split):
+    def __call__(self, outputs, targets, is_train, split):
         logging.debug("Default metric is called")
         if isinstance(outputs, dict):
             logits = outputs['logits']

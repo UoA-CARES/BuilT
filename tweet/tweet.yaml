@@ -1,0 +1,72 @@
+wandb:
+  sweep:
+    name: "Sweep"
+    use: False
+    yaml: "sweep.yaml"
+
+dataset:
+  name: "TweetDataset"
+  params:
+    tweet: "data"
+    max_len: 96
+    roberta_path: '../input/roberta-base/'
+
+  splits:
+    - train: True
+    - train: False      
+
+transforms:
+  name: ""
+  num_preprocessor: 8
+  params:
+    - ToTensor:
+      name: "ToTensor"
+    - Normalize:
+      name: "Normalize"
+      params:
+        mean: !!python/tuple [0.1307, ]
+        std: !!python/tuple [0.3081, ]
+
+
+model:
+  name: "Mnist"
+  params:
+    num_classes: 10
+
+train:
+  dir: "train_dirs/default"
+  batch_size: 64
+  num_epochs: 1
+  gradient_accumulation_step: 1
+
+evaluation:
+  batch_size: 64
+
+loss:
+  name: "NLLLoss"
+
+optimizer:
+  name: "Adadelta"
+  params:
+    lr: 1.0
+
+scheduler:
+  name: "StepLR"
+  params:
+    step_size: 1
+    gamma: 0.7
+
+forward_hook:
+  name: "TweetForwardHook"
+
+post_forward_hook:
+  name: "TweetPostForwardHook"
+
+metric_hook:
+  name: "TweetMetric"
+
+logger_hook:
+  name: "DefaultLogger"
+  params:
+    use_tensorboard: True
+    use_wandb: False

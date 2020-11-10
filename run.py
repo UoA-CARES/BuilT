@@ -10,8 +10,9 @@ from easydict import EasyDict as edict
 from sacred import Experiment
 from sacred.utils import apply_backspaces_and_linefeeds
 
-from src.models.mnist import Mnist
-from src.trainer import Trainer
+# from models.mnist import Mnist
+from built.trainer import Trainer
+
 
 
 ex = Experiment('orsum')

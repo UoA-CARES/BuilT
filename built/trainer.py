@@ -9,7 +9,7 @@ import wandb
 from torch.utils.tensorboard import SummaryWriter
 from collections import defaultdict
 
-from .builder import Builder
+from built.builder import Builder
 from .utils import group_weight
 from .checkpoint_manager import CheckpointManager
 from .early_stopper import EarlyStopper
@@ -43,14 +43,14 @@ class Trainer(object):
             aggregated_metric_dict = defaultdict(list)
             tbar = tqdm.tqdm(enumerate(dataloader), total=total_step)
             for i, (data, target) in tbar:
-                images = data.to(self.device)
-                labels = target.to(self.device)
+                inputs = data.to(self.device)
+                targets = target.to(self.device)
 
-                output = self.model(images)
+                output = self.forward_hook(self.model, inputs, targets)
                 output = self.post_forward_hook(
-                    outputs=output, images=images, labels=labels, data=None, is_train=False)
+                    outputs=output, inputs=inputs, targets=targets, data=None, is_train=False)
 
-                loss = self.loss_fn(output, labels)
+                loss = self.loss_fn(output, targets)
 
                 if isinstance(loss, dict):
                     loss_dict = loss
@@ -59,7 +59,7 @@ class Trainer(object):
                     loss_dict = {'loss': loss}
 
                 metric_dict = self.metric_fn(
-                    outputs=output, labels=labels, is_train=True, split=None)                
+                    outputs=output, targets=targets, is_train=True, split=None)                
 
                 log_dict = {key: value.item() for key, value in loss_dict.items()}
                 log_dict['lr'] = self.optimizer.param_groups[0]['lr']
@@ -73,7 +73,7 @@ class Trainer(object):
                 tbar.set_postfix(
                     lr=self.optimizer.param_groups[0]['lr'], loss=loss.item())
                 
-                self.logger_fn(self.writer, split='test', outputs=output, labels=labels,
+                self.logger_fn(self.writer, split='test', outputs=output, labels=targets,
                                      log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
             
             aggregated_metric_dict = {f'avg_{key}':np.mean(value) for key, value in aggregated_metric_dict.items()}
@@ -90,17 +90,17 @@ class Trainer(object):
 
         tbar = tqdm.tqdm(enumerate(dataloader), total=total_step)
         for i, (data, target) in tbar:
-            images = data.to(self.device)
-            labels = target.to(self.device)
+            inputs = data.to(self.device)
+            targets = target.to(self.device)
 
-            output = self.model(images)
+            output = self.forward_hook(self.model, inputs, targets)
             output = self.post_forward_hook(
-                outputs=output, images=images, labels=labels, data=None, is_train=True)
+                outputs=output, inputs=inputs, targets=targets, data=None, is_train=True)
 
-            loss = self.loss_fn(output, labels)
+            loss = self.loss_fn(output, targets)
 
             metric_dict = self.metric_fn(
-                outputs=output, labels=labels, is_train=True, split=None)
+                outputs=output, targets=targets, is_train=True, split=None)
 
             if isinstance(loss, dict):
                 loss_dict = loss
@@ -127,7 +127,7 @@ class Trainer(object):
             tbar.set_postfix(
                 lr=self.optimizer.param_groups[0]['lr'], loss=loss.item())
 
-            self.logger_fn(self.writer, split='train', outputs=output, labels=labels,
+            self.logger_fn(self.writer, split='train', outputs=output, labels=targets,
                                  log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
 
 
@@ -183,6 +183,7 @@ class Trainer(object):
         self.loss_fn = builder.build_loss_fn(self.config)
 
         # build hooks
+        self.forward_hook = builder.build_forward_hook(self.config)
         self.post_forward_hook = builder.build_post_forward_hook(self.config)
 
         # build metric

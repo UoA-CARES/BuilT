@@ -11,25 +11,25 @@ class ForwardHookBase(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __call__(self, model, images, labels=None, data=None, is_train=False):
+    def __call__(self, model, inputs, targets=None, data=None, is_train=False):
         pass
 
 
 class DefaultForwardHook(ForwardHookBase):
-    def __call__(self, model, images, labels=None, data=None, is_train=False):
+    def __call__(self, model, inputs, targets=None, data=None, is_train=False):
         logging.debug("Default forward hook is called")
-        return model(images)
+        return model(inputs)
 
 
 class PostForwardHookBase(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __call__(self, outputs, images=None, labels=None, data=None, is_train=False):
+    def __call__(self, outputs, inputs=None, targets=None, data=None, is_train=False):
         pass
 
 
 class DefaultPostForwardHook(PostForwardHookBase):
-    def __call__(self, outputs, images=None, labels=None, data=None, is_train=False):
+    def __call__(self, outputs, inputs=None, targets=None, data=None, is_train=False):
         logging.info("Default post forward hook is called")
         return outputs
