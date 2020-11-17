@@ -9,32 +9,29 @@ from easydict import EasyDict as edict
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-from .registry import Registry
-
-from .forward_hook import DefaultPostForwardHook
-from .metric import DefaultMetric
-from .logger import DefaultLogger
-from .models.mnist import Mnist
+from built.registry import Registry
+from built.forward_hook import DefaultPostForwardHook
+from built.metric import DefaultMetric
+from built.logger import DefaultLogger
+from built.models.mnist import Mnist
+from built.splitter import Splitter
 
 class Builder(object):
     def __init__(self):
-        # self.r = Registry()
         self.load_all_modules_from_dir('.')
         self.regist_defaults()
 
     def load_all_modules_from_dir(self, dirname):
         for importer, package_name, _ in pkgutil.iter_modules([dirname]):
-            print(f'{package_name}')
-            if package_name in sys.modules:
-                print(package_name)
             if package_name not in sys.modules and package_name != 'main':
                 module = importer.find_module(package_name).load_module(package_name)
-                print(f'{module} is loaded!!!!!!!!!!!!!!!!11')
 
     def regist_defaults(self):
         Registry.add('loss', nn.NLLLoss)
         Registry.add('optimizer', optim.Adadelta)
+        Registry.add('optimizer', optim.AdamW)
         Registry.add('scheduler', optim.lr_scheduler.StepLR)
+        Registry.add('scheduler', optim.lr_scheduler.MultiStepLR)
         Registry.add('dataset', datasets.MNIST)
         Registry.add('transform', transforms.ToTensor)
         Registry.add('transform', transforms.Normalize)
@@ -67,6 +64,9 @@ class Builder(object):
     def build_logger_fn(self, config, **kwargs):
         return Registry.build_from_config('hooks', config.logger_hook, kwargs)
 
+    def build_splitter(self, config, **kwargs):
+        return Registry.build_from_config('splitter', config.splitter, kwargs)
+
     def build_transforms(self, config, **kwargs):
         if config.transforms.name == 'Compose':
             transfms = []
@@ -81,14 +81,62 @@ class Builder(object):
 
     def build_dataloaders(self, config, **kwargs):
         dataloaders = []
+        # splitter = self.build_logger_splitter(config)
+
+        # for fold in range(splitter.n_splits):
+        #     train, val = splitter.get_fold(fold)
+
+        #     # dataset_config = {'name': config.dataset.name, 'params': config.dataset.params}
+        #     # dataset_config['params'].update(split_config)
+
+        #     transform = self.build_transforms(config)
+        #     default_args = {}
+        #     if transform is not None:
+        #         default_args['transform'] = transform
+
+        #     default_args['indices'] = train
+        #     dataset = Registry.build_from_config('dataset', config.dataset, default_args=default_args)                       
+            
+        #     batch_size = config.train.batch_size
+        #     is_train = True
+        #     dataloader = DataLoader(dataset,
+        #                             shuffle=is_train,
+        #                             batch_size=batch_size,
+        #                             drop_last=is_train,
+        #                             num_workers=config.transforms.num_preprocessor,
+        #                             pin_memory=True)
+
+        #     dataloaders.append({'fold': fold, 'mode': is_train,'dataloader': dataloader})
+
+
+
+        #     # validation dataloder
+        #     default_args['indices'] = val
+
+        #     dataset = Registry.build_from_config('dataset', config.dataset, default_args=default_args)
+        #     batch_size = config.evaluation.batch_size
+        #     is_train = False
+            
+        #     dataloader = DataLoader(dataset,
+        #                             shuffle=is_train,
+        #                             batch_size=batch_size,
+        #                             drop_last=is_train,
+        #                             num_workers=config.transforms.num_preprocessor,
+        #                             pin_memory=True)
+
+        #     dataloaders.append({'fold': fold, 'mode': is_train,'dataloader': dataloader})
+
+
         for split_config in config.dataset.splits:
-            dataset_config = edict({'name': config.dataset.name,
-                                    'params': config.dataset.params})
+            dataset_config = {'name': config.dataset.name, 'params': config.dataset.params}
             dataset_config['params'].update(split_config)
 
             transform = self.build_transforms(config)
+            default_args = {}
+            if transform is not None:
+                default_args['transform'] = transform
 
-            dataset = Registry.build_from_config('dataset', config.dataset, default_args={})
+            dataset = Registry.build_from_config('dataset', config.dataset, default_args=default_args)
 
             is_train = dataset_config['params'].train
             if is_train:

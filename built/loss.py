@@ -10,12 +10,12 @@ class LossBase(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __call__(self, outputs, labels, data, is_train):
+    def __call__(self, outputs, targets, data=None, is_train=False, device='cpu'):
         pass
 
 
 class DefaultLoss(LossBase):
-    def __call__(self, loss_fn, outputs, labels, data, is_train):
+    def __call__(self, loss_fn, outputs, targets, data, is_train, device='cpu'):
         if isinstance(outputs, dict):
-            return loss_fn(input=outputs['logits'], target=labels)
-        return loss_fn(input=outputs, target=labels)
+            return loss_fn(input=outputs['logits'], target=targets)
+        return loss_fn(input=outputs, target=targets)

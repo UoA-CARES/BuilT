@@ -10,26 +10,29 @@ from torch.utils.tensorboard import SummaryWriter
 from collections import defaultdict
 
 from built.builder import Builder
-from .utils import group_weight
-from .checkpoint_manager import CheckpointManager
-from .early_stopper import EarlyStopper
+from built.utils import group_weight
+from built.checkpoint_manager import CheckpointManager
+from built.early_stopper import EarlyStopper
 
 
 class Trainer(object):
-    def __init__(self, config, wandb_conf=None):
-        self.config = config        
+    def __init__(self, config, builder, wandb_conf=None):
+        self.config = config
+        self.builder = builder
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')        
         self.es = EarlyStopper(mode='max')
-        self.cm = CheckpointManager(self.config.train.dir)
+        
+        self.working_dir = os.path.join(self.config.train.dir, self.config.train.name)
+        self.cm = CheckpointManager(self.working_dir)
         self.writer = {}
         if config.logger_hook.params.use_tensorboard:
-            self.writer['tensorboard'] = SummaryWriter(log_dir=config.train.dir)
+            self.writer['tensorboard'] = SummaryWriter(log_dir=self.working_dir)
         if config.logger_hook.params.use_wandb:
             self.writer['wandb'] = wandb.init(
                 config=wandb_conf, project="BuilT")
 
     def prepare_directories(self):
-        os.makedirs(os.path.join(self.config.train.dir,
+        os.makedirs(os.path.join(self.working_dir,
                                  'checkpoint'), exist_ok=True)
 
     def evaluate_single_epoch(self, dataloader, epoch):
@@ -41,16 +44,13 @@ class Trainer(object):
 
         with torch.no_grad():
             aggregated_metric_dict = defaultdict(list)
-            tbar = tqdm.tqdm(enumerate(dataloader), total=total_step)
-            for i, (data, target) in tbar:
-                inputs = data.to(self.device)
-                targets = target.to(self.device)
-
-                output = self.forward_hook(self.model, inputs, targets)
+            tbar = tqdm.tqdm(enumerate(dataloader), total=total_step, bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
+            for i, (inputs, targets) in tbar:
+                output = self.forward_hook(self.model, inputs, targets, device=self.device)
                 output = self.post_forward_hook(
-                    outputs=output, inputs=inputs, targets=targets, data=None, is_train=False)
+                    outputs=output, inputs=inputs, targets=targets, data=None, is_train=True)
 
-                loss = self.loss_fn(output, targets)
+                loss = self.loss_fn(output, targets, device=self.device)
 
                 if isinstance(loss, dict):
                     loss_dict = loss
@@ -69,9 +69,9 @@ class Trainer(object):
                     aggregated_metric_dict[key].append(value)
 
                 f_epoch = epoch + i / total_step
-                tbar.set_description(f'{f_epoch:.2f} epoch')
+                tbar.set_description(f'[ val ] {f_epoch: .2f} epoch')
                 tbar.set_postfix(
-                    lr=self.optimizer.param_groups[0]['lr'], loss=loss.item())
+                    lr=self.optimizer.param_groups[0]['lr'], loss=f'{loss.item():.5f}')
                 
                 self.logger_fn(self.writer, split='test', outputs=output, labels=targets,
                                      log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
@@ -88,16 +88,13 @@ class Trainer(object):
         total_size = len(dataloader.dataset)
         total_step = math.ceil(total_size / batch_size)
 
-        tbar = tqdm.tqdm(enumerate(dataloader), total=total_step)
-        for i, (data, target) in tbar:
-            inputs = data.to(self.device)
-            targets = target.to(self.device)
-
-            output = self.forward_hook(self.model, inputs, targets)
+        tbar = tqdm.tqdm(enumerate(dataloader), total=total_step, bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
+        for i, (inputs, targets) in tbar:
+            output = self.forward_hook(self.model, inputs, targets, device=self.device)
             output = self.post_forward_hook(
                 outputs=output, inputs=inputs, targets=targets, data=None, is_train=True)
 
-            loss = self.loss_fn(output, targets)
+            loss = self.loss_fn(output, targets, device=self.device)
 
             metric_dict = self.metric_fn(
                 outputs=output, targets=targets, is_train=True, split=None)
@@ -123,39 +120,32 @@ class Trainer(object):
             log_dict.update({'epoch': epoch})
 
             f_epoch = epoch + i / total_step
-            tbar.set_description(f'{f_epoch:.2f} epoch')
+            tbar.set_description(f'[train] {f_epoch: .2f} epoch')
             tbar.set_postfix(
-                lr=self.optimizer.param_groups[0]['lr'], loss=loss.item())
+                lr=self.optimizer.param_groups[0]['lr'], loss=f'{loss.item():.5f}')
 
             self.logger_fn(self.writer, split='train', outputs=output, labels=targets,
                                  log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
 
 
-    def train(self, last_epoch):
+    def train(self, last_epoch, last_accuracy=None):
+        ckpt_score = last_accuracy
 
         for epoch in range(last_epoch, self.config.train.num_epochs):
             # train
             for dataloader in self.dataloaders:
-                # split = dataloader['split']
                 is_train = dataloader['mode']
-
                 if is_train:
                     dataloader = dataloader['dataloader']
                     self.train_single_epoch(dataloader, epoch)
 
             # validation
-            # score_dict = {}
-            ckpt_score = None
             for dataloader in self.dataloaders:
-                # split = dataloader['split']
                 is_train = dataloader['mode']
 
                 if not is_train:
                     dataloader = dataloader['dataloader']
                     score = self.evaluate_single_epoch(dataloader, epoch)
-                    # score_dict[split] = score
-                    # Use score of the first split
-                    # if ckpt_score is None:
                     ckpt_score = score
 
             # update learning rate
@@ -163,7 +153,7 @@ class Trainer(object):
 
             stop_early, save_ckpt = self.es(ckpt_score)
             if save_ckpt:
-                self.cm.save(self.model, self.optimizer, epoch, keep=2)
+                self.cm.save(self.model, self.optimizer, epoch, ckpt_score, keep=2)
             if stop_early:
                 break
 
@@ -171,26 +161,25 @@ class Trainer(object):
         # prepare directories
         self.prepare_directories()
 
-        builder = Builder()
         # build dataloaders
-        self.dataloaders = builder.build_dataloaders(self.config)
+        self.dataloaders = self.builder.build_dataloaders(self.config)
 
         # build model
-        self.model = builder.build_model(self.config)
+        self.model = self.builder.build_model(self.config)
         self.model = self.model.to(self.device)
 
         # build loss
-        self.loss_fn = builder.build_loss_fn(self.config)
+        self.loss_fn = self.builder.build_loss_fn(self.config)
 
         # build hooks
-        self.forward_hook = builder.build_forward_hook(self.config)
-        self.post_forward_hook = builder.build_post_forward_hook(self.config)
+        self.forward_hook = self.builder.build_forward_hook(self.config)
+        self.post_forward_hook = self.builder.build_post_forward_hook(self.config)
 
         # build metric
-        self.metric_fn = builder.build_metric_fn(self.config)
+        self.metric_fn = self.builder.build_metric_fn(self.config)
 
         # build logger
-        self.logger_fn = builder.build_logger_fn(self.config)
+        self.logger_fn = self.builder.build_logger_fn(self.config)
 
         # build optimizer
         if 'no_bias_decay' in self.config.train and self.config.train.no_bias_decay:
@@ -199,19 +188,18 @@ class Trainer(object):
                 'params': group_no_decay, 'weight_decay': 0.0}]
         else:
             params = self.model.parameters()
-        self.optimizer = builder.build_optimizer(self.config, params=params)
+        self.optimizer = self.builder.build_optimizer(self.config, params=params)
 
         # load checkpoint
         ckpt = self.cm.latest()
         if ckpt is not None:
-            last_epoch, step = self.cm.load(self.model, self.optimizer, ckpt)
-            print('epoch, step:', last_epoch, step)
+            last_epoch, step, last_accuracy = self.cm.load(self.model, self.optimizer, ckpt)
         else:
-            last_epoch, step = -1, -1
+            last_epoch, step, last_accuracy = -1, -1, None
 
         # build scheduler
-        self.scheduler = builder.build_scheduler(
+        self.scheduler = self.builder.build_scheduler(
             self.config, optimizer=self.optimizer, last_epoch=last_epoch)
 
         # train loop
-        self.train(last_epoch=last_epoch)
+        self.train(last_epoch=last_epoch, last_accuracy=last_accuracy)

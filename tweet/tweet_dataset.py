@@ -20,119 +20,98 @@ from transformers import AdamW
 from transformers import get_linear_schedule_with_warmup
 
 
-sentiment_id = {'positive': 1313, 'negative': 2430, 'neutral': 7974}
-sentiment_tar = {'positive': 1, 'negative': 2, 'neutral': 0}
-
-def process_data(tweet, selected_text, sentiment, tokenizer, max_len, do_ques_ans=False):
-
-    # FIND TEXT / SELECTED_TEXT OVERLAP
-    tweet = " " + " ".join(str(tweet).split())
-    selected_text = " ".join(str(selected_text).split())
-
-    start_idx = tweet.find(selected_text)
-    end_idx = start_idx + len(selected_text)
-
-    char_targets = [0] * len(tweet)
-    if start_idx != None and end_idx != None:
-        for ct in range(start_idx, end_idx):
-            char_targets[ct] = 1
-
-    tok = tokenizer.encode(tweet)
-    tweet_ids = tok.ids
-
-    # OFFSETS, CHAR CENTERS
-    tweet_offsets = tok.offsets
-    char_centers = [(offset[0] + offset[1]) / 2 for offset in tweet_offsets]
-
-    target_idx = []
-    for j, (offset1, offset2) in enumerate(tweet_offsets):
-        if sum(char_targets[offset1: offset2]) > 0:
-            target_idx.append(j)
-
-#     print(target_idx)
-
-    targets_start = target_idx[0]
-    targets_end = target_idx[-1]
-
-    stok = [sentiment_id[sentiment]]
-
-    input_ids = [0] + tweet_ids + [2]
-    token_type_ids = [0] + [0] * (len(tweet_ids) + 1)
-    mask = [1] * len(token_type_ids)
-    tweet_offsets = [(0, 0)] + tweet_offsets + [(0, 0)]
-    targets_start += 1
-    targets_end += 1
-
-    if do_ques_ans:
-        input_ids = [0] + stok + [2] + [2] + tweet_ids + [2]
-        token_type_ids = [0, 0, 0, 0] + [0] * (len(tweet_ids) + 1)
-        mask = [1] * len(token_type_ids)
-        tweet_offsets = [(0, 0)] * 4 + tweet_offsets + [(0, 0)]
-        targets_start += 4
-        targets_end += 4
-
-    padding_length = max_len - len(input_ids)
-    if padding_length > 0:
-        input_ids = input_ids + ([1] * padding_length)
-        mask = mask + ([0] * padding_length)
-        token_type_ids = token_type_ids + ([0] * padding_length)
-        tweet_offsets = tweet_offsets + ([(0, 0)] * padding_length)
-#         print(char_centers)
-        char_centers = char_centers + ([0] * padding_length)
-
-    return {
-        'ids': input_ids,
-        'mask': mask,
-        'token_type_ids': token_type_ids,
-        'targets_start': targets_start,
-        'targets_end': targets_end,
-        'orig_tweet': tweet,
-        'orig_selected': selected_text,
-        'sentiment': sentiment,
-        'offsets': tweet_offsets,
-        'char_cent': char_centers,
-        'sentiment_tar': sentiment_tar[sentiment]
-    }
-
-
 @Registry.register(category='dataset')
-class TweetDataset:
-    def __init__(self, max_len, roberta_path, tweet=None, sentiment=None, selected_text=None, train=False):
-        print('TweetDataset!!!')
+class TweetDataset(torch.utils.data.Dataset):
+    def __init__(self, model_path, csv_path, train=False, max_len=96):
+        df = pd.read_csv(csv_path)
+        self.df = df.dropna().reset_index(drop=True)
         self.max_len = max_len
-        self.roberta_path = roberta_path
-        self.tweet = tweet
-        self.sentiment = sentiment
-        self.selected_text = selected_text
+        self.labeled = 'selected_text' in self.df
         self.tokenizer = tokenizers.ByteLevelBPETokenizer(
-                        vocab_file=self.roberta_path+'vocab.json',
-                        merges_file=self.roberta_path+'merges.txt',
-                        lowercase=True,
-                        add_prefix_space=True
-                    )
+            vocab_file=model_path+'vocab.json', 
+            merges_file=model_path+'merges.txt', 
+            lowercase=True,
+            add_prefix_space=True)
+
+    def __getitem__(self, index):
+        data = {}
+        target = {}
+
+        row = self.df.iloc[index]
+        
+        ids, masks, tweet, offsets, sentiment_id, sentiment_target = self.get_input_data(row)
+        data['ids'] = ids
+        data['masks'] = masks
+        data['tweet'] = tweet
+        data['offsets'] = offsets
+        target['sentiment_id'] = sentiment_id
+        target['sentiment_target'] = sentiment_target
+        
+        if self.labeled:
+            start_idx, end_idx = self.get_target_idx(row, tweet, offsets)
+            data['start_idx'] = start_idx
+            data['end_idx'] = end_idx
+            target['start_idx'] = start_idx
+            target['end_idx'] = end_idx
+
+        return data, target
 
     def __len__(self):
-        return len(self.tweet)
+        return len(self.df)
 
-    def __getitem__(self, item):
-        data = process_data(
-            self.tweet[item],
-            self.selected_text[item],
-            self.sentiment[item],
-            self.tokenizer,
-            self.max_len
-        )
+    def sentiment_to_target(self, sentiment):
+        targets = {'positive': 1, 'negative': 2, 'neutral': 0}
+        return targets[sentiment]
+    
+    def get_input_data(self, row):
+        try:
+            tweet = " " + " ".join(row.text.lower().split())
+        except:
+            print(row)
 
-        return {
-            'ids': torch.tensor(data["ids"], dtype=torch.long),
-            'mask': torch.tensor(data["mask"], dtype=torch.long),
-            'token_type_ids': torch.tensor(data["token_type_ids"], dtype=torch.long),
-            'targets_start': torch.tensor(data["targets_start"], dtype=torch.long),
-            'targets_end': torch.tensor(data["targets_end"], dtype=torch.long),
-            'orig_tweet': data["orig_tweet"],
-            'orig_selected': data["orig_selected"],
-            'sentiment': data["sentiment"],
-            'offsets': torch.tensor(data["offsets"], dtype=torch.long),
-            'char_cent': torch.tensor(data['char_cent'], dtype=torch.long),
-            'sentiment_tar': data['sentiment_tar']
-        }
+        encoding = self.tokenizer.encode(tweet)
+        sentiment_id = self.tokenizer.encode(row.sentiment).ids
+
+        ids = [0] + encoding.ids + [2]
+        offsets = [(0, 0)] + encoding.offsets + [(0, 0)]
+                
+        pad_len = self.max_len - len(ids)
+        if pad_len > 0:
+            ids += [1] * pad_len
+            offsets += [(0, 0)] * pad_len
+        
+        ids = torch.tensor(ids)
+        masks = torch.where(ids != 1, torch.tensor(1), torch.tensor(0))
+        offsets = torch.tensor(offsets)
+        sentiment_id = torch.tensor(sentiment_id)
+        sentiment_target = torch.tensor(self.sentiment_to_target(row.sentiment))
+
+        return ids, masks, tweet, offsets, sentiment_id, sentiment_target
+        
+    def get_target_idx(self, row, tweet, offsets):
+        selected_text = " " +  " ".join(row.selected_text.lower().split())
+
+        len_st = len(selected_text) - 1
+        idx0 = None
+        idx1 = None
+
+        for ind in (i for i, e in enumerate(tweet) if e == selected_text[1]):
+            if " " + tweet[ind: ind+len_st] == selected_text:
+                idx0 = ind
+                idx1 = ind + len_st - 1
+                break
+
+        char_targets = [0] * len(tweet)
+        if idx0 != None and idx1 != None:
+            for ct in range(idx0, idx1 + 1):
+                char_targets[ct] = 1
+
+        target_idx = []
+        for j, (offset1, offset2) in enumerate(offsets):
+            if sum(char_targets[offset1: offset2]) > 0:
+                target_idx.append(j)
+
+        start_idx = target_idx[0]
+        end_idx = target_idx[-1]
+        
+        return start_idx, end_idx        

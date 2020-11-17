@@ -1,8 +1,10 @@
+tweet/input
+
 # wandb
 wandb/
 
 # vscode settings
-.vscode/
+# .vscode/
 
 # training data
 data/

@@ -10,11 +10,11 @@ from easydict import EasyDict as edict
 from collections import defaultdict
 from torchvision import datasets, transforms
 
-from .singleton_decorator import SingletonDecorator
-from .forward_hook import DefaultPostForwardHook
-from .metric import DefaultMetric
-from .logger import DefaultLogger
-from .models.mnist import Mnist
+from built.singleton_decorator import SingletonDecorator
+from built.forward_hook import DefaultPostForwardHook
+from built.metric import DefaultMetric
+from built.logger import DefaultLogger
+from built.models.mnist import Mnist
 
 class Category:
     def __init__(self, name):
@@ -109,42 +109,3 @@ class Registry:
         if 'params' in config:
             args.update(config['params'])
         return klass(**args)
-
-    # @classmethod
-    # def build_model(cls, config, **kwargs):
-    #     return cls.build_from_config('model', config.model, kwargs)
-
-    # @classmethod
-    # def build_loss_fn(cls, config, **kwargs):
-    #     return cls.build_from_config('loss', config.loss, kwargs)
-
-    # @classmethod
-    # def build_optimizer(cls, config, **kwargs):
-    #     return cls.build_from_config('optimizer', config.optimizer, kwargs)
-
-    # @classmethod
-    # def build_scheduler(cls, config, **kwargs):
-    #     return cls.build_from_config('scheduler', config.scheduler, kwargs)
-
-    # @classmethod
-    # def build_post_forward_hook(cls, config, **kwargs):
-    #     return cls.build_from_config('hooks', config.post_forward_hook, kwargs)
-
-    # @classmethod
-    # def build_metric_fn(cls, config, **kwargs):
-    #     return cls.build_from_config('hooks', config.metric_hook, kwargs)
-
-    # @classmethod
-    # def build_logger_fn(cls, config, **kwargs):
-    #     return cls.build_from_config('hooks', config.logger_hook, kwargs)
-
-    # @classmethod
-    # def build_transforms(cls, config, **kwargs):
-    #     if config.transforms.name == 'Compose':
-    #         transfms = []
-    #         for t in config.transforms.params:
-    #             transfms.append(cls.build_from_config('transform', t))
-
-    #         return transforms.Compose(transfms)
-    #     else:
-    #         return cls.build_from_config('transform', config.transforms),

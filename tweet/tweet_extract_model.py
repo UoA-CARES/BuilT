@@ -19,10 +19,8 @@ from transformers import get_linear_schedule_with_warmup
 from built.registry import Registry
 
 
-ROBERTA_PATH = '../input/roberta-base/'
-
 @Registry.register(category="model")
-class TweetExtractModel(transformers.BertPreTrainedModel):
+class TweetExtractModel(nn.Module):
     """BERT model for QA and classification tasks.
 
     Parameters
@@ -34,17 +32,20 @@ class TweetExtractModel(transformers.BertPreTrainedModel):
         Classification scores of each labels.
     """
 
-    def __init__(self, conf):
-        super(TweetExtractModel, self).__init__(conf)
+    def __init__(self, transformer_type, transformer_path, drop_out_rate, num_classes):
+        super().__init__()
+        self.transformer_type = transformer_type
+        self.transformer_path = transformer_path
+        model_config = transformers.RobertaConfig.from_pretrained(
+            self.transformer_path, output_hidden_states=True)
         self.roberta = transformers.RobertaModel.from_pretrained(
-            ROBERTA_PATH, config=conf)
-        self.drop_out = nn.Dropout(0.1)
-        self.classifier = nn.Linear(768, 3)
+            self.transformer_path, config=model_config)
+        self.drop_out = nn.Dropout(drop_out_rate)
+        self.classifier = nn.Linear(768, num_classes)
 
-    def forward(self, input_ids, attention_mask=None, token_type_ids=None, position_ids=None, head_mask=None):
-        hidden_states, pooled_output, _ = self.roberta(input_ids,
-                                                       attention_mask=attention_mask,
-                                                       token_type_ids=token_type_ids)
+    def forward(self, input_ids, attention_mask=None, position_ids=None, head_mask=None):
+        last_hidden_states, pooled_output, hidden_states = self.roberta(
+            input_ids, attention_mask=attention_mask)
 
         # classification
         pooled_output = self.drop_out(pooled_output)

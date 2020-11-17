@@ -53,10 +53,11 @@ class CheckpointManager:
 
         step = checkpoint['step'] if 'step' in checkpoint else -1
         last_epoch = checkpoint['epoch'] if 'epoch' in checkpoint else -1
+        last_accuracy = checkpoint['accuracy'] if 'epoch' in checkpoint else -1
 
-        return last_epoch, step
+        return last_epoch, step, last_accuracy
 
-    def save(self, model, optimizer, epoch, step=0, keep=None):
+    def save(self, model, optimizer, epoch, accuracy, step=0, keep=None):
         checkpoint_path = os.path.join(
             self.root_dir, f'{self.prefix}{epoch:04d}{self.ext}')
 
@@ -71,6 +72,7 @@ class CheckpointManager:
             'optimizer_dict': optimizer.state_dict(),
             'epoch': epoch,
             'step': step,
+            'accuracy': accuracy,
         }
         torch.save(weights_dict, checkpoint_path)
 
