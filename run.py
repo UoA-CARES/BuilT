@@ -38,6 +38,9 @@ def train(_run, _config):
     splitter = builder.build_splitter(config)
     df = pd.read_csv(splitter.csv_path)
 
+    if not os.path.exists(config.train.dir):
+        os.makedirs(config.train.dir)
+        
     for i_fold in range(splitter.n_splits):
         print(f'Training start: {i_fold} fold')
         train_idx, val_idx = splitter.get_fold(i_fold)
