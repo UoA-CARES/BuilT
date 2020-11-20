@@ -14,6 +14,7 @@ from sacred.utils import apply_backspaces_and_linefeeds
 from built.trainer import Trainer
 from built.builder import Builder
 
+from built.ensembler import Ensembler
 
 ex = Experiment('orsum')
 ex.captured_out_filter = apply_backspaces_and_linefeeds
@@ -27,6 +28,21 @@ def cfg():
 def main(_run, _config):
     config = edict(_config)
     pprint.PrettyPrinter(indent=2).pprint(config)
+
+@ex.command
+def ensemble(_run, _config):
+    config = edict(_config)
+    config.dataset.splits = []
+    config.dataset.splits.append({'train': False, 'csv_path': 'tweet/input/tweet-sentiment-extraction/train.csv'})
+    config.train.num_epochs = 1
+    builder = Builder()
+    ensembler = Ensembler(config, builder)
+    ensembled_output = ensembler.forward_models()
+    
+    df = pd.read_csv('tweet/input/tweet-sentiment-extraction/train.csv')
+    
+    
+    
 
 
 @ex.command
@@ -61,6 +77,12 @@ def train(_run, _config):
         tr.run()
         print(f'Training end\n')
 
+from tweet.correct_dataset import correct_dataset
+
+@ex.command
+def correct_data(_run, _config):
+    config = edict(_config)    
+    correct_dataset(config.dataset.params.csv_path)
 
 if __name__ == '__main__':
     torch.multiprocessing.set_sharing_strategy('file_system')

@@ -31,9 +31,35 @@ class Trainer(object):
             self.writer['wandb'] = wandb.init(
                 config=wandb_conf, project="BuilT")
 
+        self.build_classes()
+
     def prepare_directories(self):
         os.makedirs(os.path.join(self.working_dir,
                                  'checkpoint'), exist_ok=True)
+
+    def forward(self):
+        self.model.eval()
+
+        for dataloader in self.dataloaders:
+            dataloader = dataloader['dataloader']
+            
+            batch_size = self.config.evaluation.batch_size
+            total_size = len(dataloader.dataset)
+            total_step = math.ceil(total_size / batch_size)
+            
+            outputs = []
+            
+            with torch.no_grad():
+                tbar = tqdm.tqdm(enumerate(dataloader), total=total_step, bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
+                for _, (inputs, targets) in tbar:
+                    output = self.forward_hook(self.model, inputs, targets, device=self.device)
+                    output = self.post_forward_hook(
+                        outputs=output, inputs=inputs, targets=targets, data=None, is_train=True)
+
+                    outputs.append(output)
+                
+                outputs = torch.cat(outputs, dim=0)
+                return outputs
 
     def evaluate_single_epoch(self, dataloader, epoch):
         self.model.eval()
@@ -59,7 +85,7 @@ class Trainer(object):
                     loss_dict = {'loss': loss}
 
                 metric_dict = self.metric_fn(
-                    outputs=output, targets=targets, is_train=True, split=None)                
+                    outputs=output, targets=targets, is_train=False, split=None)                
 
                 log_dict = {key: value.item() for key, value in loss_dict.items()}
                 log_dict['lr'] = self.optimizer.param_groups[0]['lr']
@@ -157,7 +183,7 @@ class Trainer(object):
             if stop_early:
                 break
 
-    def run(self):
+    def build_classes(self):
         # prepare directories
         self.prepare_directories()
 
@@ -190,6 +216,8 @@ class Trainer(object):
             params = self.model.parameters()
         self.optimizer = self.builder.build_optimizer(self.config, params=params)
 
+    def run(self):
+        
         # load checkpoint
         ckpt = self.cm.latest()
         if ckpt is not None:
