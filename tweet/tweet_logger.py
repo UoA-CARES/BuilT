@@ -3,6 +3,7 @@ import logging
 import torch
 import numpy as np
 
+from sklearn import metrics
 from built.logger import LoggerBase
 from built.registry import Registry
 
@@ -27,11 +28,21 @@ class TweetLogger(LoggerBase):
         if self.use_wandb:
             log_dict.update({'epoch': epoch, 'mode': split})
             writer['wandb'].log(log_dict)
-        
+
         if labels is not None and outputs is not None:
             labels = labels['sentiment_target']
             outputs = torch.sigmoid(outputs).cpu().detach().numpy().tolist()
             outputs = np.argmax(outputs, axis=1)
-        
+
             writer['tensorboard'].add_pr_curve(
                 f'pr_curve_{split}', labels, outputs, log_step)
+            
+            y = labels.numpy()
+            pred = outputs
+            fpr, tpr, thresholds = metrics.roc_curve(
+                labels.numpy(), outputs, pos_label=2)
+            auc = metrics.auc(fpr, tpr)
+            
+            writer['tensorboard'].add_scalar(
+                f'auc_curve_{split}', auc, log_step)
+            
