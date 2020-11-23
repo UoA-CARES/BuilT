@@ -38,3 +38,7 @@ class DefaultLogger(LoggerBase):
         if self.use_wandb:
             log_dict.update({'epoch': epoch, 'mode':split})
             writer['wandb'].log(log_dict)
+            
+        if labels is not None and outputs is not None:
+            writer['tensorboard'].add_pr_curve(
+                'pr_curve', labels, outputs, log_step)

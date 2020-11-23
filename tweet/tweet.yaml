@@ -80,7 +80,7 @@ metric_hook:
   name: "TweetMetric"
 
 logger_hook:
-  name: "DefaultLogger"
+  name: "TweetLogger"
   params:
     use_tensorboard: True
     use_wandb: False
