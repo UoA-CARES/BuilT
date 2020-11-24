@@ -39,7 +39,7 @@ transforms:
         std: !!python/tuple [0.3081]
 
 model:
-  name: "TweetExtractModel"
+  name: "TweetSentimentClassificationModel"
   params:
     transformer_type: "roberta"
     transformer_path: "tweet/input/roberta-base/"

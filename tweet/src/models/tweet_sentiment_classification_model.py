@@ -20,7 +20,7 @@ from built.registry import Registry
 
 
 @Registry.register(category="model")
-class TweetExtractModel(nn.Module):
+class TweetSentimentClassificationModel(nn.Module):
     """BERT model for QA and classification tasks.
 
     Parameters
