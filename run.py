@@ -77,7 +77,7 @@ def train(_run, _config):
         tr.run()
         print(f'Training end\n')
 
-from tweet.correct_dataset import correct_dataset
+from tweet.src.correct_dataset import correct_dataset
 
 @ex.command
 def correct_data(_run, _config):

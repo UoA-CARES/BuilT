@@ -13,7 +13,7 @@
             "args": [
                 "train",
                 "with",
-                "${workspaceFolder}/tweet/tweet.yaml",
+                "${workspaceFolder}/tweet/config/tweet_sentiment_classification.yaml",
                 "-f"
             ],
             "env": {
@@ -29,7 +29,7 @@
             "args": [
                 "ensemble",
                 "with",
-                "${workspaceFolder}/tweet/tweet.yaml",
+                "${workspaceFolder}/tweet/config/tweet_sentiment_classification.yaml",
                 "-f"
             ],
             "env": {
