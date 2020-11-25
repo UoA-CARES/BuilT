@@ -31,4 +31,6 @@ class TweetIndexExtractionMetric(MetricBase):
         start_idx_accuracy = metrics.accuracy_score(start_idx, start_pred)
         end_idx_accuracy = metrics.accuracy_score(end_idx, end_pred)
         
-        return {'start_idx_accuracy': start_idx_accuracy, 'end_idx_accuracy': end_idx_accuracy}        
+        score = (start_idx_accuracy + end_idx_accuracy) / 2.0
+        
+        return {'score': score, 'start_idx_accuracy': start_idx_accuracy, 'end_idx_accuracy': end_idx_accuracy}
