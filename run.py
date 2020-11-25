@@ -7,6 +7,7 @@ import os
 import pprint
 import torch
 import pandas as pd
+import datetime
 
 from easydict import EasyDict as edict
 from sacred import Experiment
@@ -21,8 +22,7 @@ ex.captured_out_filter = apply_backspaces_and_linefeeds
 
 @ex.config
 def cfg():
-    description = 'Tweet Sentiment Classification'
-
+    description = 'Tweet Sentiment Classification'    
 
 @ex.main
 def main(_run, _config):
@@ -49,6 +49,11 @@ def ensemble(_run, _config):
 def train(_run, _config):
     config = edict(_config)    
     pprint.PrettyPrinter(indent=2).pprint(config)
+
+    if 'use_date' in config and config['use_date'] is True:
+        now = datetime.datetime.now()
+        now = now.strftime("%Y%m%d-%H%M%S")
+        config.train.dir = os.path.join(config.train.dir, now) 
 
     builder = Builder()
     splitter = builder.build_splitter(config)

@@ -30,7 +30,8 @@
                 "train",
                 "with",
                 "${workspaceFolder}/tweet/config/tweet_index_extraction.yaml",
-                "-f"
+                "-f",
+                "use_date=True"
             ],
             "env": {
                 "TOKENIZERS_PARALLELISM": "True"
