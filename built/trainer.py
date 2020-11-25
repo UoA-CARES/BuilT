@@ -10,7 +10,7 @@ from torch.utils.tensorboard import SummaryWriter
 from collections import defaultdict
 
 from built.builder import Builder
-from built.utils import group_weight
+from built.utils.util_functions import group_weight
 from built.checkpoint_manager import CheckpointManager
 from built.early_stopper import EarlyStopper
 

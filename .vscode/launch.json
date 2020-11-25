@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Train",
+            "name": "Train_sentiment_classification",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/run.py",
@@ -14,6 +14,22 @@
                 "train",
                 "with",
                 "${workspaceFolder}/tweet/config/tweet_sentiment_classification.yaml",
+                "-f"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "Train_index_extraction",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction.yaml",
                 "-f"
             ],
             "env": {
