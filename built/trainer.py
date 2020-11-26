@@ -193,6 +193,8 @@ class Trainer(object):
         # build model
         self.model = self.builder.build_model(self.config)
         self.model = self.model.to(self.device)
+        if torch.cuda.device_count() > 1:
+            self.model = torch.nn.DataParallel(self.model)
 
         # build loss
         self.loss_fn = self.builder.build_loss_fn(self.config)
