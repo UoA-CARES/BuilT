@@ -13,10 +13,36 @@ from sklearn import metrics
 from built.metric import MetricBase
 from built.registry import Registry
 
+def get_selected_text(text, start_idx, end_idx, offsets):
+    selected_text = ""
+    for ix in range(start_idx, end_idx + 1):
+        selected_text += text[offsets[ix][0]: offsets[ix][1]]
+        if (ix + 1) < len(offsets) and offsets[ix][1] < offsets[ix + 1][0]:
+            selected_text += " "
+    return selected_text
 
+def jaccard(str1, str2):
+    a = set(str1.lower().split())
+    b = set(str2.lower().split())
+    c = a.intersection(b)
+    return float(len(c)) / (len(a) + len(b) - len(c))
+
+def compute_jaccard_score(text, start_idx, end_idx, start_logits, end_logits, offsets):
+    start_pred = start_logits
+    end_pred = end_logits
+    
+    if start_pred > end_pred:
+        pred = text
+    else:
+        pred = get_selected_text(text, start_pred, end_pred, offsets)
+
+    true = get_selected_text(text, start_idx, end_idx, offsets)
+
+    return jaccard(true, pred)
+    
 @Registry.register(category='hooks')
 class TweetIndexExtractionMetric(MetricBase):
-    def __call__(self, outputs, targets, is_train, split):
+    def __call__(self, outputs, targets, data=None, is_train=False, device='cpu'):
         start_idx = targets['start_idx'].cpu().detach().numpy()
         end_idx = targets['end_idx'].cpu().detach().numpy()
         
@@ -31,6 +57,23 @@ class TweetIndexExtractionMetric(MetricBase):
         start_idx_accuracy = metrics.accuracy_score(start_idx, start_pred)
         end_idx_accuracy = metrics.accuracy_score(end_idx, end_pred)
         
-        score = (start_idx_accuracy + end_idx_accuracy) / 2.0
+        ids = data['ids']
+        tweet = data['tweet']
+        offsets = data['offsets'].cpu().numpy()        
+
+        jaccard = 0.0
+
+        for i in range(len(ids)):
+            jaccard_score = compute_jaccard_score(
+                tweet[i],
+                start_idx[i],
+                end_idx[i],
+                start_pred[i],
+                end_pred[i],
+                offsets[i])
+
+            jaccard += jaccard_score
+
+        score = jaccard / len(ids)
         
         return {'score': score, 'start_idx_accuracy': start_idx_accuracy, 'end_idx_accuracy': end_idx_accuracy}

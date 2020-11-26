@@ -85,7 +85,7 @@ class Trainer(object):
                     loss_dict = {'loss': loss}
 
                 metric_dict = self.metric_fn(
-                    outputs=output, targets=targets, is_train=False, split=None)                
+                    outputs=output, targets=targets, data=inputs, is_train=False)                
 
                 log_dict = {key: value.item() for key, value in loss_dict.items()}
                 log_dict['lr'] = self.optimizer.param_groups[0]['lr']
@@ -123,7 +123,7 @@ class Trainer(object):
             loss = self.loss_fn(output, targets, device=self.device)
 
             metric_dict = self.metric_fn(
-                outputs=output, targets=targets, is_train=True, split=None)
+                outputs=output, targets=targets, data=inputs, is_train=True)
 
             if isinstance(loss, dict):
                 loss_dict = loss
