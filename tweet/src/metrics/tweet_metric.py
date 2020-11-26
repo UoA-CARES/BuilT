@@ -16,7 +16,7 @@ from built.registry import Registry
 
 @Registry.register(category='hooks')
 class TweetMetric(MetricBase):
-    def __call__(self, outputs, targets, is_train, data=None, is_train=False, device='cpu'):
+    def __call__(self, outputs, targets, data=None, is_train=False, device='cpu'):
         outputs = torch.sigmoid(outputs).cpu().detach().numpy().tolist()    
         outputs = np.argmax(outputs, axis=1)
 
