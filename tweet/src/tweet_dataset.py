@@ -38,6 +38,7 @@ class TweetDataset(torch.utils.data.Dataset):
         target = {}
 
         row = self.df.iloc[index]
+        #print("index = ",index)
         
         ids, masks, tweet, offsets, sentiment_id, sentiment_target, char_centers = self.get_input_data(row)
         data['ids'] = ids
@@ -96,29 +97,33 @@ class TweetDataset(torch.utils.data.Dataset):
         return ids, masks, tweet, offsets, sentiment_id, sentiment_target, char_centers
         
     def get_target_idx(self, row, tweet, offsets):
-        selected_text = " " +  " ".join(row.selected_text.lower().split())
+        start_idx = 0
+        end_idx = 0
+        try:
+            selected_text = " " +  " ".join(row.selected_text.lower().split())
+            if len(selected_text) != selected_text.count(' '):
+                len_st = len(selected_text) - 1
+                idx0 = None
+                idx1 = None
+                for ind in (i for i, e in enumerate(tweet) if e == selected_text[1]):
+                    if " " + tweet[ind: ind+len_st] == selected_text:
+                        idx0 = ind
+                        idx1 = ind + len_st - 1
+                        break
 
-        len_st = len(selected_text) - 1
-        idx0 = None
-        idx1 = None
+                char_targets = [0] * len(tweet)
+                if idx0 != None and idx1 != None:
+                    for ct in range(idx0, idx1 + 1):
+                        char_targets[ct] = 1
 
-        for ind in (i for i, e in enumerate(tweet) if e == selected_text[1]):
-            if " " + tweet[ind: ind+len_st] == selected_text:
-                idx0 = ind
-                idx1 = ind + len_st - 1
-                break
+                target_idx = []
+                for j, (offset1, offset2) in enumerate(offsets):
+                    if sum(char_targets[offset1: offset2]) > 0:
+                        target_idx.append(j)
 
-        char_targets = [0] * len(tweet)
-        if idx0 != None and idx1 != None:
-            for ct in range(idx0, idx1 + 1):
-                char_targets[ct] = 1
-
-        target_idx = []
-        for j, (offset1, offset2) in enumerate(offsets):
-            if sum(char_targets[offset1: offset2]) > 0:
-                target_idx.append(j)
-
-        start_idx = target_idx[0]
-        end_idx = target_idx[-1]
-        
+                start_idx = target_idx[0]
+                end_idx = target_idx[-1]
+        except:
+            print("selected_text is empty with spaces")
+            
         return start_idx, end_idx, selected_text
