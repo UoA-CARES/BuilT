@@ -11,7 +11,7 @@ from built.registry import Registry
 @Registry.register(category="hooks")
 class TweetLogger(LoggerBase):
     def __call__(self, writer, split, outputs, labels, log_dict,
-                 epoch, step=None, num_steps_in_epoch=None):
+                 epoch, step=None, num_steps_in_epoch=None, data=None):
 
         if step is not None:
             assert num_steps_in_epoch is not None

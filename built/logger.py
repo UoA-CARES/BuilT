@@ -16,12 +16,12 @@ class LoggerBase(object):
 
     @abc.abstractmethod
     def __call__(self, writer, split, outputs, labels, log_dict,
-                 epoch, step=None, num_steps_in_epoch=None):
+                 epoch, step=None, num_steps_in_epoch=None, data=None):
         pass
 
 class DefaultLogger(LoggerBase):
     def __call__(self, writer, split, outputs, labels, log_dict,
-                 epoch, step=None, num_steps_in_epoch=None):
+                 epoch, step=None, num_steps_in_epoch=None, data=None):
         logging.debug("Default logger is called")
 
         if step is not None:

@@ -99,7 +99,7 @@ class Trainer(object):
                 tbar.set_postfix(
                     lr=self.optimizer.param_groups[0]['lr'], loss=f'{loss.item():.5f}')
                 
-                self.logger_fn(self.writer, split='test', outputs=output, labels=targets,
+                self.logger_fn(self.writer, split='test', outputs=output, labels=targets, data=inputs,
                                      log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
             
             aggregated_metric_dict = {f'avg_{key}':np.mean(value) for key, value in aggregated_metric_dict.items()}

@@ -51,4 +51,4 @@ class TweetSentimentClassificationModel(nn.Module):
         pooled_output = self.drop_out(pooled_output)
         classifier_logits = self.classifier(pooled_output)
 
-        return hidden_states, classifier_logits
+        return last_hidden_states, classifier_logits

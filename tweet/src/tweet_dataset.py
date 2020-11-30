@@ -39,20 +39,25 @@ class TweetDataset(torch.utils.data.Dataset):
 
         row = self.df.iloc[index]
         
-        ids, masks, tweet, offsets, sentiment_id, sentiment_target = self.get_input_data(row)
+        ids, masks, tweet, offsets, sentiment_id, sentiment_target, char_centers = self.get_input_data(row)
         data['ids'] = ids
         data['masks'] = masks
         data['tweet'] = tweet
         data['offsets'] = offsets
+        data['sentiment_id'] = sentiment_id
+        data['sentiment_target'] = sentiment_target      
+        data['char_centers'] = char_centers
         target['sentiment_id'] = sentiment_id
         target['sentiment_target'] = sentiment_target
         
         if self.labeled:
-            start_idx, end_idx = self.get_target_idx(row, tweet, offsets)
+            start_idx, end_idx, selected_text = self.get_target_idx(row, tweet, offsets)
             data['start_idx'] = start_idx
             data['end_idx'] = end_idx
+            data['selected_text'] = selected_text
             target['start_idx'] = start_idx
-            target['end_idx'] = end_idx
+            target['end_idx'] = end_idx          
+            target['selected_text'] = selected_text  
 
         return data, target
 
@@ -74,19 +79,21 @@ class TweetDataset(torch.utils.data.Dataset):
 
         ids = [0] + encoding.ids + [2]
         offsets = [(0, 0)] + encoding.offsets + [(0, 0)]
-                
+        char_centers = [(x[0] + x[1]) / 2 for x in encoding.offsets]
+
         pad_len = self.max_len - len(ids)
         if pad_len > 0:
             ids += [1] * pad_len
             offsets += [(0, 0)] * pad_len
+            char_centers += [0] * pad_len
         
         ids = torch.tensor(ids)
         masks = torch.where(ids != 1, torch.tensor(1), torch.tensor(0))
         offsets = torch.tensor(offsets)
         sentiment_id = torch.tensor(sentiment_id)
         sentiment_target = torch.tensor(self.sentiment_to_target(row.sentiment))
-
-        return ids, masks, tweet, offsets, sentiment_id, sentiment_target
+        char_centers = torch.tensor(char_centers)
+        return ids, masks, tweet, offsets, sentiment_id, sentiment_target, char_centers
         
     def get_target_idx(self, row, tweet, offsets):
         selected_text = " " +  " ".join(row.selected_text.lower().split())
@@ -114,4 +121,4 @@ class TweetDataset(torch.utils.data.Dataset):
         start_idx = target_idx[0]
         end_idx = target_idx[-1]
         
-        return start_idx, end_idx        
+        return start_idx, end_idx, selected_text

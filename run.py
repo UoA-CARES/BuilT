@@ -82,12 +82,12 @@ def train(_run, _config):
         tr.run()
         print(f'Training end\n')
 
-from tweet.src.correct_dataset import correct_dataset
+# from tweet.src.correct_dataset import correct_dataset
 
-@ex.command
-def correct_data(_run, _config):
-    config = edict(_config)    
-    correct_dataset(config.dataset.params.csv_path)
+# @ex.command
+# def correct_data(_run, _config):
+#     config = edict(_config)    
+#     correct_dataset(config.dataset.params.csv_path)
 
 if __name__ == '__main__':
     torch.multiprocessing.set_sharing_strategy('file_system')
