@@ -38,6 +38,23 @@
             }
         },
         {
+            "name": "Train_index_extraction_coverage",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_coverage.yaml",
+                "-f",
+                "use_date=True"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
             "name": "Ensemble",
             "type": "python",
             "request": "launch",
