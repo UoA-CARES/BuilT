@@ -9,6 +9,7 @@ import torch
 import pandas as pd
 import datetime
 
+from pathlib import Path
 from easydict import EasyDict as edict
 from sacred import Experiment
 from sacred.utils import apply_backspaces_and_linefeeds
@@ -17,43 +18,46 @@ from built.builder import Builder
 
 from built.ensembler import Ensembler
 
+from tweet.src.correct_dataset import correct_dataset
+
 ex = Experiment('orsum')
 ex.captured_out_filter = apply_backspaces_and_linefeeds
 
+
 @ex.config
 def cfg():
-    description = 'Tweet Sentiment Classification'    
+    description = 'Tweet Sentiment Classification'
+
 
 @ex.main
 def main(_run, _config):
     config = edict(_config)
     pprint.PrettyPrinter(indent=2).pprint(config)
 
+
 @ex.command
 def ensemble(_run, _config):
     config = edict(_config)
     config.dataset.splits = []
-    config.dataset.splits.append({'train': False, 'csv_path': 'tweet/input/tweet-sentiment-extraction/train.csv'})
+    config.dataset.splits.append(
+        {'train': False, 'csv_path': 'tweet/input/tweet-sentiment-extraction/train.csv'})
     config.train.num_epochs = 1
     builder = Builder()
     ensembler = Ensembler(config, builder)
     ensembled_output = ensembler.forward_models()
-    
+
     df = pd.read_csv('tweet/input/tweet-sentiment-extraction/train.csv')
-    
-    
-    
 
 
 @ex.command
 def train(_run, _config):
-    config = edict(_config)    
+    config = edict(_config)
     pprint.PrettyPrinter(indent=2).pprint(config)
 
     if 'use_date' in config and config['use_date'] is True:
         now = datetime.datetime.now()
         now = now.strftime("%Y%m%d-%H%M%S")
-        config.train.dir = os.path.join(config.train.dir, now) 
+        config.train.dir = os.path.join(config.train.dir, now)
 
     builder = Builder()
     splitter = builder.build_splitter(config)
@@ -61,35 +65,62 @@ def train(_run, _config):
 
     if not os.path.exists(config.train.dir):
         os.makedirs(config.train.dir)
-        
+
     for i_fold in range(splitter.n_splits):
         print(f'Training start: {i_fold} fold')
         train_idx, val_idx = splitter.get_fold(i_fold)
 
         train_df = df.iloc[train_idx]
-        train_csv_path = os.path.join(config.train.dir, str(i_fold) + '_train.csv')
+        train_csv_path = os.path.join(
+            config.train.dir, str(i_fold) + '_train.csv')
         train_df.to_csv(train_csv_path)
-        
+
         val_df = df.iloc[val_idx]
         val_csv_path = os.path.join(config.train.dir, str(i_fold) + '_val.csv')
         val_df.to_csv(val_csv_path)
         config.dataset.splits = []
-        config.dataset.splits.append({'train': True, 'csv_path': train_csv_path})
-        config.dataset.splits.append({'train': False, 'csv_path': val_csv_path})
+        config.dataset.splits.append(
+            {'train': True, 'csv_path': train_csv_path})
+        config.dataset.splits.append(
+            {'train': False, 'csv_path': val_csv_path})
         config.train.name = str(i_fold) + '_fold'
-        
+
         tr = Trainer(config, builder)
         tr.run()
         print(f'Training end\n')
 
-# from tweet.src.correct_dataset import correct_dataset
 
-# @ex.command
-# def correct_data(_run, _config):
-#     config = edict(_config)    
-#     correct_dataset(config.dataset.params.csv_path)
+@ex.command
+def split(_run, _config):
+    config = edict(_config)
+
+    builder = Builder()
+    splitter = builder.build_splitter(config)
+    df = pd.read_csv(splitter.csv_path)
+
+    output_dir = Path(splitter.csv_path).parent
+
+    fold = 0
+    train_idx, val_idx = splitter.get_fold(fold)
+
+    train_df = df.iloc[train_idx]
+    train_csv_path = os.path.join(output_dir, 'new_train.csv')
+    train_df.to_csv(train_csv_path)
+    correct_dataset(train_csv_path)
+
+    val_df = df.iloc[val_idx]
+    val_csv_path = os.path.join(output_dir, 'new_test.csv')
+    val_df.to_csv(val_csv_path)
+    correct_dataset(val_csv_path)
+
+
+@ex.command
+def correct_data(_run, _config):
+    config = edict(_config)
+    correct_dataset(config.dataset.params.csv_path)
+
 
 if __name__ == '__main__':
     torch.multiprocessing.set_sharing_strategy('file_system')
-    torch.backends.cudnn.deterministic=True
+    torch.backends.cudnn.deterministic = True
     ex.run_commandline()

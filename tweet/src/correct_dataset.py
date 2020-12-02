@@ -1,9 +1,11 @@
+import os 
 import numpy as np
 import pandas as pd
 
+from pathlib import Path
 from tqdm import tqdm
-tqdm.pandas()
 
+tqdm.pandas()
 
 def process(text, selected_text, ib_space):
     added_extra_space = False
@@ -70,6 +72,10 @@ def process_selected_text(text, selected_text):
 
 
 def correct_dataset(csv_path):
+    p = Path(csv_path)
+    output_dir = p.parent
+    file_name = p.name
+    
     train = pd.read_csv(csv_path)
     train['corrected_selected_text'] = train.selected_text
     
@@ -79,7 +85,8 @@ def correct_dataset(csv_path):
     pn_df['corrected_selected_text'] = pn_df.progress_apply(lambda x: process_selected_text(x.text, x.selected_text), axis=1)
     conflicted_df = pn_df[pn_df.selected_text != pn_df.corrected_selected_text]    
 
-    conflicted_df.to_csv('conflicted_df.csv', index=False)
+    conflicted_df.to_csv(os.path.join(
+        output_dir, 'conflicted_' + file_name), index=False)
     train_corrected = train
 
     for txtId in tqdm(conflicted_df['textID'], total=len(conflicted_df)):
@@ -88,4 +95,5 @@ def correct_dataset(csv_path):
 
     del train_corrected['corrected_selected_text']
 
-    train_corrected.to_csv('train_corrected.csv', index=False)
+    train_corrected.to_csv(os.path.join(
+        output_dir, 'corrected_' + file_name), index=False)
