@@ -2,7 +2,7 @@
 
 DEVICE_ID=0
 CLASSIFICATION_CONFIG=tweet/config/tweet_sentiment_classification.yaml
-INDEX_EXTRACTION_CONFIG=tweet/config/tweet_index_extraction.yaml
+INDEX_EXTRACTION_CONFIG=tweet/config/tweet_index_extraction_correct.yaml
 
 [ ! -d "tweet/input" ] && cd tweet && sh download_data.sh && cd ..
 

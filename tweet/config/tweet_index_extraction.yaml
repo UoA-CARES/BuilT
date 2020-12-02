@@ -48,8 +48,8 @@ model:
 train:
   dir: "train_dirs/tweet_index_extraction/roberta-base"
   name: ""
-  batch_size: 32
-  num_epochs: 1
+  batch_size: 200
+  num_epochs: 5
   gradient_accumulation_step: 1
 
 evaluation:
@@ -81,5 +81,5 @@ metric_hook:
 logger_hook:
   name: "TweetIndexExtractionLogger"
   params:
-    use_tensorboard: True
-    use_wandb: False
+    use_tensorboard: False
+    use_wandb: True

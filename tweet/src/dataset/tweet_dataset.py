@@ -126,4 +126,8 @@ class TweetDataset(torch.utils.data.Dataset):
         except:
             print("selected_text is empty with spaces")
             
+<<<<<<< HEAD:tweet/src/dataset/tweet_dataset.py
         return start_idx, end_idx, selected_text
+=======
+        return start_idx, end_idx
+>>>>>>> nlp:tweet/src/tweet_dataset.py
