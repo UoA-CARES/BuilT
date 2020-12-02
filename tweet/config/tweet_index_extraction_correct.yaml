@@ -3,6 +3,8 @@ wandb:
     name: "Sweep"
     use: False
     yaml: "sweep.yaml"
+  group:
+    name: "corrected"
 
 dataset:
   name: "TweetDataset"
