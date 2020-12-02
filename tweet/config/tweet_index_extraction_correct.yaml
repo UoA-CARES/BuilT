@@ -4,14 +4,14 @@ wandb:
     use: False
     yaml: "sweep.yaml"
   group:
-    name: "original"
+    name: "corrected"
 
 dataset:
-  name: "TweetIndexExtractionDataset"
+  name: "TweetDataset"
   params:
     max_len: 96
     model_path: "tweet/input/roberta-base/"
-    csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/train_corrected.csv"
 
   splits:
     # - train: True
@@ -22,7 +22,7 @@ dataset:
 splitter:
   name: "TweetSplitter"
   params:
-    csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/train_corrected.csv"
     n_splits: 5
     shuffle: True
     random_state: 42

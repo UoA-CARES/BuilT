@@ -29,7 +29,7 @@ class Trainer(object):
             self.writer['tensorboard'] = SummaryWriter(log_dir=self.working_dir)
         if config.logger_hook.params.use_wandb:
             self.writer['wandb'] = wandb.init(
-                config=wandb_conf, project="BuilT")
+                config=wandb_conf, project="BuilT",group=config.wandb.group.name)
 
         self.build_classes()
 

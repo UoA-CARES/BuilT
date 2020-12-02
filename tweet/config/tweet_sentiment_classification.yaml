@@ -9,7 +9,7 @@ dataset:
   params:
     max_len: 96
     model_path: "tweet/input/roberta-base/"
-    csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/train_corrected.csv"
 
   splits:
     # - train: True
@@ -20,7 +20,7 @@ dataset:
 splitter:
   name: "TweetSplitter"
   params:
-    csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/train_corrected.csv"
     n_splits: 5
     shuffle: True
     random_state: 42
@@ -49,8 +49,8 @@ model:
 train:
   dir: "train_dirs/tweet_classification/roberta-base"
   name: ""
-  batch_size: 256
-  num_epochs: 1
+  batch_size: 128
+  num_epochs: 5
   gradient_accumulation_step: 1
 
 evaluation:
