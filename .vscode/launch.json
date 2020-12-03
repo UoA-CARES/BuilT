@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Train_sentiment_classification",
+            "name": "[Roberta] Train_sentiment_classification",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/run.py",
@@ -14,14 +14,32 @@
                 "train",
                 "with",
                 "${workspaceFolder}/tweet/config/tweet_sentiment_classification.yaml",
-                "-f"
+                "-f",
+                "use_date=True"
             ],
             "env": {
                 "TOKENIZERS_PARALLELISM": "True"
             }
         },
         {
-            "name": "Train_index_extraction",
+            "name": "[Bert] Train_sentiment_classification",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_sentiment_classification_bert.yaml",
+                "-f",
+                "use_date=True"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "[Roberta] Train_index_extraction",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/run.py",
@@ -38,7 +56,24 @@
             }
         },
         {
-            "name": "Train_index_extraction_coverage",
+            "name": "[Bert] Train_index_extraction",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_bert.yaml",
+                "-f",
+                "use_date=True"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "[Roberta] Train_index_extraction_coverage",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/run.py",
@@ -47,6 +82,23 @@
                 "train",
                 "with",
                 "${workspaceFolder}/tweet/config/tweet_index_extraction_coverage.yaml",
+                "-f",
+                "use_date=True"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "[Bert] Train_index_extraction_coverage",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_coverage_bert.yaml",
                 "-f",
                 "use_date=True"
             ],

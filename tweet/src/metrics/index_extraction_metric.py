@@ -31,12 +31,15 @@ def compute_jaccard_score(text, start_idx, end_idx, start_logits, end_logits, of
     start_pred = start_logits
     end_pred = end_logits
     
-    if start_pred > end_pred:
-        pred = text
-    else:
-        pred = get_selected_text(text, start_pred, end_pred, offsets)
+    try:
+        if start_pred > end_pred:
+            pred = text
+        else:
+            pred = get_selected_text(text, start_pred, end_pred, offsets)
 
-    true = get_selected_text(text, start_idx, end_idx, offsets)
+        true = get_selected_text(text, start_idx, end_idx, offsets)
+    except:
+        raise RuntimeError('something wrong here')
 
     return jaccard(true, pred)
     

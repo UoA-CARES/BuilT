@@ -36,15 +36,23 @@ class TweetSentimentClassificationModel(nn.Module):
         super().__init__()
         self.transformer_type = transformer_type
         self.transformer_path = transformer_path
-        model_config = transformers.RobertaConfig.from_pretrained(
-            self.transformer_path, output_hidden_states=True)
-        self.roberta = transformers.RobertaModel.from_pretrained(
-            self.transformer_path, config=model_config)
+        
+        if self.transformer_type == 'roberta':
+            model_config = transformers.RobertaConfig.from_pretrained(
+                self.transformer_path, output_hidden_states=True)
+            self.transformer = transformers.RobertaModel.from_pretrained(
+                self.transformer_path, config=model_config)
+        elif self.transformer_type == 'bert':
+            model_config = transformers.BertConfig.from_pretrained(
+                self.transformer_path, output_hidden_states=True)
+            self.transformer = transformers.BertModel.from_pretrained(
+                self.transformer_path, config=model_config)
+        
         self.drop_out = nn.Dropout(drop_out_rate)
         self.classifier = nn.Linear(768, num_classes)
 
     def forward(self, input_ids, attention_mask=None, position_ids=None, head_mask=None):
-        last_hidden_states, pooled_output, hidden_states = self.roberta(
+        last_hidden_states, pooled_output, hidden_states = self.transformer(
             input_ids, attention_mask=attention_mask)
 
         # classification
