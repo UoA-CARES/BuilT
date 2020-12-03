@@ -4,10 +4,10 @@ wandb:
     use: False
     yaml: "sweep.yaml"
   group:
-    name: "corrected"
+    name: "corrected_with_sentiment"
 
 dataset:
-  name: "TweetDataset"
+  name: "TweetIndexExtractionDataset"
   params:
     max_len: 96
     model_path: "tweet/input/roberta-base/"

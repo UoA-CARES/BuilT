@@ -4,7 +4,7 @@ wandb:
     use: False
     yaml: "sweep.yaml"
   group:
-    name: "original"
+    name: "original_with_sentiment"
 
 dataset:
   name: "TweetIndexExtractionDataset"
