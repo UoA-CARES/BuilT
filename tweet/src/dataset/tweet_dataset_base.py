@@ -19,20 +19,31 @@ from transformers import get_linear_schedule_with_warmup
 
 
 class TweetDatasetBase(torch.utils.data.Dataset):
-    def __init__(self, model_path, csv_path, train=False, max_len=96):
+    def __init__(self, model_path, csv_path, transformer_type='roberta', train=False, max_len=96):
         df = pd.read_csv(csv_path)
         self.df = df.dropna().reset_index(drop=True)
         self.max_len = max_len
         self.labeled = 'selected_text' in self.df
+        self.transformer_type = transformer_type
         self.tokenizer = self.get_tokenizer(model_path)
-        
+
     def get_tokenizer(self, model_path):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=model_path+'vocab.json',
-            merges_file=model_path+'merges.txt',
-            lowercase=True,
-            add_prefix_space=True)
-        
+        tokenizer = None
+        if 'roberta' in self.transformer_type:
+            tokenizer = tokenizers.ByteLevelBPETokenizer(
+                vocab_file=model_path+'vocab.json',
+                merges_file=model_path+'merges.txt',
+                lowercase=True,
+                add_prefix_space=True)
+        elif 'bert' in self.transformer_type:
+            vocab_path = os.path.join(model_path, 'vocab.txt')
+            tokenizer = tokenizers.BertWordPieceTokenizer(
+                vocab_path,
+                lowercase=True
+            )
+        else:
+            raise RuntimeError(f'{self.transformer_type} is not supported')
+
         return tokenizer
 
     def __getitem__(self, index):
@@ -74,10 +85,10 @@ class TweetDatasetBase(torch.utils.data.Dataset):
 
     def encode_ids(self, encoding, row=None):
         pass
-    
+
     def encode_offsets(self, encoding):
         pass
-    
+
     def get_input_data(self, row):
         try:
             tweet = " " + " ".join(row.text.lower().split())
@@ -86,10 +97,10 @@ class TweetDatasetBase(torch.utils.data.Dataset):
 
         encoding = self.tokenizer.encode(tweet)
         sentiment_id = self.tokenizer.encode(row.sentiment).ids
-        
+
         ids = self.encode_ids(encoding, row)
         offsets = self.encode_offsets(encoding)
-        
+
         char_centers = [(x[0] + x[1]) / 2 for x in encoding.offsets]
 
         pad_len = self.max_len - len(ids)
@@ -114,7 +125,7 @@ class TweetDatasetBase(torch.utils.data.Dataset):
             # selected_text = " " + " ".join(row.selected_text.lower().split())
             tweet = " " + " ".join(str(tweet).split())
             selected_text = " ".join(row.selected_text.lower().split())
-            
+
             if len(selected_text) != selected_text.count(' '):
                 start_idx = tweet.find(selected_text)
                 end_idx = start_idx + len(selected_text)

@@ -7,10 +7,10 @@ wandb:
 dataset:
   name: "TweetDataset"
   params:
-    max_len: 96
-    model_path: "tweet/input/roberta-base/"
+    max_len: 128
+    model_path: "tweet/input/bert-base-uncased/"
     csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
-    transformer_type: "roberta"
+    transformer_type: "bert"
 
   splits:
     # - train: True
@@ -42,13 +42,13 @@ transforms:
 model:
   name: "TweetSentimentClassificationModel"
   params:
-    transformer_type: "roberta"
-    transformer_path: "tweet/input/roberta-base/"
+    transformer_type: "bert"
+    transformer_path: "tweet/input/bert-base-uncased/"
     drop_out_rate: 0.1
     num_classes: 3
 
 train:
-  dir: "train_dirs/tweet_classification/roberta-base"
+  dir: "train_dirs/tweet_classification/bert-base-uncased"
   name: ""
   batch_size: 128
   num_epochs: 5

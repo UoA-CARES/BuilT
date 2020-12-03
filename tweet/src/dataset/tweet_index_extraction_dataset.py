@@ -24,14 +24,30 @@ from tweet.src.dataset.tweet_dataset_base import TweetDatasetBase
 
 @Registry.register(category='dataset')
 class TweetIndexExtractionDataset(TweetDatasetBase):
-    def __init__(self, model_path, csv_path, train=False, max_len=96):
-        super().__init__(model_path, csv_path, train, max_len)
+    def __init__(self, model_path, csv_path, transformer_type='roberta', train=False, max_len=96):
+        super().__init__(model_path, csv_path, transformer_type, train, max_len)
 
     def encode_ids(self, encoding, row=None):
         sentiment_id = self.tokenizer.encode(row.sentiment).ids
-        ids = [0] + sentiment_id + [2, 2] + encoding.ids + [2]
+        
+        ids = None
+        if 'roberta' in self.transformer_type:
+            ids = [0] + sentiment_id + [2, 2] + encoding.ids + [2]
+        elif 'bert' in self.transformer_type:
+            ids = [101] + sentiment_id[1:-1] + [102] + encoding.ids[1:-1] + [102]
+        else:
+            raise RuntimeError(f'{self.transformer_type} is not supported')
+        
         return ids
 
     def encode_offsets(self, encoding):
-        offsets = [(0, 0)] * 4 + encoding.offsets + [(0, 0)]
+        offsets = None
+        
+        if 'roberta' in self.transformer_type:
+            offsets = [(0, 0)] * 4 + encoding.offsets + [(0, 0)]
+        elif 'bert' in self.transformer_type:
+            offsets = [(0, 0)] * 3 + encoding.offsets + [(0, 0)]
+        else:
+            raise RuntimeError(f'{self.transformer_type} is not supported')
+        
         return offsets
