@@ -23,11 +23,18 @@ from tweet.src.dataset.tweet_dataset_base import TweetDatasetBase
 
 @Registry.register(category='dataset')
 class TweetDataset(TweetDatasetBase):
-    def __init__(self, model_path, csv_path, train=False, max_len=96):
-        super().__init__(model_path, csv_path, train, max_len)
+    def __init__(self, model_path, csv_path, transformer_type='roberta', train=False, max_len=96):
+        super().__init__(model_path, csv_path, transformer_type, train, max_len)
 
     def encode_ids(self, encoding, row=None):
-        ids = [0] + encoding.ids + [2]
+        ids = None
+        if 'roberta' in self.transformer_type:
+            ids = [0] + encoding.ids + [2]
+        elif 'bert' in self.transformer_type:
+            ids = [101] + encoding.ids[1:-1] + [102]
+        else:
+            raise RuntimeError(f'{self.transformer_type} is not supported')
+        
         return ids
 
     def encode_offsets(self, encoding):
