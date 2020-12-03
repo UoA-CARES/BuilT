@@ -5,6 +5,8 @@ wandb:
     yaml: "sweep.yaml"
   group:
     name: "covereage"
+  project:
+    name: "BuilT"
 
 dataset:
   name: "TweetIndexExtractionCoverageDataset"

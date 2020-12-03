@@ -3,6 +3,10 @@ wandb:
     name: "Sweep"
     use: False
     yaml: "sweep.yaml"
+  group:
+    name: "classification"
+  project:
+    name: "BuilT"
 
 dataset:
   name: "TweetDataset"
