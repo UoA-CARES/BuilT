@@ -89,3 +89,46 @@ tensorboard --logdir train_dirs/tweet_classification
 ```
 
 ## wandb logging and visualisation
+Assuming that you already have wandb account in order to proceed this section (otherwise please go ahead to `https://www.wandb.com/` and create one). It is also suggested to create an environment (e.g., virtualenv or conda) for ease of managing many packages. We assume you already setup a conda environement namely `conda_BuilT` from previou section.
+
+```bash
+(conda_BuilT)$pip install wandb
+(conda_BuilT)$wandb login
+```
+It will then ask your API key
+```
+wandb: You can find your API key in your browser here: https://app.wandb.ai/authorize
+wandb: Paste an API key from your profile and hit enter:
+```
+and please follow the rest of wandb login procedures and you should be able to see `Successfully logged in to Weights & Biases!`.
+
+In order to use wandb, we need to change two things: set `use_wandb` flag true and update group name.
+We take `tweet_index_extraction.yaml` config file as an example here.
+
+#### set use_wandb: True
+
+```yaml
+logger_hook:
+  name: "TweetIndexExtractionLogger"
+  params:
+    use_tensorboard: False
+    use_wandb: True
+```
+
+#### set group name as you want in wandb block
+```yaml
+wandb:
+  sweep:
+    name: "Sweep"
+    use: False
+    yaml: "sweep.yaml"
+  group:
+    name: "original_with_sentiment"
+```
+Grouping is useful feature in wandb because you can then easily organise your multiple runs in your wandb project and utilise stochastic plots such as [wandb line plot](https://docs.wandb.com/app/features/panels/compare-metrics).
+
+At the moment, we set the wandb project name as `BuilT` in [trainer.py](https://github.com/inkyusa/BuilT/blob/2f42b0772c697449126cc591414ae9438e28615a/built/trainer.py#L32) but you can update this as you wish (passing this via configuration is WIP).
+
+
+
+
