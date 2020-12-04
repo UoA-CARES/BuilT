@@ -10,16 +10,6 @@ from built.registry import Registry
 
 @Registry.register(category="hooks")
 class TweetLogger(LoggerBase):
-    def cat_tensors(self, list_of_tensors):
-        # x = torch.as_tensor(list_of_tensors[0])
-
-        # for i in range(1, len(list_of_tensors)):
-        #     x = torch.stack(x, list_of_tensors[i])
-
-        # return x
-        x = torch.cat(tuple(list_of_tensors))
-        return x
-
     def __call__(self, writer, split, outputs, labels, log_dict,
                  epoch, step=None, num_steps_in_epoch=None, data=None):
         if step is not None:
