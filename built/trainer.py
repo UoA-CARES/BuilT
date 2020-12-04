@@ -69,6 +69,8 @@ class Trainer(object):
         total_step = math.ceil(total_size / batch_size)
 
         with torch.no_grad():
+            all_outputs = []
+            all_targets = []
             aggregated_metric_dict = defaultdict(list)
             tbar = tqdm.tqdm(enumerate(dataloader), total=total_step, bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
             for i, (inputs, targets) in tbar:
@@ -99,11 +101,13 @@ class Trainer(object):
                 tbar.set_postfix(
                     lr=self.optimizer.param_groups[0]['lr'], loss=f'{loss.item():.5f}')
                 
+                all_outputs.append(output)
+                all_targets.append(targets)
                 self.logger_fn(self.writer, split='test', outputs=output, labels=targets, data=inputs,
                                      log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
             
             aggregated_metric_dict = {f'avg_{key}':np.mean(value) for key, value in aggregated_metric_dict.items()}
-            self.logger_fn(self.writer, split='test', outputs=None, labels=None,
+            self.logger_fn(self.writer, split='test', outputs=all_outputs, labels=all_targets,
                                      log_dict=aggregated_metric_dict, epoch=epoch)
             return aggregated_metric_dict['avg_score']
 
