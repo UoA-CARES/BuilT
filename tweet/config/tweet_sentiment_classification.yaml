@@ -5,6 +5,8 @@ wandb:
     yaml: "sweep.yaml"
   group:
     name: "original_classification"
+  project:
+    name: "BuilT"
 
 dataset:
   name: "TweetDataset"
