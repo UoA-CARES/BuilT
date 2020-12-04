@@ -3,6 +3,11 @@ wandb:
     name: "Sweep"
     use: False
     yaml: "sweep.yaml"
+  group:
+    name: "original_classification_bert"
+  project:
+    name: "BuilT"
+
 
 dataset:
   name: "TweetDataset"
@@ -83,5 +88,5 @@ metric_hook:
 logger_hook:
   name: "TweetLogger"
   params:
-    use_tensorboard: True
-    use_wandb: False
+    use_tensorboard: False
+    use_wandb: True

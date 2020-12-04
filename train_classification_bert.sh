@@ -1,11 +1,12 @@
 #!/bin/bash
 
 DEVICE_ID=0
-CLASSIFICATION_CONFIG=tweet/config/tweet_sentiment_classification.yaml
+CLASSIFICATION_CONFIG=tweet/config/tweet_sentiment_classification_bert.yaml
 INDEX_EXTRACTION_CONFIG=tweet/config/tweet_index_extraction.yaml
 
 [ ! -d "tweet/input" ] && cd tweet && sh download_data.sh && cd ..
-[ ! -d "tweet/input/roberta-base" ] && cd tweet && sh download_model_roberta.sh && cd ..
+[ ! -d "tweet/input/bert-base-uncased" ] && cd tweet && sh download_model_bert.sh && cd ..
+
 
 export TOKENIZERS_PARALLELISM=true
 
