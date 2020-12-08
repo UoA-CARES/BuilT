@@ -3,10 +3,13 @@
 export KaggleCompName=tweet-sentiment-extraction
 export DownloadPath=input
 export RobertaBase=roberta-base
+export RobertaLarge=roberta-large
 export BertBaseUncased=bert-base-uncased
 
 BERT=https://github.com/inkyusa/BuilT/releases/download/v0.1/bert-base-uncased.zip
-ROBERTA=https://github.com/inkyusa/BuilT/releases/download/v0.1/roberta-base.zip
+ROBERTA_BASE=https://github.com/inkyusa/BuilT/releases/download/v0.1/roberta-base.zip
+ROBERTA_LARGE=https://github.com/inkyusa/BuilT/releases/download/v0.1/roberta-large.zip
+
 TRAIN=https://github.com/inkyusa/BuilT/releases/download/v0.1/train.csv
 TRAIN_CORR=https://github.com/inkyusa/BuilT/releases/download/v0.1/train_corrected.csv
 if [ ! -d "${DownloadPath}" ]; then
@@ -17,23 +20,43 @@ if [ ! -d "${DownloadPath}" ]; then
 fi
 
 #=====================
-# Roberta
+# Roberta-base
 #=====================
 if [ ! -d "input/roberta-base" ]; then
   if [ ! -f "${DownloadPath}/${RobertaBase}.zip" ]; then
     echo "=================================="
-    echo "  Downloading ${ROBERTA} to ${DownloadPath}"
+    echo "  Downloading ${ROBERTA_BASE} to ${DownloadPath}"
     echo "=================================="
-    wget ${ROBERTA} -P ${DownloadPath}
+    wget ${ROBERTA_BASE} -P ${DownloadPath}
   fi
   echo "=================================="
-  echo "  Uncompressing ${ROBERTA}"
+  echo "  Uncompressing ${ROBERTA_BASE}"
   echo "=================================="
   unzip -d ${DownloadPath} "${DownloadPath}/${RobertaBase}.zip"
   echo "=================================="
   echo "  Delete ${RobertaBase}.zip"
   echo "=================================="
   rm "${DownloadPath}/${RobertaBase}.zip"
+fi
+
+#=====================
+# Roberta-large
+#=====================
+if [ ! -d "input/roberta-large" ]; then
+  if [ ! -f "${DownloadPath}/${RobertaLarge}.zip" ]; then
+    echo "=================================="
+    echo "  Downloading ${ROBERTA_LARGE} to ${DownloadPath}"
+    echo "=================================="
+    wget ${ROBERTA_LARGE} -P ${DownloadPath}
+  fi
+  echo "=================================="
+  echo "  Uncompressing ${ROBERTA_LARGER}"
+  echo "=================================="
+  unzip -d ${DownloadPath} "${DownloadPath}/${RobertaLarge}.zip"
+  echo "=================================="
+  echo "  Delete ${RobertaLarge}.zip"
+  echo "=================================="
+  rm "${DownloadPath}/${RobertaLarge}.zip"
 fi
 
 #=====================
