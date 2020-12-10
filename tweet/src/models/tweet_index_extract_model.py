@@ -20,7 +20,7 @@ from built.registry import Registry
 
 @Registry.register(category="model")
 class TweetIndexExtractModel(nn.Module):
-    def __init__(self, transformer_type, transformer_path, drop_out_rate):
+    def __init__(self, transformer_type, transformer_path, drop_out_rate, input_size):
         super().__init__()
 
         self.transformer_type = transformer_type

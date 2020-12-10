@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEVICE_ID=0
+DEVICE_ID=1
 DATASET=("TR" "TR_CORR")
 TASK=("SC" "SE")
 EXT=("En" "Es" "Esc")

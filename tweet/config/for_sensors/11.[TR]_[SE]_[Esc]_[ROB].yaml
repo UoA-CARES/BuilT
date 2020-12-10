@@ -53,7 +53,7 @@ model:
 train:
   dir: "train_dirs/tweet_index_extraction_coverage/roberta-base"
   name: ""
-  batch_size: 128
+  batch_size: 16
   num_epochs: 1
   gradient_accumulation_step: 1
 
