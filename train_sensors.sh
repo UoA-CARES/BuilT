@@ -9,6 +9,7 @@ MODEL_CNT=1
 
 
 CLASSIFICATION_CONFIG_BASE="tweet/config/for_sensors"
+export TOKENIZERS_PARALLELISM=true
 
 #1.[TR]_[SC]_[BERT].yaml
 
@@ -23,8 +24,11 @@ do
                 do
                     #echo $MODEL_CNT
                     CONFIG=${CLASSIFICATION_CONFIG_BASE}/$MODEL_CNT.[${DATASET[i]}]_[${TASK[j]}]_[${EXT[k]}]_[${TRANSFORMER[l]}].yaml
+                    echo "========================="
                     echo $CONFIG
+                    echo "========================="
                     ((MODEL_CNT=MODEL_CNT+1))
+                    CUDA_VISIBLE_DEVICES=$DEVICE_ID python run.py train with $CONFIG -f use_date=True
                     #echo "$MODEL_CNT.$DATASET[i]_$TASK[i]_$TRANSFORMER[i]$"
                     #CLASSIFICATION_CONFIG=${CLASSIFICATION_CONFIG_BASE/$MODEL_CNT.$DATASET[i]_$TASK[i]_$TRANSFORMER[i]$}
                     #echo $CLASSIFICATION_CONFIG
@@ -35,8 +39,11 @@ do
             do
                 #echo $MODEL_CNT
                 CONFIG=${CLASSIFICATION_CONFIG_BASE}/$MODEL_CNT.[${DATASET[i]}]_[${TASK[j]}]_[${TRANSFORMER[m]}].yaml
+                echo "========================="
                 echo $CONFIG
+                echo "========================="
                 ((MODEL_CNT=MODEL_CNT+1))
+                CUDA_VISIBLE_DEVICES=$DEVICE_ID python run.py train with $CONFIG -f use_date=True
                 #echo "$MODEL_CNT.$DATASET[i]_$TASK[i]_$TRANSFORMER[i]$"
                 #CLASSIFICATION_CONFIG=${CLASSIFICATION_CONFIG_BASE/$MODEL_CNT.$DATASET[i]_$TASK[i]_$TRANSFORMER[i]$}
                 #echo $CLASSIFICATION_CONFIG
@@ -45,6 +52,7 @@ do
     done
 done
 
+#echo $CONFIG
 
 # [ ! -d "tweet/input" ] && cd tweet && sh download_data.sh && cd ..
 # [ ! -d "tweet/input/bert-base-uncased" ] && cd tweet && sh download_model_bert.sh && cd ..

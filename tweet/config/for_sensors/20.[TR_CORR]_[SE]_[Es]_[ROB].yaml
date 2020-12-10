@@ -3,14 +3,17 @@ wandb:
     name: "Sweep"
     use: False
     yaml: "sweep.yaml"
+  group:
+    name: "20.[TR_CORR]_[SE]_[Es]_[ROB]"
+  project:
+    name: "built-sensors"
 
 dataset:
-  name: "TweetIndexExtractionCoverageDataset"
+  name: "TweetIndexExtractionDataset"
   params:
-    max_len: 128
-    model_path: "tweet/input/bert-base-uncased/"
-    csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
-    transformer_type: "bert"
+    max_len: 96
+    model_path: "tweet/input/roberta-base/"
+    csv_path: "tweet/input/tweet-sentiment-extraction/train_corrected.csv"
 
   splits:
     # - train: True
@@ -21,8 +24,8 @@ dataset:
 splitter:
   name: "TweetSplitter"
   params:
-    csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
-    n_splits: 5
+    csv_path: "tweet/input/tweet-sentiment-extraction/train_corrected.csv"
+    n_splits: 2
     shuffle: True
     random_state: 42
 
@@ -42,14 +45,15 @@ transforms:
 model:
   name: "TweetIndexExtractModel"
   params:
-    transformer_type: "bert"
-    transformer_path: "tweet/input/bert-base-uncased/"
+    transformer_type: "roberta"
+    transformer_path: "tweet/input/roberta-base/"
     drop_out_rate: 0.3
+    input_size: 768
 
 train:
-  dir: "train_dirs/tweet_index_extraction_coverage/bert-base-uncased"
+  dir: "train_dirs/tweet_index_extraction/roberta-base"
   name: ""
-  batch_size: 32
+  batch_size: 128
   num_epochs: 1
   gradient_accumulation_step: 1
 
@@ -82,5 +86,5 @@ metric_hook:
 logger_hook:
   name: "TweetIndexExtractionLogger"
   params:
-    use_tensorboard: True
-    use_wandb: False
+    use_tensorboard: False
+    use_wandb: True

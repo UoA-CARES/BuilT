@@ -4,16 +4,17 @@ wandb:
     use: False
     yaml: "sweep.yaml"
   group:
-    name: "original_with_sentiment"
+    name: "4.[TR]_[SE]_[En]_[BERT]"
   project:
-    name: "BuilT"
+    name: "built-sensors"
 
 dataset:
   name: "TweetIndexExtractionDataset"
   params:
-    max_len: 96
-    model_path: "tweet/input/roberta-base/"
+    max_len: 128
+    model_path: "tweet/input/bert-base-uncased/"
     csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
+    transformer_type: "bert"
 
   splits:
     # - train: True
@@ -25,7 +26,7 @@ splitter:
   name: "TweetSplitter"
   params:
     csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
-    n_splits: 5
+    n_splits: 2
     shuffle: True
     random_state: 42
 
@@ -45,15 +46,15 @@ transforms:
 model:
   name: "TweetIndexExtractModel"
   params:
-    transformer_type: "roberta"
-    transformer_path: "tweet/input/roberta-base/"
+    transformer_type: "bert"
+    transformer_path: "tweet/input/bert-base-uncased/"
     drop_out_rate: 0.3
 
 train:
-  dir: "train_dirs/tweet_index_extraction/roberta-base"
+  dir: "train_dirs/tweet_index_extraction/bert-base-uncased"
   name: ""
-  batch_size: 200
-  num_epochs: 5
+  batch_size: 64
+  num_epochs: 1
   gradient_accumulation_step: 1
 
 evaluation:

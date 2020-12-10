@@ -4,9 +4,9 @@ wandb:
     use: False
     yaml: "sweep.yaml"
   group:
-    name: "5.[TR_CORR]_[SC]_[ROB]"
+    name: "14.[TR_CORR]_[SC]_[ROB]"
   project:
-    name: "BuilT"
+    name: "built-sensors"
 
 dataset:
   name: "TweetDataset"
@@ -26,7 +26,7 @@ splitter:
   name: "TweetSplitter"
   params:
     csv_path: "tweet/input/tweet-sentiment-extraction/train_corrected.csv"
-    n_splits: 5
+    n_splits: 2
     shuffle: True
     random_state: 42
 
