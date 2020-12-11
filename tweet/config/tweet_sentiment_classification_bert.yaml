@@ -4,7 +4,7 @@ wandb:
     use: False
     yaml: "sweep.yaml"
   group:
-    name: "original_classification_bert"
+    name: "original_classification_bert_with_auc"
   project:
     name: "BuilT"
 

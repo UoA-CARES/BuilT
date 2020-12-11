@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEVICE_ID=1
+DEVICE_ID=0
 DATASET=("TR" "TR_CORR")
 TASK=("SC" "SE")
 EXT=("En" "Es" "Esc")
@@ -12,45 +12,51 @@ CLASSIFICATION_CONFIG_BASE="tweet/config/for_sensors"
 export TOKENIZERS_PARALLELISM=true
 
 #1.[TR]_[SC]_[BERT].yaml
-
-for i in {0..1} #dataset
+for o in {0..4}
 do
-    for j in {0..1} #task
+    echo "==================================="
+    echo $o run
+    echo "==================================="
+    for i in {0..1} #dataset
     do
-        if [ ${TASK[j]} == "SE" ]; then
-            for k in {0..2} #Ext
-            do
-                for l in {0..2} #transformer
+        for j in {0..1} #task
+        do
+            if [ ${TASK[j]} == "SE" ]; then
+                for k in {0..2} #Ext
+                do
+                    for l in {0..2} #transformer
+                    do
+                        #echo $MODEL_CNT
+                        CONFIG=${CLASSIFICATION_CONFIG_BASE}/$MODEL_CNT.[${DATASET[i]}]_[${TASK[j]}]_[${EXT[k]}]_[${TRANSFORMER[l]}].yaml
+                        echo "========================================="
+                        echo $CONFIG
+                        echo "========================================="
+                        ((MODEL_CNT=MODEL_CNT+1))
+                        CUDA_VISIBLE_DEVICES=$DEVICE_ID python run.py train with $CONFIG -f use_date=True
+                        #echo "$MODEL_CNT.$DATASET[i]_$TASK[i]_$TRANSFORMER[i]$"
+                        #CLASSIFICATION_CONFIG=${CLASSIFICATION_CONFIG_BASE/$MODEL_CNT.$DATASET[i]_$TASK[i]_$TRANSFORMER[i]$}
+                        #echo $CLASSIFICATION_CONFIG
+                    done
+                done
+            else
+                for m in {0..2} #transformer
                 do
                     #echo $MODEL_CNT
-                    CONFIG=${CLASSIFICATION_CONFIG_BASE}/$MODEL_CNT.[${DATASET[i]}]_[${TASK[j]}]_[${EXT[k]}]_[${TRANSFORMER[l]}].yaml
-                    echo "========================="
+                    CONFIG=${CLASSIFICATION_CONFIG_BASE}/$MODEL_CNT.[${DATASET[i]}]_[${TASK[j]}]_[${TRANSFORMER[m]}].yaml
+                    echo "========================================="
                     echo $CONFIG
-                    echo "========================="
+                    echo "========================================="
                     ((MODEL_CNT=MODEL_CNT+1))
                     CUDA_VISIBLE_DEVICES=$DEVICE_ID python run.py train with $CONFIG -f use_date=True
                     #echo "$MODEL_CNT.$DATASET[i]_$TASK[i]_$TRANSFORMER[i]$"
                     #CLASSIFICATION_CONFIG=${CLASSIFICATION_CONFIG_BASE/$MODEL_CNT.$DATASET[i]_$TASK[i]_$TRANSFORMER[i]$}
                     #echo $CLASSIFICATION_CONFIG
                 done
-            done
-        else
-            for m in {0..2} #transformer
-            do
-                #echo $MODEL_CNT
-                CONFIG=${CLASSIFICATION_CONFIG_BASE}/$MODEL_CNT.[${DATASET[i]}]_[${TASK[j]}]_[${TRANSFORMER[m]}].yaml
-                echo "========================="
-                echo $CONFIG
-                echo "========================="
-                ((MODEL_CNT=MODEL_CNT+1))
-                CUDA_VISIBLE_DEVICES=$DEVICE_ID python run.py train with $CONFIG -f use_date=True
-                #echo "$MODEL_CNT.$DATASET[i]_$TASK[i]_$TRANSFORMER[i]$"
-                #CLASSIFICATION_CONFIG=${CLASSIFICATION_CONFIG_BASE/$MODEL_CNT.$DATASET[i]_$TASK[i]_$TRANSFORMER[i]$}
-                #echo $CLASSIFICATION_CONFIG
-            done
-        fi
+            fi
+        done
     done
 done
+
 
 #echo $CONFIG
 

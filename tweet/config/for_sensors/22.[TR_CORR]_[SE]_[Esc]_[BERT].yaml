@@ -15,7 +15,7 @@ dataset:
   params:
     max_len: 128
     model_path: "tweet/input/bert-base-uncased/"
-    csv_path: "tweet/input/tweet-sentiment-extraction/train_corrected.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
     transformer_type: "bert"
 
   splits:
@@ -27,8 +27,8 @@ dataset:
 splitter:
   name: "TweetSplitter"
   params:
-    csv_path: "tweet/input/tweet-sentiment-extraction/train_corrected.csv"
-    n_splits: 2
+    csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
+    n_splits: 5
     shuffle: True
     random_state: 42
 
@@ -51,13 +51,12 @@ model:
     transformer_type: "bert"
     transformer_path: "tweet/input/bert-base-uncased/"
     drop_out_rate: 0.3
-    input_size: 768
 
 train:
   dir: "train_dirs/tweet_index_extraction_coverage/bert-base-uncased"
   name: ""
-  batch_size: 16
-  num_epochs: 1
+  batch_size: 32
+  num_epochs: 5
   gradient_accumulation_step: 1
 
 evaluation:
@@ -89,5 +88,5 @@ metric_hook:
 logger_hook:
   name: "TweetIndexExtractionLogger"
   params:
-    use_tensorboard: True
-    use_wandb: False
+    use_tensorboard: False
+    use_wandb: True
