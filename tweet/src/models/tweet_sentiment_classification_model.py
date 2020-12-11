@@ -32,7 +32,7 @@ class TweetSentimentClassificationModel(nn.Module):
         Classification scores of each labels.
     """
 
-    def __init__(self, transformer_type, transformer_path, drop_out_rate, input_size, num_classes):
+    def __init__(self, transformer_type, transformer_path, drop_out_rate, num_classes):
         super().__init__()
         self.transformer_type = transformer_type
         self.transformer_path = transformer_path
@@ -50,7 +50,7 @@ class TweetSentimentClassificationModel(nn.Module):
         
         self.drop_out = nn.Dropout(drop_out_rate)
         #self.classifier = nn.Linear(768, num_classes)
-        self.classifier = nn.Linear(input_size, num_classes)
+        self.classifier = nn.Linear(model_config.hidden_size, num_classes)
 
     def forward(self, input_ids, attention_mask=None, position_ids=None, head_mask=None):
         last_hidden_states, pooled_output, hidden_states = self.transformer(

@@ -50,7 +50,6 @@ model:
     transformer_path: "tweet/input/roberta-large/"
     drop_out_rate: 0.1
     num_classes: 3
-    input_size: 1024
 
 train:
   dir: "train_dirs/tweet_classification/roberta-large"
