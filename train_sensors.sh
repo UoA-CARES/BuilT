@@ -33,9 +33,7 @@ do
                         echo "========================================="
                         ((MODEL_CNT=MODEL_CNT+1))
                         CUDA_VISIBLE_DEVICES=$DEVICE_ID python run.py train with $CONFIG -f use_date=True
-                        #echo "$MODEL_CNT.$DATASET[i]_$TASK[i]_$TRANSFORMER[i]$"
-                        #CLASSIFICATION_CONFIG=${CLASSIFICATION_CONFIG_BASE/$MODEL_CNT.$DATASET[i]_$TASK[i]_$TRANSFORMER[i]$}
-                        #echo $CLASSIFICATION_CONFIG
+
                     done
                 done
             else
@@ -48,13 +46,12 @@ do
                     echo "========================================="
                     ((MODEL_CNT=MODEL_CNT+1))
                     CUDA_VISIBLE_DEVICES=$DEVICE_ID python run.py train with $CONFIG -f use_date=True
-                    #echo "$MODEL_CNT.$DATASET[i]_$TASK[i]_$TRANSFORMER[i]$"
-                    #CLASSIFICATION_CONFIG=${CLASSIFICATION_CONFIG_BASE/$MODEL_CNT.$DATASET[i]_$TASK[i]_$TRANSFORMER[i]$}
-                    #echo $CLASSIFICATION_CONFIG
+
                 done
             fi
         done
     done
+    MODEL_CNT=1
 done
 
 
