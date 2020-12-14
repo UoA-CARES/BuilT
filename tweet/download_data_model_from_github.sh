@@ -83,16 +83,30 @@ fi
 #=====================
 # Dataset
 #=====================
-if [ ! -f "${DownloadPath}/${KaggleCompName}/train.csv" ]; then
+if [ ! -f "${DownloadPath}/${KaggleCompName}/new_train.csv" ]; then
   echo "=================================="
-  echo "     Downloading train.csv        "
+  echo "     Downloading new_train.csv        "
   echo "=================================="
   wget ${TRAIN} -P "${DownloadPath}/${KaggleCompName}"
 fi
 
-if [ ! -f "${DownloadPath}/${KaggleCompName}/train_corrected.csv" ]; then
+if [ ! -f "${DownloadPath}/${KaggleCompName}/corrected_new_train.csv" ]; then
   echo "=================================="
-  echo " Downloading train_corrected.csv  "
+  echo " Downloading corrected_new_train.csv  "
+  echo "=================================="
+  wget ${TRAIN_CORR} -P "${DownloadPath}/${KaggleCompName}"
+fi
+
+if [ ! -f "${DownloadPath}/${KaggleCompName}/new_test.csv" ]; then
+  echo "=================================="
+  echo "     Downloading new_test.csv        "
+  echo "=================================="
+  wget ${TRAIN} -P "${DownloadPath}/${KaggleCompName}"
+fi
+
+if [ ! -f "${DownloadPath}/${KaggleCompName}/corrected_new_test.csv" ]; then
+  echo "=================================="
+  echo " Downloading corrected_new_test.csv  "
   echo "=================================="
   wget ${TRAIN_CORR} -P "${DownloadPath}/${KaggleCompName}"
 fi
