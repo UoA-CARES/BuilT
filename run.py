@@ -447,7 +447,7 @@ def train(_run, _config):
         config.dataset.splits.append(
             {'train': True, 'split': 'train', 'csv_path': train_csv_path})
         config.dataset.splits.append(
-            {'train': False, 'split': 'train', 'csv_path': val_csv_path})
+            {'train': False, 'split': 'val', 'csv_path': val_csv_path})
         config.dataset.splits.append(
             {'train': False, 'split': 'test', 'csv_path': 'tweet/input/tweet-sentiment-extraction/corrected_new_test.csv'})
         config.train.name = str(i_fold) + '_fold'

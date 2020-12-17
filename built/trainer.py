@@ -117,7 +117,7 @@ class Trainer(object):
                     
                 return all_outputs, all_targets
 
-    def evaluate_single_epoch(self, dataloader, epoch):
+    def evaluate_single_epoch(self, dataloader, epoch, split):
         self.model.eval()
 
         batch_size = self.config.evaluation.batch_size
@@ -176,15 +176,15 @@ class Trainer(object):
                         all_targets = []    
                     all_targets.append(targets)
                     
-                self.logger_fn(self.writer, split='test', outputs=output, labels=targets, data=inputs,
+                self.logger_fn(self.writer, split=split, outputs=output, labels=targets, data=inputs,
                                      log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
             
             aggregated_metric_dict = {f'avg_{key}':np.mean(value) for key, value in aggregated_metric_dict.items()}
-            self.logger_fn(self.writer, split='test', outputs=all_outputs, labels=all_targets,
+            self.logger_fn(self.writer, split=split, outputs=all_outputs, labels=all_targets,
                                      log_dict=aggregated_metric_dict, epoch=epoch)
-            return aggregated_metric_dict['avg_score']
+            return aggregated_metric_dict[f'{split}_avg_score']
 
-    def train_single_epoch(self, dataloader, epoch):
+    def train_single_epoch(self, dataloader, epoch, split):
         self.model.train()
 
         batch_size = self.config.train.batch_size
@@ -227,7 +227,7 @@ class Trainer(object):
             tbar.set_postfix(
                 lr=self.optimizer.param_groups[0]['lr'], loss=f'{loss.item():.5f}')
 
-            self.logger_fn(self.writer, split='train', outputs=output, labels=targets,
+            self.logger_fn(self.writer, split=split, outputs=output, labels=targets,
                                  log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
 
 
@@ -238,18 +238,21 @@ class Trainer(object):
             # train
             for d in self.dataloaders:
                 is_train = d['mode']
+                split = d['split']
+                
                 if is_train:
                     dataloader = d['dataloader']
-                    self.train_single_epoch(dataloader, epoch)
+                    self.train_single_epoch(dataloader, epoch, split)
 
             # validation
             for d in self.dataloaders:
                 is_train = d['mode']
-
+                split = d['split']
+                
                 if not is_train:
                     dataloader = d['dataloader']
-                    score = self.evaluate_single_epoch(dataloader, epoch)
-                    if d['split'] != 'test':
+                    score = self.evaluate_single_epoch(dataloader, epoch, split)
+                    if split == 'test':
                         ckpt_score = score
                     else:
                         print(f'score on test: {score}')

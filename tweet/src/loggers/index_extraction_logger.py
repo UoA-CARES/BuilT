@@ -25,8 +25,15 @@ class TweetIndexExtractionLogger(LoggerBase):
                 writer['tensorboard'].add_scalar(
                     f'{split}/{key}', value, log_step)
 
+        log_dict.update({'epoch': epoch})
+        keys = list(log_dict.keys())
+        for k in keys:
+            prefix = f'[{split}]'
+            if prefix not in k:
+                new_key = f'{prefix}_{k}'
+                log_dict[new_key] = log_dict.pop(k)
+                
         if self.use_wandb:
-            log_dict.update({'epoch': epoch, 'mode': split})
             writer['wandb'].log(log_dict)
 
         # if labels is not None and outputs is not None:

@@ -1,4 +1,5 @@
 
+import os
 import logging
 import torch
 import numpy as np
@@ -44,8 +45,17 @@ class TweetLogger(LoggerBase):
 
             log_dict.update({'auc': auc})
 
-        if self.use_wandb:
-            log_dict.update({'epoch': epoch, 'mode': split})
+
+        log_dict.update({'epoch': epoch})
+        keys = list(log_dict.keys())
+        for k in keys:
+            prefix = f'[{split}]'
+            if prefix not in k:
+                new_key = f'{prefix}_{k}' 
+                log_dict[new_key] = log_dict.pop(k)
+            
+        if self.use_wandb:    
+            
             writer['wandb'].log(log_dict)
 
         if self.use_tensorboard:
