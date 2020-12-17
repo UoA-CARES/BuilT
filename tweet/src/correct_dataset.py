@@ -70,6 +70,12 @@ def process_selected_text(text, selected_text):
             new_selected_text = process(text, selected_text, in_between_space)
     return new_selected_text
 
+def strip_ws(d):
+    try:
+        d = d.strip()
+    except:
+        print('!')
+    return d
 
 def correct_dataset(csv_path):
     p = Path(csv_path)
@@ -88,6 +94,12 @@ def correct_dataset(csv_path):
     conflicted_df.to_csv(os.path.join(
         output_dir, 'conflicted_' + file_name), index=False)
     train_corrected = train
+    
+    train_corrected.dropna(inplace=True)
+    train_corrected['selected_text'].apply(lambda x: strip_ws(x))
+    train_corrected.replace('', np.nan, inplace=True)
+    train_corrected = train_corrected.dropna().reset_index(drop=True)
+
 
     for txtId in tqdm(conflicted_df['textID'], total=len(conflicted_df)):
         corrected_text = conflicted_df[conflicted_df['textID'] == txtId]['corrected_selected_text']

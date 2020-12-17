@@ -13,7 +13,7 @@ dataset:
   params:
     max_len: 96
     model_path: "tweet/input/roberta-base/"
-    csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
     transformer_type: "roberta"
 
   splits:
@@ -55,7 +55,7 @@ train:
   dir: "train_dirs/tweet_classification/roberta-base"
   name: ""
   batch_size: 128
-  num_epochs: 5
+  num_epochs: 1
   gradient_accumulation_step: 1
 
 evaluation:

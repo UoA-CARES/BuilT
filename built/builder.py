@@ -150,7 +150,7 @@ class Builder(object):
                                     num_workers=config.transforms.num_preprocessor,
                                     pin_memory=True)
 
-            dataloaders.append({'mode': is_train,'dataloader': dataloader})
+            dataloaders.append({'mode': is_train, 'split': dataset_config['params'].split, 'dataloader': dataloader})
         return dataloaders        
     
     def build_sweep(self, config):

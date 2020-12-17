@@ -19,8 +19,10 @@ from transformers import get_linear_schedule_with_warmup
 
 
 class TweetDatasetBase(torch.utils.data.Dataset):
-    def __init__(self, model_path, csv_path, transformer_type='roberta', train=False, max_len=96):
+    def __init__(self, model_path, csv_path, transformer_type='roberta', train=False, split='train', max_len=96):
         df = pd.read_csv(csv_path)
+        
+        
         self.df = df.dropna().reset_index(drop=True)
         self.max_len = max_len
         self.labeled = 'selected_text' in self.df
@@ -73,6 +75,8 @@ class TweetDatasetBase(torch.utils.data.Dataset):
             target['start_idx'] = start_idx
             target['end_idx'] = end_idx
             target['selected_text'] = selected_text
+            target['offsets'] = offsets
+            target['tweet'] = tweet
 
         return data, target
 
@@ -93,7 +97,7 @@ class TweetDatasetBase(torch.utils.data.Dataset):
         try:
             tweet = " " + " ".join(row.text.lower().split())
         except:
-            print(row)
+            raise RuntimeError(f'{row}')
 
         encoding = self.tokenizer.encode(tweet)
         sentiment_id = self.tokenizer.encode(row.sentiment).ids

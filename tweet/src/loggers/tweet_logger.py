@@ -26,10 +26,10 @@ class TweetLogger(LoggerBase):
 
         if isinstance(outputs, list):
             outputs = torch.cat(tuple(outputs))
-            sentiment_targets = []
-            for d in labels:
-                sentiment_targets.append(d['sentiment_target'])
-
+            # sentiment_targets = []
+            # for d in labels:
+            #     sentiment_targets.append(d['sentiment_target'])
+            sentiment_targets = labels['sentiment_target']
             sentiment_targets = torch.cat(tuple(sentiment_targets))
 
             preds = torch.sigmoid(outputs).cpu().detach().numpy().tolist()

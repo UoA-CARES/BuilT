@@ -47,19 +47,75 @@ class Trainer(object):
             total_size = len(dataloader.dataset)
             total_step = math.ceil(total_size / batch_size)
             
-            outputs = []
-            
+            all_outputs = []
+            all_targets = None
+            aggregated_metric_dict = defaultdict(list)
+            epoch = 0
             with torch.no_grad():
                 tbar = tqdm.tqdm(enumerate(dataloader), total=total_step, bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
-                for _, (inputs, targets) in tbar:
+                for i, (inputs, targets) in tbar:
                     output = self.forward_hook(self.model, inputs, targets, device=self.device)
                     output = self.post_forward_hook(
                         outputs=output, inputs=inputs, targets=targets, data=None, is_train=True)
 
-                    outputs.append(output)
+                    metric_dict = self.metric_fn(
+                        outputs=output, targets=targets, data=inputs, is_train=False)                
+
+                    log_dict = {}
+                    log_dict['lr'] = self.optimizer.param_groups[0]['lr']
+                    log_dict.update(metric_dict)
+
+                    for key, value in log_dict.items():
+                        aggregated_metric_dict[key].append(value)
+                    
+                    f_epoch = epoch + i / total_step
+
+                    if isinstance(output, list) or isinstance(output, tuple):
+                        for i in range(len(output)):
+                            if len(all_outputs) < len(output):
+                                all_outputs.append([])
+                            all_outputs[i].append(output[i])
+                    else:
+                        all_outputs.append(output)
+                    
+                    if isinstance(targets, dict):
+                        if all_targets is None:
+                            all_targets = defaultdict(list)
+                            
+                        for k in targets:
+                            all_targets[k].append(targets[k])            
+                    else:
+                        if all_targets is None:
+                            all_targets = []    
+                        all_targets.append(targets)
+                        
+                    self.logger_fn(self.writer, split='test', outputs=output, labels=targets, data=inputs,
+                                        log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
+
+                aggregated_metric_dict = {f'avg_{key}':np.mean(value) for key, value in aggregated_metric_dict.items()}
+                self.logger_fn(self.writer, split='test', outputs=all_outputs, labels=all_targets,
+                                     log_dict=aggregated_metric_dict, epoch=epoch)                                        
                 
-                outputs = torch.cat(outputs, dim=0)
-                return outputs
+                if isinstance(all_outputs[0], list):
+                    for i in range(len(all_outputs)):
+                        all_outputs[i] = torch.cat(all_outputs[i], dim=0)
+                else:
+                    all_outputs = torch.cat(all_outputs, dim=0)
+                    
+                if isinstance(all_targets, dict):
+                    for k in all_targets:
+                        if isinstance(all_targets[k][0], torch.Tensor):
+                            all_targets[k] = torch.cat(all_targets[k], dim=0)
+                        else:
+                            # if it's a list, 
+                            tmp = []
+                            for v in all_targets[k]:
+                                tmp.extend(v)
+                            all_targets[k] = tmp
+                else:
+                    all_targets = torch.cat(all_targets, dim=0)
+                    
+                return all_outputs, all_targets
 
     def evaluate_single_epoch(self, dataloader, epoch):
         self.model.eval()
@@ -70,7 +126,7 @@ class Trainer(object):
 
         with torch.no_grad():
             all_outputs = []
-            all_targets = []
+            all_targets = None
             aggregated_metric_dict = defaultdict(list)
             tbar = tqdm.tqdm(enumerate(dataloader), total=total_step, bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
             for i, (inputs, targets) in tbar:
@@ -101,8 +157,25 @@ class Trainer(object):
                 tbar.set_postfix(
                     lr=self.optimizer.param_groups[0]['lr'], loss=f'{loss.item():.5f}')
                 
-                all_outputs.append(output)
-                all_targets.append(targets)
+                if isinstance(output, list) or isinstance(output, tuple):
+                    for i in range(len(output)):
+                        if len(all_outputs) < len(output):
+                            all_outputs.append([])
+                        all_outputs[i].append(output[i])
+                else:
+                    all_outputs.append(output)
+                
+                if isinstance(targets, dict):
+                    if all_targets is None:
+                        all_targets = defaultdict(list)
+                        
+                    for k in targets:
+                        all_targets[k].append(targets[k])            
+                else:
+                    if all_targets is None:
+                        all_targets = []    
+                    all_targets.append(targets)
+                    
                 self.logger_fn(self.writer, split='test', outputs=output, labels=targets, data=inputs,
                                      log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
             
@@ -163,20 +236,23 @@ class Trainer(object):
 
         for epoch in range(last_epoch, self.config.train.num_epochs):
             # train
-            for dataloader in self.dataloaders:
-                is_train = dataloader['mode']
+            for d in self.dataloaders:
+                is_train = d['mode']
                 if is_train:
-                    dataloader = dataloader['dataloader']
+                    dataloader = d['dataloader']
                     self.train_single_epoch(dataloader, epoch)
 
             # validation
-            for dataloader in self.dataloaders:
-                is_train = dataloader['mode']
+            for d in self.dataloaders:
+                is_train = d['mode']
 
                 if not is_train:
-                    dataloader = dataloader['dataloader']
+                    dataloader = d['dataloader']
                     score = self.evaluate_single_epoch(dataloader, epoch)
-                    ckpt_score = score
+                    if d['split'] != 'test':
+                        ckpt_score = score
+                    else:
+                        print(f'score on test: {score}')
 
             # update learning rate
             self.scheduler.step()

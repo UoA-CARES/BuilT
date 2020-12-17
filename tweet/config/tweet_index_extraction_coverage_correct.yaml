@@ -13,7 +13,7 @@ dataset:
   params:
     max_len: 96
     model_path: "tweet/input/roberta-base/"
-    csv_path: "tweet/input/tweet-sentiment-extraction/train_corrected.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
 
   splits:
     # - train: True
@@ -24,7 +24,7 @@ dataset:
 splitter:
   name: "TweetSplitter"
   params:
-    csv_path: "tweet/input/tweet-sentiment-extraction/train_corrected.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
     n_splits: 5
     shuffle: True
     random_state: 42
