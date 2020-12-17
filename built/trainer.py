@@ -182,7 +182,7 @@ class Trainer(object):
             aggregated_metric_dict = {f'avg_{key}':np.mean(value) for key, value in aggregated_metric_dict.items()}
             self.logger_fn(self.writer, split=split, outputs=all_outputs, labels=all_targets,
                                      log_dict=aggregated_metric_dict, epoch=epoch)
-            return aggregated_metric_dict[f'{split}_avg_score']
+            return aggregated_metric_dict[f'[{split}]_avg_score']
 
     def train_single_epoch(self, dataloader, epoch, split):
         self.model.train()

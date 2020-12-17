@@ -107,5 +107,12 @@ def correct_dataset(csv_path):
 
     del train_corrected['corrected_selected_text']
 
+    strange_quote = 'ï¿½'
+    
+    train_corrected['text'] = train_corrected['text'].map(
+        lambda x: x.replace(strange_quote, "'"))
+    train_corrected['selected_text'] = train_corrected['selected_text'].map(
+        lambda x: x.replace(strange_quote, "'"))
+    
     train_corrected.to_csv(os.path.join(
         output_dir, 'corrected_' + file_name), index=False)
