@@ -24,7 +24,7 @@ from tweet.src.dataset.tweet_dataset_base import TweetDatasetBase
 @Registry.register(category='dataset')
 class TweetDataset(TweetDatasetBase):
     def __init__(self, model_path, csv_path, transformer_type='roberta', train=False, split='train', max_len=96):
-        super().__init__(model_path, csv_path, transformer_type, train, split, split, max_len)
+        super().__init__(model_path, csv_path, transformer_type, train, split, max_len)
 
     def encode_ids(self, encoding, row=None):
         ids = None
