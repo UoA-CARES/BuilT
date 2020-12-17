@@ -49,7 +49,8 @@ class TweetSentimentClassificationModel(nn.Module):
                 self.transformer_path, config=model_config)
         
         self.drop_out = nn.Dropout(drop_out_rate)
-        self.classifier = nn.Linear(768, num_classes)
+        #self.classifier = nn.Linear(768, num_classes)
+        self.classifier = nn.Linear(model_config.hidden_size, num_classes)
 
     def forward(self, input_ids, attention_mask=None, position_ids=None, head_mask=None):
         last_hidden_states, pooled_output, hidden_states = self.transformer(

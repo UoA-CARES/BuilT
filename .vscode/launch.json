@@ -38,6 +38,23 @@
             }
         },
         {
+            "name": "[Roberta-large] Train_sentiment_classification",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_sentiment_classification_roberta_large.yaml",
+                "-f",
+                "use_date=True"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
             "name": "[Bert] Train_sentiment_classification",
             "type": "python",
             "request": "launch",
