@@ -25,8 +25,8 @@ from tweet.src.dataset.tweet_dataset_base import TweetDatasetBase
 
 @Registry.register(category='dataset')
 class TweetIndexExtractionCoverageDataset(TweetDatasetBase):
-    def __init__(self, model_path, csv_path, transformer_type='roberta', train=False, max_len=96):
-        super().__init__(model_path, csv_path, transformer_type, train, max_len)
+    def __init__(self, model_path, csv_path, transformer_type='roberta', train=False, split='train', max_len=96):
+        super().__init__(model_path, csv_path, transformer_type, train, split, max_len)
 
     def encode_ids(self, encoding, row=None):
         sentiment_id = self.tokenizer.encode(row.sentiment).ids
