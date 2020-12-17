@@ -65,6 +65,7 @@ class CAMForwardHook(ForwardHookBase):
             plt.title(
                 f'Predict label is {pr[pred]} True label is {sentiment[index]} : {tweet[index].lower()}', size=16)
             plt.savefig(f'{index}.png')
+            plt.close()
 
             # DISPLAY ACTIVATION TEXT
             html = ''
@@ -89,6 +90,9 @@ class CAMForwardHook(ForwardHookBase):
             html += " (true)"
 
             options = {"xvfb": ""}
-            imgkit.from_string(html, f'{index}t.png', options=options)
+            try:
+                imgkit.from_string(html, f'{index}t.png', options=options)
+            except:
+                print(f"index={index}")
 
         return outputs

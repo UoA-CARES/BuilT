@@ -13,7 +13,7 @@ dataset:
   params:
     max_len: 96
     model_path: "tweet/input/roberta-base/"
-    csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
     transformer_type: "roberta"
 
   splits:

@@ -35,7 +35,8 @@ class Ensembler(object):
         working_dir = self.config.train.dir
 
         results = []
-        
+        targets = None 
+
         for f in os.listdir(working_dir):
             cur_path = os.path.join(working_dir, f)
             if os.path.isdir(cur_path):
@@ -46,7 +47,7 @@ class Ensembler(object):
                     last_epoch, step, last_accuracy = cm.load(self.trainer.model, self.trainer.optimizer, ckpt)
                     print(f'{cur_path}:{last_epoch} , {last_accuracy}')
 
-                    output = self.trainer.forward()
+                    output, targets = self.trainer.forward()
                     
                     cur_result = {'name': f, 'output': output, 'accuracy': last_accuracy}
                     
@@ -58,15 +59,37 @@ class Ensembler(object):
         
         ensembled = None
         for cur, w in zip(results, weights):
-            output = torch.sigmoid(
-                cur['output']).cpu().detach().numpy().tolist() * w
+            if isinstance(cur['output'], list):
+                tmp = []
+                for c in cur['output']:
+                    t = torch.softmax(c, dim=1).cpu().detach().numpy()
+                    t = np.multiply(t, w)
+                    tmp.append(t)
+                output = tmp
+                # output = cur['output']
+            else:
+                # output = torch.softmax(cur['output'], dim=1)
+                # classification task
+                output = torch.sigmoid(cur['output'])
+                output = output.cpu().detach().numpy()
+                output = np.multiply(output, w)
+            
             
             if ensembled is None:
                 ensembled = output
             else:
                 ensembled += output
         
-        ensembled = np.argmax(ensembled, axis=1)
+        if isinstance(ensembled, list):
+            for i in range(len(ensembled)):
+                # ensembled[i] = ensembled[i] / n
+                # pred = torch.softmax(ensembled[i], dim=1).cpu().detach().numpy()
+                # ensembled[i] = np.argmax(pred, axis=1)
+                ensembled[i] = np.argmax(ensembled[i], axis=1)
+        else:
+            ensembled = np.argmax(ensembled, axis=1)
+            
+        return ensembled, targets
 
             
     def get_weights(self, results, ensemble_policy):

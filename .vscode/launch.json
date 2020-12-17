@@ -5,6 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "split dataset",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "split",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_default.yaml",
+                "-f",
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
             "name": "[Roberta] Train_sentiment_classification",
             "type": "python",
             "request": "launch",
@@ -15,7 +31,7 @@
                 "with",
                 "${workspaceFolder}/tweet/config/tweet_sentiment_classification.yaml",
                 "-f",
-                "use_date=True"
+                // "use_date=True"
             ],
             "env": {
                 "TOKENIZERS_PARALLELISM": "True"
@@ -64,9 +80,9 @@
             "args": [
                 "train",
                 "with",
-                "${workspaceFolder}/tweet/config/tweet_index_extraction.yaml",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_correct.yaml",
                 "-f",
-                "use_date=True"
+                // "use_date=True"
             ],
             "env": {
                 "TOKENIZERS_PARALLELISM": "True"
@@ -98,9 +114,9 @@
             "args": [
                 "train",
                 "with",
-                "${workspaceFolder}/tweet/config/tweet_index_extraction_coverage.yaml",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_coverage_correct.yaml",
                 "-f",
-                "use_date=True"
+                // "use_date=True"
             ],
             "env": {
                 "TOKENIZERS_PARALLELISM": "True"
@@ -117,22 +133,70 @@
                 "with",
                 "${workspaceFolder}/tweet/config/tweet_index_extraction_coverage_bert.yaml",
                 "-f",
-                "use_date=True"
+                // "use_date=True"
             ],
             "env": {
                 "TOKENIZERS_PARALLELISM": "True"
             }
         },
         {
-            "name": "Ensemble",
+            "name": "ensemble_sentiment",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/run.py",
             "console": "integratedTerminal",
             "args": [
-                "ensemble",
+                "ensemble_sentiment",
                 "with",
                 "${workspaceFolder}/tweet/config/tweet_sentiment_classification.yaml",
+                "-f"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "ensemble_index_extraction",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "ensemble_index_extraction",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_correct.yaml",
+                "-f"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "ensemble_SE_Esc",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "ensemble_SE_Esc",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_coverage_correct.yaml",
+                "-f"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "ensemble_SE_Esc2",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "ensemble_SE_Esc2",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_coverage_correct.yaml",
                 "-f"
             ],
             "env": {
