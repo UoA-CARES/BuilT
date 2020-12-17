@@ -15,8 +15,9 @@ class TweetIndexExtractionLogger(LoggerBase):
 
         if step is not None:
             assert num_steps_in_epoch is not None
-            log_step = epoch * 10000 + (step / num_steps_in_epoch) * 10000
-            log_step = int(log_step)
+            # log_step = epoch * 10000 + (step / num_steps_in_epoch) * 10000
+            # log_step = int(log_step)
+            log_step = (epoch + 1) * num_steps_in_epoch + step
         else:
             log_step = epoch
 
@@ -25,7 +26,8 @@ class TweetIndexExtractionLogger(LoggerBase):
                 writer['tensorboard'].add_scalar(
                     f'{split}/{key}', value, log_step)
 
-        log_dict.update({'epoch': epoch})
+        
+        log_dict.update({'epoch': epoch, 'log_step': log_step})
         keys = list(log_dict.keys())
         for k in keys:
             prefix = f'[{split}]'
