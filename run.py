@@ -43,7 +43,7 @@ def ensemble_sentiment(_run, _config):
 
     config.dataset.splits = []
     config.dataset.splits.append(
-        {'train': False, 'csv_path': 'tweet/input/tweet-sentiment-extraction/corrected_new_test.csv'})
+        {'train': False, 'split': 'test', 'csv_path': 'tweet/input/tweet-sentiment-extraction/corrected_new_test.csv'})
     config.train.num_epochs = 1
     builder = Builder()
     ensembler = Ensembler(config, builder)
