@@ -11,7 +11,11 @@ ROBERTA_BASE=https://github.com/inkyusa/BuilT/releases/download/v0.1/roberta-bas
 ROBERTA_LARGE=https://github.com/inkyusa/BuilT/releases/download/v0.1/roberta-large.zip
 
 TRAIN=https://github.com/inkyusa/BuilT/releases/download/v0.1/train.csv
-TRAIN_CORR=https://github.com/inkyusa/BuilT/releases/download/v0.1/train_corrected.csv
+NEW_TRAIN=https://github.com/inkyusa/BuilT/releases/download/v0.1/new_train.csv
+NEW_TEST=https://github.com/inkyusa/BuilT/releases/download/v0.1/new_test.csv
+CORR_NEW_TRAIN=https://github.com/inkyusa/BuilT/releases/download/v0.1/corrected_new_train.csv
+CORR_NEW_TEST=https://github.com/inkyusa/BuilT/releases/download/v0.1/corrected_new_test.csv
+
 if [ ! -d "${DownloadPath}" ]; then
   echo "=================================="
   echo "   Creating ${DownloadPath} folder  "
@@ -83,30 +87,38 @@ fi
 #=====================
 # Dataset
 #=====================
+
+if [ ! -f "${DownloadPath}/${KaggleCompName}/train.csv" ]; then
+  echo "=================================="
+  echo "     Downloading train.csv        "
+  echo "=================================="
+  wget ${TRAIN} -P "${DownloadPath}/${KaggleCompName}"
+fi
+
 if [ ! -f "${DownloadPath}/${KaggleCompName}/new_train.csv" ]; then
   echo "=================================="
   echo "     Downloading new_train.csv        "
   echo "=================================="
-  wget ${TRAIN} -P "${DownloadPath}/${KaggleCompName}"
+  wget ${NEW_TRAIN} -P "${DownloadPath}/${KaggleCompName}"
 fi
 
 if [ ! -f "${DownloadPath}/${KaggleCompName}/corrected_new_train.csv" ]; then
   echo "=================================="
   echo " Downloading corrected_new_train.csv  "
   echo "=================================="
-  wget ${TRAIN_CORR} -P "${DownloadPath}/${KaggleCompName}"
+  wget ${CORR_NEW_TRAIN} -P "${DownloadPath}/${KaggleCompName}"
 fi
 
 if [ ! -f "${DownloadPath}/${KaggleCompName}/new_test.csv" ]; then
   echo "=================================="
   echo "     Downloading new_test.csv        "
   echo "=================================="
-  wget ${TRAIN} -P "${DownloadPath}/${KaggleCompName}"
+  wget ${NEW_TEST} -P "${DownloadPath}/${KaggleCompName}"
 fi
 
 if [ ! -f "${DownloadPath}/${KaggleCompName}/corrected_new_test.csv" ]; then
   echo "=================================="
   echo " Downloading corrected_new_test.csv  "
   echo "=================================="
-  wget ${TRAIN_CORR} -P "${DownloadPath}/${KaggleCompName}"
+  wget ${CORR_NEW_TEST} -P "${DownloadPath}/${KaggleCompName}"
 fi
