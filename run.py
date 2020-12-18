@@ -9,6 +9,7 @@ import torch
 import pandas as pd
 import datetime
 import numpy as np
+import wandb
 
 from sklearn import metrics
 from pathlib import Path
@@ -431,7 +432,12 @@ def train(_run, _config):
     if not os.path.exists(config.train.dir):
         os.makedirs(config.train.dir)
 
+
+    
     for i_fold in range(splitter.n_splits):
+        run = wandb.init(
+            project=config.wandb.project.name, group=config.wandb.group.name, reinit=True)
+        
         print(f'Training start: {i_fold} fold')
         train_idx, val_idx = splitter.get_fold(i_fold)
 
@@ -452,9 +458,10 @@ def train(_run, _config):
             {'train': False, 'split': 'test', 'csv_path': 'tweet/input/tweet-sentiment-extraction/corrected_new_test.csv'})
         config.train.name = str(i_fold) + '_fold'
 
-        tr = Trainer(config, builder)
+        tr = Trainer(config, builder, run)
         tr.run()
         print(f'Training end\n')
+        run.finish()
 
 
 @ex.command
