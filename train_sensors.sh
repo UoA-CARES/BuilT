@@ -12,7 +12,7 @@ CLASSIFICATION_CONFIG_BASE="tweet/config/for_sensors"
 export TOKENIZERS_PARALLELISM=true
 
 #1.[TR]_[SC]_[BERT].yaml
-for o in {0..4}
+for o in {0..0}
 do
     echo "==================================="
     echo $o run
@@ -32,7 +32,7 @@ do
                         echo $CONFIG
                         echo "========================================="
                         ((MODEL_CNT=MODEL_CNT+1))
-                        CUDA_VISIBLE_DEVICES=$DEVICE_ID python run.py train with $CONFIG -f use_date=True
+                        CUDA_VISIBLE_DEVICES=$DEVICE_ID python run.py train with $CONFIG -f use_date=False
 
                     done
                 done
@@ -45,7 +45,7 @@ do
                     echo $CONFIG
                     echo "========================================="
                     ((MODEL_CNT=MODEL_CNT+1))
-                    CUDA_VISIBLE_DEVICES=$DEVICE_ID python run.py train with $CONFIG -f use_date=True
+                    CUDA_VISIBLE_DEVICES=$DEVICE_ID python run.py train with $CONFIG -f use_date=False
 
                 done
             fi
