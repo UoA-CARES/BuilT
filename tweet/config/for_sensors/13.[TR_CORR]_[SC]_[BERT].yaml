@@ -6,7 +6,7 @@ wandb:
   group:
     name: "13.[TR_CORR]_[SC]_[BERT]"
   project:
-    name: "built-sensors"
+    name: "built-mdpi-sensors"
 
 
 dataset:

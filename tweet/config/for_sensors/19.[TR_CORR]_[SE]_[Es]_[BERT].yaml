@@ -6,7 +6,7 @@ wandb:
   group:
     name: "19.[TR_CORR]_[SE]_[Es]_[BERT]"
   project:
-    name: "built-sensors"
+    name: "built-mdpi-sensors"
 
 dataset:
   name: "TweetIndexExtractionDataset"

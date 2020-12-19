@@ -6,7 +6,7 @@ wandb:
   group:
     name: "10.[TR]_[SE]_[Esc]_[BERT]"
   project:
-    name: "built-sensors"
+    name: "built-mdpi-sensors"
 
 
 
