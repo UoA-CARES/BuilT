@@ -1,6 +1,6 @@
 
 
-#### Command line sequences
+#### Command line sequences for producing all results presented in Sensors paper
 
 ```shell
 1. git clone git@github.com:inkyusa/BuilT.git
