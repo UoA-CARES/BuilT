@@ -14,10 +14,11 @@ class EnsemblePolicy(enum.Enum):
     
 
 class Ensembler(object):
-    def __init__(self, conf, builder):
+    def __init__(self, conf, builder, wandb_run=None):
         self.config = conf
         self.builder = builder
-        self.trainer = Trainer(conf, self.builder)
+        self.wandb_run = wandb_run
+        self.trainer = Trainer(conf, self.builder, self.wandb_run)
         
     def exist_model(self, checkpoint_path):
         if os.path.exists(checkpoint_path):
