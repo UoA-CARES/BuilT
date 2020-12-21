@@ -47,7 +47,9 @@ def ensemble_sentiment(_run, _config):
         {'train': False, 'split': 'test', 'csv_path': 'tweet/input/tweet-sentiment-extraction/corrected_new_test.csv'})
     config.train.num_epochs = 1
     builder = Builder()
-    ensembler = Ensembler(config, builder)
+    run = wandb.init(
+        project=f'ensemble_{config.wandb.project.name}', group=config.wandb.group.name, reinit=True)
+    ensembler = Ensembler(config, builder, run)
     ensembled_output, targets = ensembler.forward_models()
 
     df = pd.read_csv('tweet/input/tweet-sentiment-extraction/new_test.csv')
@@ -57,6 +59,21 @@ def ensemble_sentiment(_run, _config):
     sentiment_target = sentiment_target.cpu().detach().numpy()
 
     accuracy = metrics.accuracy_score(sentiment_target, ensembled_output)
+    precision = metrics.precision_score(
+        sentiment_target, ensembled_output, average='micro')
+
+    recall = metrics.recall_score(
+        sentiment_target, ensembled_output, average='micro')
+
+    f1_score = metrics.f1_score(
+        sentiment_target, ensembled_output, average='micro')
+    log_dict = {
+        'ensemble_accuracy': accuracy,
+        'ensemble_precision': precision,
+        'ensemble_recall': recall,
+        'ensemble_f1_score': f1_score}
+    
+    run.log(log_dict)
     print(f'accuracy: {accuracy}')
 
     df.rename(columns={'sentiment': 'ori_sentiment'}, inplace=True)
@@ -92,7 +109,9 @@ def ensemble_index_extraction(_run, _config):
         {'train': False, 'split': 'test', 'csv_path': 'tweet/input/tweet-sentiment-extraction/corrected_new_test.csv'})
     config.train.num_epochs = 1
     builder = Builder()
-    ensembler = Ensembler(config, builder)
+    run = wandb.init(
+        project=f'ensemble_{config.wandb.project.name}', group=config.wandb.group.name, reinit=True)
+    ensembler = Ensembler(config, builder, run)
     output, targets = ensembler.forward_models()
 
     start_pred = output[0]
@@ -126,7 +145,20 @@ def ensemble_index_extraction(_run, _config):
 
     start_idx_accuracy = metrics.accuracy_score(start_idx, start_pred)
     end_idx_accuracy = metrics.accuracy_score(end_idx, end_pred)
-    print(f'accuracy - start:{start_idx_accuracy}, end:{end_idx_accuracy}')
+    start_idx_precision = metrics.precision_score(
+        start_idx, start_pred, average='micro')
+    end_idx_precision = metrics.precision_score(
+        end_idx, end_pred, average='micro')
+
+    start_idx_recall = metrics.recall_score(
+        start_idx, start_pred, average='micro')
+    end_idx_recall = metrics.recall_score(
+        end_idx, end_pred, average='micro')
+
+    start_idx_f1_score = metrics.f1_score(
+        start_idx, start_pred, average='micro')
+    end_idx_f1_score = metrics.f1_score(end_idx, end_pred, average='micro')
+
     
     jaccard = 0.0
 
@@ -143,16 +175,19 @@ def ensemble_index_extraction(_run, _config):
 
     score = jaccard / len(selected_text_ori)
     print(f'{score}')
-
-    # jaccard_score = 0.0
-    # for i in range(len(selected_text_ori)):
-    #     jaccard_score += jaccard(
-    #         selected_text_ori[i], selected_text_pred[i])
-
-    # print(f'jacaard score(pred): {jaccard_score/len(selected_text_ori)}')
-
-
-
+    log_dict = {
+        'ensemble_score': score,
+        'ensemble_start_idx_accuracy': start_idx_accuracy,
+        'ensemble_end_idx_accuracy': end_idx_accuracy,
+        'ensemble_start_idx_precision': start_idx_precision,
+        'ensemble_end_idx_precision': end_idx_precision,
+        'ensemble_start_idx_recall': start_idx_recall,
+        'ensemble_end_idx_recall': end_idx_recall,
+        'ensemble_start_idx_f1_score': start_idx_f1_score,
+        'ensemble_end_idx_f1_score': end_idx_f1_score}
+    
+    run.log(log_dict)
+    
     df.rename(columns={'selected_text': 'ori_selected_text'}, inplace=True)
 
     df['selected_text'] = selected_text_pred
@@ -164,34 +199,6 @@ def ensemble_index_extraction(_run, _config):
 
     df.to_csv(
         'tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index.csv')
-
-    
-    # df = pd.read_csv(
-    #     'tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index.csv')
-    # df = df.dropna().reset_index(drop=True)
-
-    # selected_text_ori = df['ori_selected_text'].to_numpy()
-    # selected_text_pred = df['selected_text_pred'].to_numpy()
-
-    # jaccard_score = 0.0
-    # for i in range(len(selected_text_ori)):
-    #     jaccard_score += jaccard(
-    #         selected_text_ori[i], selected_text_pred[i])
-
-    # print(f'jacaard score(pred)!!: {jaccard_score/len(selected_text)}') 
-    
-    
-    # jaccard_score = 0.0
-    # for i in range(len(selected_text_ori)):
-    #     jaccard_score += jaccard(
-    #         selected_text_ori[i], selected_text[i])
-        
-    #     if len(selected_text_ori[i].strip()) != len(selected_text[i].strip()):
-    #         print(selected_text_ori[i])
-    #         print(selected_text[i])
-            
-
-    # print(f'jacaard score(pred)!!!!!!: {jaccard_score/len(selected_text)}') 
     
     
 def compute_jaccard_score(text, start_idx, end_idx, start_logits, end_logits, offsets):
@@ -232,7 +239,9 @@ def ensemble_SE_Esc(_run, _config):
         {'train': False, 'split': 'test', 'csv_path': 'tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index.csv'})
     config.train.num_epochs = 1
     builder = Builder()
-    ensembler = Ensembler(config, builder)
+    run = wandb.init(
+        project=f'ensemble_{config.wandb.project.name}', group=config.wandb.group.name, reinit=True)
+    ensembler = Ensembler(config, builder, run)
     output, targets = ensembler.forward_models()
 
     start_pred_coverage = output[0]
@@ -253,13 +262,7 @@ def ensemble_SE_Esc(_run, _config):
     
     start_pred = df['start_pred'].to_numpy()
     end_pred = df['end_pred'].to_numpy()
-    # start_idx = targets['start_idx'].cpu().detach().numpy()
-    # end_idx = targets['end_idx'].cpu().detach().numpy()
-
-    # selected_text = []
-    # for i in range(start_idx.shape[0]):
-    #     selected_text.append(get_selected_text(
-    #         targets['tweet'][i], start_idx[i], end_idx[i], targets['offsets'][i]))
+    
 
     selected_text_pred = df['selected_text'].to_numpy()
 
@@ -268,30 +271,22 @@ def ensemble_SE_Esc(_run, _config):
     start_idx_accuracy = metrics.accuracy_score(start_idx, start_pred_coverage)
     end_idx_accuracy = metrics.accuracy_score(end_idx, end_pred_coverage)
 
-    # diff_cnt = 0
-    # for i in range(start_idx.shape[0]):
-    #     if len(selected_text_pred_coverage[i]) != len(selected_text_pred[i]):
-    #         diff_cnt += 1
-    #         print(selected_text_pred_coverage[i])
-    #         print(selected_text_pred[i])
-    # print(f'total diff cnt: {diff_cnt}')
-    # print(f'accuracy - start:{start_idx_accuracy}, end:{end_idx_accuracy}')
 
-    # jaccard_score_coverage = 0.0
-    # jaccard_score_pred = 0.0
-    # cnt = 0
-    # for i in range(len(selected_text)):
-    #     if selected_text_pred_coverage[i] == '':
-    #         continue
-    #     cnt += 1
-    #     jaccard_score_coverage += jaccard(
-    #         selected_text_ori[i], selected_text_pred_coverage[i])
-    #     jaccard_score_pred += jaccard(
-    #         selected_text_ori[i], selected_text_pred[i])
+    start_idx_precision = metrics.precision_score(
+        start_idx, start_pred_coverage, average='micro')
+    end_idx_precision = metrics.precision_score(
+        end_idx, start_pred_coverage, average='micro')
 
-    # print(f'jacaard score(pred): {jaccard_score_pred/cnt}')
-    # print(
-    #     f'jacaard score(coverage): {jaccard_score_coverage/cnt}')
+    start_idx_recall = metrics.recall_score(
+        start_idx, start_pred, average='micro')
+    end_idx_recall = metrics.recall_score(
+        end_idx, start_pred_coverage, average='micro')
+
+    start_idx_f1_score = metrics.f1_score(
+        start_idx, start_pred, average='micro')
+    end_idx_f1_score = metrics.f1_score(
+        end_idx, start_pred_coverage, average='micro')
+
     jaccard = 0.0
 
     for i in range(len(selected_text_ori)):
@@ -323,7 +318,20 @@ def ensemble_SE_Esc(_run, _config):
 
     score = jaccard / len(selected_text_ori)
     print(f'coverage: {score}')
+    
+    log_dict = {
+        'ensemble_score': score,
+        'ensemble_start_idx_accuracy': start_idx_accuracy,
+        'ensemble_end_idx_accuracy': end_idx_accuracy,
+        'ensemble_start_idx_precision': start_idx_precision,
+        'ensemble_end_idx_precision': end_idx_precision,
+        'ensemble_start_idx_recall': start_idx_recall,
+        'ensemble_end_idx_recall': end_idx_recall,
+        'ensemble_start_idx_f1_score': start_idx_f1_score,
+        'ensemble_end_idx_f1_score': end_idx_f1_score}
 
+    run.log(log_dict)
+    
     df.rename(columns={'selected_text': 'selected_text_pred'}, inplace=True)
 
     df['selected_text'] = selected_text_pred_coverage
@@ -369,24 +377,6 @@ def ensemble_SE_Esc2(_run, _config):
     start_idx_accuracy = metrics.accuracy_score(start_idx, start_pred_coverage)
     end_idx_accuracy = metrics.accuracy_score(end_idx, end_pred_coverage)
 
-    # diff_cnt = 0
-    # for i in range(start_idx.shape[0]):
-    #     if len(selected_text_pred_coverage2[i]) != len(selected_text_pred_coverage[i]):
-    #         diff_cnt += 1
-    #         print(selected_text_ori[i])
-    #         print(selected_text_pred_coverage2[i])
-    #         print(selected_text_pred_coverage[i])
-    # print(f'total diff cnt: {diff_cnt}')
-    # print(f'accuracy - start:{start_idx_accuracy}, end:{end_idx_accuracy}')
-
-    # jaccard_score_coverage2 = 0.0
-    # jaccard_score_coverage1 = 0.0
-    # for i in range(len(selected_text_ori)):
-        
-    #     jaccard_score_coverage1 += jaccard(
-    #         selected_text_ori[i], selected_text_pred_coverage[i])
-    #     jaccard_score_coverage2 += jaccard(
-    #         selected_text_ori[i], selected_text_pred_coverage2[i])
     jaccard = 0.0
     for i in range(len(selected_text_ori)):
         jaccard_score = compute_jaccard_score(
