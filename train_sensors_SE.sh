@@ -19,7 +19,7 @@ do
     echo "==================================="
     for i in {0..1} #dataset
     do
-        for j in {0..1} #task
+        for j in {1..1} #task
         do
             if [ ${TASK[j]} == "SE" ]; then
                 for k in {0..2} #Ext
