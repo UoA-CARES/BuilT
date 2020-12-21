@@ -4,17 +4,16 @@ wandb:
     use: False
     yaml: "sweep.yaml"
   group:
-    name: "original_classification_with_auc"
+    name: "24.[TR_CORR]_[SE]_[Esc]_[ROB_L]"
   project:
-    name: "BuilT"
+    name: "built-mdpi-sensors"
 
 dataset:
-  name: "TweetDataset"
+  name: "TweetIndexExtractionCoverageDataset"
   params:
     max_len: 96
-    model_path: "tweet/input/roberta-base/"
+    model_path: "tweet/input/roberta-large/"
     csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
-    transformer_type: "roberta"
 
   splits:
     # - train: True
@@ -25,7 +24,7 @@ dataset:
 splitter:
   name: "TweetSplitter"
   params:
-    csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
     n_splits: 5
     shuffle: True
     random_state: 42
@@ -44,18 +43,17 @@ transforms:
         std: !!python/tuple [0.3081]
 
 model:
-  name: "TweetSentimentClassificationModel"
+  name: "TweetIndexExtractModel"
   params:
     transformer_type: "roberta"
-    transformer_path: "tweet/input/roberta-base/"
-    drop_out_rate: 0.1
-    num_classes: 3
+    transformer_path: "tweet/input/roberta-large/"
+    drop_out_rate: 0.3
 
 
 train:
-  dir: "train_dirs/tweet_classification/roberta-base"
+  dir: "train_dirs/tweet_index_extraction_coverage/roberta-large"
   name: ""
-  batch_size: 64
+  batch_size: 16
   num_epochs: 5
   gradient_accumulation_step: 1
 
@@ -63,7 +61,7 @@ evaluation:
   batch_size: 8
 
 loss:
-  name: "TweetLoss"
+  name: "SmoothLabelLoss"
 
 optimizer:
   name: "AdamW"
@@ -77,16 +75,16 @@ scheduler:
     gamma: 0.1
 
 forward_hook:
-  name: "TweetForwardHook"
+  name: "TweetIndexExtractionForwardHook"
 
 post_forward_hook:
   name: "TweetPostForwardHook"
 
 metric_hook:
-  name: "TweetMetric"
+  name: "TweetIndexExtractionMetric"
 
 logger_hook:
-  name: "TweetLogger"
+  name: "TweetIndexExtractionLogger"
   params:
     use_tensorboard: False
     use_wandb: True

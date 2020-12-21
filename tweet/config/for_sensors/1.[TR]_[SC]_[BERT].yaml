@@ -4,17 +4,18 @@ wandb:
     use: False
     yaml: "sweep.yaml"
   group:
-    name: "original_classification_with_auc"
+    name: "1.[TR]_[SC]_[BERT]"
   project:
-    name: "BuilT"
+    name: "built-mdpi-sensors"
+
 
 dataset:
   name: "TweetDataset"
   params:
-    max_len: 96
-    model_path: "tweet/input/roberta-base/"
-    csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
-    transformer_type: "roberta"
+    max_len: 128
+    model_path: "tweet/input/bert-base-uncased/"
+    csv_path: "tweet/input/tweet-sentiment-extraction/new_train.csv"
+    transformer_type: "bert"
 
   splits:
     # - train: True
@@ -25,7 +26,7 @@ dataset:
 splitter:
   name: "TweetSplitter"
   params:
-    csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/new_train.csv"
     n_splits: 5
     shuffle: True
     random_state: 42
@@ -46,16 +47,15 @@ transforms:
 model:
   name: "TweetSentimentClassificationModel"
   params:
-    transformer_type: "roberta"
-    transformer_path: "tweet/input/roberta-base/"
+    transformer_type: "bert"
+    transformer_path: "tweet/input/bert-base-uncased/"
     drop_out_rate: 0.1
     num_classes: 3
 
-
 train:
-  dir: "train_dirs/tweet_classification/roberta-base"
+  dir: "train_dirs/tweet_classification/bert-base-uncased"
   name: ""
-  batch_size: 64
+  batch_size: 32
   num_epochs: 5
   gradient_accumulation_step: 1
 
