@@ -6,15 +6,18 @@ export RobertaBase=roberta-base
 export RobertaLarge=roberta-large
 export BertBaseUncased=bert-base-uncased
 
-BERT=https://github.com/inkyusa/BuilT/releases/download/v0.1/bert-base-uncased.zip
-ROBERTA_BASE=https://github.com/inkyusa/BuilT/releases/download/v0.1/roberta-base.zip
-ROBERTA_LARGE=https://github.com/inkyusa/BuilT/releases/download/v0.1/roberta-large.zip
+https://github.com/UoA-CARES/BuilT/releases/download/v0.1/new_test.csv
 
-TRAIN=https://github.com/inkyusa/BuilT/releases/download/v0.1/train.csv
-NEW_TRAIN=https://github.com/inkyusa/BuilT/releases/download/v0.1/new_train.csv
-NEW_TEST=https://github.com/inkyusa/BuilT/releases/download/v0.1/new_test.csv
-CORR_NEW_TRAIN=https://github.com/inkyusa/BuilT/releases/download/v0.1/corrected_new_train.csv
-CORR_NEW_TEST=https://github.com/inkyusa/BuilT/releases/download/v0.1/corrected_new_test.csv
+
+BERT=https://github.com/UoA-CARES/BuilT/releases/download/v0.1/bert-base-uncased.zip
+ROBERTA_BASE=https://github.com/UoA-CARES/BuilT/releases/download/v0.1/roberta-base.zip
+ROBERTA_LARGE=https://github.com/UoA-CARES/BuilT/releases/download/v0.1/roberta-large.zip
+
+TRAIN=https://github.com/UoA-CARES/BuilT/releases/download/v0.1/train.csv
+NEW_TRAIN=https://github.com/UoA-CARES/BuilT/releases/download/v0.1/new_train.csv
+NEW_TEST=https://github.com/UoA-CARES/BuilT/releases/download/v0.1/new_test.csv
+CORR_NEW_TRAIN=https://github.com/UoA-CARES/BuilT/releases/download/v0.1/corrected_new_train.csv
+CORR_NEW_TEST=https://github.com/UoA-CARES/BuilT/releases/download/v0.1/corrected_new_test.csv
 
 if [ ! -d "${DownloadPath}" ]; then
   echo "=================================="

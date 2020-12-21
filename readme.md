@@ -3,7 +3,7 @@
 #### Command line sequences for producing all results presented in Sensors paper
 
 ```shell
-1. git clone git@github.com:inkyusa/BuilT.git
+1. git clone git@github.com:UoA-CARES/BuilT.git
 2. cd BuilT
 3. git checkout dev/for_sensors_results
 3. cd tweet
