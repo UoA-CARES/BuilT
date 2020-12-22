@@ -5,13 +5,15 @@ wandb:
     yaml: "sweep.yaml"
   group:
     name: "original"
+  project:
+    name: "BuilT"
 
 dataset:
   name: "TweetIndexExtractionDataset"
   params:
     max_len: 128
     model_path: "tweet/input/bert-base-uncased/"
-    csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
     transformer_type: "bert"
 
   splits:
@@ -23,7 +25,7 @@ dataset:
 splitter:
   name: "TweetSplitter"
   params:
-    csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
     n_splits: 5
     shuffle: True
     random_state: 42
@@ -52,7 +54,7 @@ train:
   dir: "train_dirs/tweet_index_extraction/bert-base-uncased"
   name: ""
   batch_size: 128
-  num_epochs: 5
+  num_epochs: 3
   gradient_accumulation_step: 1
 
 evaluation:

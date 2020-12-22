@@ -41,20 +41,17 @@ def main(_run, _config):
 @ex.command
 def ensemble_sentiment(_run, _config):
     config = edict(_config)
-
     config.dataset.splits = []
     config.dataset.splits.append(
-        {'train': False, 'split': 'test', 'csv_path': 'tweet/input/tweet-sentiment-extraction/corrected_new_test.csv'})
+        {'train': config.ensemble_train, 'split': config.ensemble_split, 'csv_path': config.ensemble_csv_input_path})
     config.train.num_epochs = 1
+
     builder = Builder()
     run = wandb.init(
         project=f'ensemble_{config.wandb.project.name}', group=config.wandb.group.name, reinit=True)
     ensembler = Ensembler(config, builder, run)
     ensembled_output, targets = ensembler.forward_models()
 
-    df = pd.read_csv('tweet/input/tweet-sentiment-extraction/new_test.csv')
-    df = df.dropna().reset_index(drop=True)
-    
     sentiment_target = targets['sentiment_target']
     sentiment_target = sentiment_target.cpu().detach().numpy()
 
@@ -72,21 +69,20 @@ def ensemble_sentiment(_run, _config):
         'ensemble_precision': precision,
         'ensemble_recall': recall,
         'ensemble_f1_score': f1_score}
-    
+
     run.log(log_dict)
-    print(f'accuracy: {accuracy}')
+    print(log_dict)
 
+    df = pd.read_csv(config.ensemble_csv_input_path)
+    df = df.dropna().reset_index(drop=True)
     df.rename(columns={'sentiment': 'ori_sentiment'}, inplace=True)
-
     df['ensembled_sentiment'] = ensembled_output
 
     sentiment = ['neutral', 'positive', 'negative']
-
     for index, row in df.iterrows():
         df.at[index, 'sentiment'] = sentiment[row.ensembled_sentiment]
 
-    df.to_csv(
-        'tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment.csv')
+    df.to_csv(config.ensemble_csv_output_path)
 
 
 def get_selected_text(text, start_idx, end_idx, offsets):
@@ -103,11 +99,11 @@ def get_selected_text(text, start_idx, end_idx, offsets):
 @ex.command
 def ensemble_index_extraction(_run, _config):
     config = edict(_config)
-
     config.dataset.splits = []
     config.dataset.splits.append(
-        {'train': False, 'split': 'test', 'csv_path': 'tweet/input/tweet-sentiment-extraction/corrected_new_test.csv'})
+        {'train': config.ensemble_train, 'split': config.ensemble_split, 'csv_path': config.ensemble_csv_input_path})
     config.train.num_epochs = 1
+
     builder = Builder()
     run = wandb.init(
         project=f'ensemble_{config.wandb.project.name}', group=config.wandb.group.name, reinit=True)
@@ -125,15 +121,10 @@ def ensemble_index_extraction(_run, _config):
         selected_text_pred.append(get_selected_text(
             targets['tweet'][i], start_pred[i], end_pred[i], targets['offsets'][i]))
 
-    df = pd.read_csv(
-        'tweet/input/tweet-sentiment-extraction/corrected_new_test.csv')
+    df = pd.read_csv(config.ensemble_csv_input_path)
     df = df.dropna().reset_index(drop=True)
 
-    # selected_text_ori = df['selected_text'] #[]
-    selected_text_ori = []
-    for i in range(start_idx.shape[0]):
-        selected_text_ori.append(get_selected_text(
-            targets['tweet'][i], start_idx[i], end_idx[i], targets['offsets'][i]))
+    selected_text_ori = df[config.original_selected_text_column].to_numpy()
 
     diff_cnt = 0
     for i in range(start_idx.shape[0]):
@@ -159,7 +150,6 @@ def ensemble_index_extraction(_run, _config):
         start_idx, start_pred, average='micro')
     end_idx_f1_score = metrics.f1_score(end_idx, end_pred, average='micro')
 
-    
     jaccard = 0.0
 
     for i in range(len(selected_text_ori)):
@@ -174,7 +164,7 @@ def ensemble_index_extraction(_run, _config):
         jaccard += jaccard_score
 
     score = jaccard / len(selected_text_ori)
-    print(f'{score}')
+
     log_dict = {
         'ensemble_score': score,
         'ensemble_start_idx_accuracy': start_idx_accuracy,
@@ -185,9 +175,10 @@ def ensemble_index_extraction(_run, _config):
         'ensemble_end_idx_recall': end_idx_recall,
         'ensemble_start_idx_f1_score': start_idx_f1_score,
         'ensemble_end_idx_f1_score': end_idx_f1_score}
-    
+
     run.log(log_dict)
-    
+    print(log_dict)
+
     df.rename(columns={'selected_text': 'ori_selected_text'}, inplace=True)
 
     df['selected_text'] = selected_text_pred
@@ -197,10 +188,9 @@ def ensemble_index_extraction(_run, _config):
     df['start_pred'] = start_pred
     df['end_pred'] = end_pred
 
-    df.to_csv(
-        'tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index.csv')
-    
-    
+    df.to_csv(config.ensemble_csv_output_path)
+
+
 def compute_jaccard_score(text, start_idx, end_idx, start_logits, end_logits, offsets):
     start_pred = start_logits
     end_pred = end_logits
@@ -218,12 +208,11 @@ def compute_jaccard_score(text, start_idx, end_idx, start_logits, end_logits, of
     return jaccard(true, pred)
 
 
-
 def jaccard(str1, str2):
     # for s in [',', '.', ';', ':']:
     #     str1 = str1.replace(s, "")
     #     str2 = str2.replace(s, "")
-    
+
     a = set(str1.lower().split())
     b = set(str2.lower().split())
     c = a.intersection(b)
@@ -236,7 +225,7 @@ def ensemble_SE_Esc(_run, _config):
 
     config.dataset.splits = []
     config.dataset.splits.append(
-        {'train': False, 'split': 'test', 'csv_path': 'tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index.csv'})
+        {'train': config.ensemble_train, 'split': config.ensemble_split, 'csv_path': config.ensemble_csv_input_path})
     config.train.num_epochs = 1
     builder = Builder()
     run = wandb.init(
@@ -252,25 +241,132 @@ def ensemble_SE_Esc(_run, _config):
         selected_text_pred_coverage.append(get_selected_text(
             targets['tweet'][i], start_pred_coverage[i], end_pred_coverage[i], targets['offsets'][i]))
 
-    df = pd.read_csv(
-        'tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index.csv')
+    df = pd.read_csv(config.ensemble_csv_input_path)
     df = df.dropna().reset_index(drop=True)
 
-    selected_text_ori = df['ori_selected_text'].to_numpy()
-    start_idx = df['start_idx'].to_numpy()
-    end_idx = df['end_idx'].to_numpy()
-    
-    start_pred = df['start_pred'].to_numpy()
-    end_pred = df['end_pred'].to_numpy()
-    
+    selected_text_ori = df[config.original_selected_text_column].to_numpy()
 
-    selected_text_pred = df['selected_text'].to_numpy()
+    # start_idx = df['start_idx'].to_numpy()
+    # end_idx = df['end_idx'].to_numpy()
+    start_idx = targets['start_idx'].cpu().detach().numpy()
+    end_idx = targets['end_idx'].cpu().detach().numpy()
 
-    
+    # start_pred = df['start_pred'].to_numpy()
+    # end_pred = df['end_pred'].to_numpy()
+
+    # selected_text_pred = df['selected_text'].to_numpy()
 
     start_idx_accuracy = metrics.accuracy_score(start_idx, start_pred_coverage)
     end_idx_accuracy = metrics.accuracy_score(end_idx, end_pred_coverage)
 
+    start_idx_precision = metrics.precision_score(
+        start_idx, start_pred_coverage, average='micro')
+    end_idx_precision = metrics.precision_score(
+        end_idx, end_pred_coverage, average='micro')
+
+    start_idx_recall = metrics.recall_score(
+        start_idx, start_pred_coverage, average='micro')
+    end_idx_recall = metrics.recall_score(
+        end_idx, end_pred_coverage, average='micro')
+
+    start_idx_f1_score = metrics.f1_score(
+        start_idx, start_pred_coverage, average='micro')
+    end_idx_f1_score = metrics.f1_score(
+        end_idx, end_pred_coverage, average='micro')
+
+    # jaccard = 0.0
+
+    # for i in range(len(selected_text_ori)):
+    #     jaccard_score = compute_jaccard_score(
+    #         targets['tweet'][i],
+    #         start_idx[i] + 1,
+    #         end_idx[i] + 1,
+    #         start_pred[i] + 1,
+    #         end_pred[i] + 1,
+    #         targets['offsets'][i])
+
+    #     jaccard += jaccard_score
+
+    # score = jaccard / len(selected_text_ori)
+    # print(f'pred: {score}')
+
+    jaccard = 0.0
+
+    for i in range(len(selected_text_ori)):
+        jaccard_score = compute_jaccard_score(
+            targets['tweet'][i],
+            start_idx[i],
+            end_idx[i],
+            start_pred_coverage[i],
+            end_pred_coverage[i],
+            targets['offsets'][i])
+
+        jaccard += jaccard_score
+
+    score = jaccard / len(selected_text_ori)
+    print(f'coverage: {score}')
+
+    log_dict = {
+        'ensemble_score': score,
+        'ensemble_start_idx_accuracy': start_idx_accuracy,
+        'ensemble_end_idx_accuracy': end_idx_accuracy,
+        'ensemble_start_idx_precision': start_idx_precision,
+        'ensemble_end_idx_precision': end_idx_precision,
+        'ensemble_start_idx_recall': start_idx_recall,
+        'ensemble_end_idx_recall': end_idx_recall,
+        'ensemble_start_idx_f1_score': start_idx_f1_score,
+        'ensemble_end_idx_f1_score': end_idx_f1_score}
+
+    run.log(log_dict)
+    print(log_dict)
+
+    df.rename(columns={'selected_text': 'selected_text_pred'}, inplace=True)
+
+    df['selected_text'] = selected_text_pred_coverage
+    df['selected_text_pred_coverage'] = selected_text_pred_coverage
+
+    df['start_pred_coverage'] = start_pred_coverage
+    df['end_pred_coverage'] = end_pred_coverage
+
+    df.to_csv(config.ensemble_csv_output_path)
+
+
+@ex.command
+def ensemble_SE_Esc_using_Es(_run, _config):
+    config = edict(_config)
+
+    config.dataset.splits = []
+    config.dataset.splits.append(
+        {'train': config.ensemble_train, 'split': config.ensemble_split, 'csv_path': config.ensemble_csv_input_path})
+    config.train.num_epochs = 1
+    builder = Builder()
+    run = wandb.init(
+        project=f'ensemble_{config.wandb.project.name}', group=config.wandb.group.name, reinit=True)
+    ensembler = Ensembler(config, builder, run)
+    output, targets = ensembler.forward_models()
+
+    start_pred_coverage = output[0]
+    end_pred_coverage = output[1]
+
+    selected_text_pred_coverage = []
+    for i in range(start_pred_coverage.shape[0]):
+        selected_text_pred_coverage.append(get_selected_text(
+            targets['tweet'][i], start_pred_coverage[i], end_pred_coverage[i], targets['offsets'][i]))
+
+    df = pd.read_csv(config.ensemble_csv_input_path)
+    df = df.dropna().reset_index(drop=True)
+
+    selected_text_ori = df[config.original_selected_text_column].to_numpy()
+    start_idx = df['start_idx'].to_numpy()
+    end_idx = df['end_idx'].to_numpy()
+
+    start_pred = df['start_pred'].to_numpy()
+    end_pred = df['end_pred'].to_numpy()
+
+    selected_text_pred = df[config.pred_selected_text_column].to_numpy()
+
+    start_idx_accuracy = metrics.accuracy_score(start_idx, start_pred_coverage)
+    end_idx_accuracy = metrics.accuracy_score(end_idx, end_pred_coverage)
 
     start_idx_precision = metrics.precision_score(
         start_idx, start_pred_coverage, average='micro')
@@ -302,7 +398,7 @@ def ensemble_SE_Esc(_run, _config):
 
     score = jaccard / len(selected_text_ori)
     print(f'pred: {score}')
-    
+
     jaccard = 0.0
 
     for i in range(len(selected_text_ori)):
@@ -318,7 +414,7 @@ def ensemble_SE_Esc(_run, _config):
 
     score = jaccard / len(selected_text_ori)
     print(f'coverage: {score}')
-    
+
     log_dict = {
         'ensemble_score': score,
         'ensemble_start_idx_accuracy': start_idx_accuracy,
@@ -331,7 +427,8 @@ def ensemble_SE_Esc(_run, _config):
         'ensemble_end_idx_f1_score': end_idx_f1_score}
 
     run.log(log_dict)
-    
+    print(log_dict)
+
     df.rename(columns={'selected_text': 'selected_text_pred'}, inplace=True)
 
     df['selected_text'] = selected_text_pred_coverage
@@ -340,69 +437,66 @@ def ensemble_SE_Esc(_run, _config):
     df['start_pred_coverage'] = start_pred_coverage
     df['end_pred_coverage'] = end_pred_coverage
 
-    df.to_csv(
-        'tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index_Coverage.csv')
+    df.to_csv(config.ensemble_csv_output_path)
 
 
-@ex.command
-def ensemble_SE_Esc2(_run, _config):
-    config = edict(_config)
+# @ex.command
+# def ensemble_SE_Esc2(_run, _config):
+#     config = edict(_config)
 
-    config.dataset.splits = []
-    config.dataset.splits.append(
-        {'train': False, 'split': 'test', 'csv_path': 'tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index_Coverage.csv'})
-    config.train.num_epochs = 1
-    builder = Builder()
-    ensembler = Ensembler(config, builder)
-    output, targets = ensembler.forward_models()
+#     config.dataset.splits = []
+#     config.dataset.splits.append(
+#         {'train': False, 'split': 'test', 'csv_path': 'tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index_Coverage.csv'})
+#     config.train.num_epochs = 1
+#     builder = Builder()
+#     ensembler = Ensembler(config, builder)
+#     output, targets = ensembler.forward_models()
 
-    start_pred_coverage = output[0]
-    end_pred_coverage = output[1]
+#     start_pred_coverage = output[0]
+#     end_pred_coverage = output[1]
 
-    selected_text_pred_coverage2 = []
-    for i in range(start_pred_coverage.shape[0]):
-        selected_text_pred_coverage2.append(get_selected_text(
-            targets['tweet'][i], start_pred_coverage[i], end_pred_coverage[i], targets['offsets'][i]))
+#     selected_text_pred_coverage2 = []
+#     for i in range(start_pred_coverage.shape[0]):
+#         selected_text_pred_coverage2.append(get_selected_text(
+#             targets['tweet'][i], start_pred_coverage[i], end_pred_coverage[i], targets['offsets'][i]))
 
-    df = pd.read_csv(
-        'tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index_Coverage.csv')
-    df = df.dropna().reset_index(drop=True)
+#     df = pd.read_csv(
+#         'tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index_Coverage.csv')
+#     df = df.dropna().reset_index(drop=True)
 
-    selected_text_ori = df['ori_selected_text']
-    selected_text_pred_coverage = df['selected_text']
+#     selected_text_ori = df['ori_selected_text']
+#     selected_text_pred_coverage = df['selected_text']
 
-    start_idx = df['start_idx'].to_numpy()
-    end_idx = df['end_idx'].to_numpy()
+#     start_idx = df['start_idx'].to_numpy()
+#     end_idx = df['end_idx'].to_numpy()
 
-    start_idx_accuracy = metrics.accuracy_score(start_idx, start_pred_coverage)
-    end_idx_accuracy = metrics.accuracy_score(end_idx, end_pred_coverage)
+#     start_idx_accuracy = metrics.accuracy_score(start_idx, start_pred_coverage)
+#     end_idx_accuracy = metrics.accuracy_score(end_idx, end_pred_coverage)
 
-    jaccard = 0.0
-    for i in range(len(selected_text_ori)):
-        jaccard_score = compute_jaccard_score(
-            targets['tweet'][i],
-            start_idx[i] + 1,
-            end_idx[i] + 1,
-            start_pred_coverage[i],
-            end_pred_coverage[i],
-            targets['offsets'][i])
+#     jaccard = 0.0
+#     for i in range(len(selected_text_ori)):
+#         jaccard_score = compute_jaccard_score(
+#             targets['tweet'][i],
+#             start_idx[i] + 1,
+#             end_idx[i] + 1,
+#             start_pred_coverage[i],
+#             end_pred_coverage[i],
+#             targets['offsets'][i])
 
-        jaccard += jaccard_score
+#         jaccard += jaccard_score
 
-    score = jaccard / len(selected_text_ori)
-    print(f'coverage: {score}')
+#     score = jaccard / len(selected_text_ori)
+#     print(f'coverage: {score}')
 
-    
+#     df.rename(columns={'selected_text': 'selected_text_pred'}, inplace=True)
 
-    df.rename(columns={'selected_text': 'selected_text_pred'}, inplace=True)
+#     df['selected_text_pred_coverage2'] = selected_text_pred_coverage
 
-    df['selected_text_pred_coverage2'] = selected_text_pred_coverage
+#     df['start_pred_coverage'] = start_pred_coverage
+#     df['end_pred_coverage'] = end_pred_coverage
 
-    df['start_pred_coverage'] = start_pred_coverage
-    df['end_pred_coverage'] = end_pred_coverage
-
-    df.to_csv(
-        'tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index_Coverage_2.csv')
+#     df.to_csv(
+#         'tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index_Coverage_2.csv')
 
 
 @ex.command
@@ -422,12 +516,10 @@ def train(_run, _config):
     if not os.path.exists(config.train.dir):
         os.makedirs(config.train.dir)
 
-
-    
     for i_fold in range(splitter.n_splits):
         run = wandb.init(
             project=config.wandb.project.name, group=config.wandb.group.name, reinit=True)
-        
+
         print(f'Training start: {i_fold} fold')
         train_idx, val_idx = splitter.get_fold(i_fold)
 

@@ -3,13 +3,17 @@ wandb:
     name: "Sweep"
     use: False
     yaml: "sweep.yaml"
+  group:
+    name: "original"
+  project:
+    name: "BuilT"
 
 dataset:
   name: "TweetIndexExtractionCoverageDataset"
   params:
     max_len: 128
     model_path: "tweet/input/bert-base-uncased/"
-    csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
     transformer_type: "bert"
 
   splits:
@@ -21,7 +25,7 @@ dataset:
 splitter:
   name: "TweetSplitter"
   params:
-    csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
+    csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
     n_splits: 5
     shuffle: True
     random_state: 42
