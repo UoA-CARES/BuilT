@@ -34,7 +34,7 @@ do
                         # CUDA_VISIBLE_DEVICES=$DEVICE_ID python run.py train with $CONFIG -f use_date=False
 
                         SUFFIX="[${DATASET[i]}]_[${TASK[j]}]_[${EXT[k]}]_[${TRANSFORMER[l]}]"
-                        if [ ${EXT[k]} == "En" ] && [ ${EXT[k]} == "Es" ]; then
+                        if [ ${EXT[k]} == "En" ] || [ ${EXT[k]} == "Es" ]; then
                             CUDA_VISIBLE_DEVICES=$DEVICE_ID python run.py ensemble_index_extraction with $CONFIG \
                                 ensemble_train=False \
                                 ensemble_split='test' \
