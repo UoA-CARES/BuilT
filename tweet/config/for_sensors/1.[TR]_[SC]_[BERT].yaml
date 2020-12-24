@@ -53,7 +53,7 @@ model:
     num_classes: 3
 
 train:
-  dir: "train_dirs/tweet_classification/bert-base-uncased"
+  dir: "train_dirs/[TR]_[SC]_[BERT]"
   name: ""
   batch_size: 32
   num_epochs: 5

@@ -51,7 +51,7 @@ model:
     drop_out_rate: 0.3
 
 train:
-  dir: "train_dirs/tweet_index_extraction/bert-base-uncased"
+  dir: "train_dirs/[TR_CORR]_[SE]_[Es]_[BERT]"
   name: ""
   batch_size: 32
   num_epochs: 5

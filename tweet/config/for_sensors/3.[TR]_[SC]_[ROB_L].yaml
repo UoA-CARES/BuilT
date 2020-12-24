@@ -52,7 +52,7 @@ model:
     num_classes: 3
 
 train:
-  dir: "train_dirs/tweet_classification/roberta-large"
+  dir: "train_dirs/[TR]_[SC]_[ROB_L]"
   name: ""
   batch_size: 16
   num_epochs: 5

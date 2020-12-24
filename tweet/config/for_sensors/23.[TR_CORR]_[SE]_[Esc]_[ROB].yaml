@@ -51,7 +51,7 @@ model:
 
 
 train:
-  dir: "train_dirs/tweet_index_extraction_coverage/roberta-base"
+  dir: "train_dirs/[TR_CORR]_[SE]_[Esc]_[ROB]"
   name: ""
   batch_size: 32
   num_epochs: 5
