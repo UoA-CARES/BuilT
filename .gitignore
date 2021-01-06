@@ -1,8 +1,10 @@
+tweet/input
+
 # wandb
 wandb/
 
 # vscode settings
-.vscode/
+# .vscode/
 
 # training data
 data/
@@ -148,3 +150,4 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+.fuse

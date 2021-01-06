@@ -1,0 +1,92 @@
+wandb:
+  sweep:
+    name: "Sweep"
+    use: False
+    yaml: "sweep.yaml"
+  group:
+    name: "13.[TR_CORR]_[SC]_[BERT]"
+  project:
+    name: "built-mdpi-sensors"
+
+
+dataset:
+  name: "TweetDataset"
+  params:
+    max_len: 128
+    model_path: "tweet/input/bert-base-uncased/"
+    csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
+    transformer_type: "bert"
+
+  splits:
+    # - train: True
+    #   csv_path: ''
+    # - train: False
+    #   csv_path: ''
+
+splitter:
+  name: "TweetSplitter"
+  params:
+    csv_path: "tweet/input/tweet-sentiment-extraction/corrected_new_train.csv"
+    n_splits: 5
+    shuffle: True
+    random_state: 42
+
+
+transforms:
+  name: ""
+  num_preprocessor: 1
+  params:
+    - ToTensor:
+      name: "ToTensor"
+    - Normalize:
+      name: "Normalize"
+      params:
+        mean: !!python/tuple [0.1307]
+        std: !!python/tuple [0.3081]
+
+model:
+  name: "TweetSentimentClassificationModel"
+  params:
+    transformer_type: "bert"
+    transformer_path: "tweet/input/bert-base-uncased/"
+    drop_out_rate: 0.1
+    num_classes: 3
+
+train:
+  dir: "train_dirs/[TR_CORR]_[SC]_[BERT]"
+  name: ""
+  batch_size: 32
+  num_epochs: 5
+  gradient_accumulation_step: 1
+
+evaluation:
+  batch_size: 8
+
+loss:
+  name: "TweetLoss"
+
+optimizer:
+  name: "AdamW"
+  params:
+    lr: 0.00003
+
+scheduler:
+  name: "MultiStepLR"
+  params:
+    milestones: [3, 4, 5]
+    gamma: 0.1
+
+forward_hook:
+  name: "TweetForwardHook"
+
+post_forward_hook:
+  name: "TweetPostForwardHook"
+
+metric_hook:
+  name: "TweetMetric"
+
+logger_hook:
+  name: "TweetLogger"
+  params:
+    use_tensorboard: False
+    use_wandb: True

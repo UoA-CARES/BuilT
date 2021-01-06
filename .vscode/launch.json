@@ -1,0 +1,280 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "split dataset",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "split",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_default.yaml",
+                "-f",
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "[Roberta] Train_sentiment_classification",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_sentiment_classification.yaml",
+                "-f",
+                // "use_date=True"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "[Roberta-large] Train_sentiment_classification",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_sentiment_classification_roberta_large.yaml",
+                "-f",
+                // "use_date=True"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "[Bert] Train_sentiment_classification",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_sentiment_classification_bert.yaml",
+                "-f",
+                "use_date=True"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "[Roberta] Train_index_extraction",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_correct.yaml",
+                "-f",
+                // "use_date=True"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "[Bert] Train_index_extraction",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_bert.yaml",
+                "-f",
+                "use_date=True"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "[Roberta] Train_index_extraction_coverage",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_coverage_correct.yaml",
+                "-f",
+                // "use_date=True"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "[Bert] Train_index_extraction_coverage",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_coverage_bert.yaml",
+                "-f",
+                // "use_date=True"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "ensemble_sentiment",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "ensemble_sentiment",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_sentiment_classification.yaml",
+                "-f"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "ensemble_sentiment[bert]",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "ensemble_sentiment",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_sentiment_classification_bert.yaml",
+                "ensemble_train=False",
+                "ensemble_split='test'",
+                "ensemble_csv_input_path='tweet/input/tweet-sentiment-extraction/corrected_new_test.csv'",
+                "ensemble_csv_output_path='tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment.csv'",
+                "-f"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "ensemble_index_extraction",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "ensemble_index_extraction",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_correct.yaml",
+                "ensemble_train=False",
+                "ensemble_split='test'",
+                "ensemble_csv_input_path='tweet/input/tweet-sentiment-extraction/corrected_new_test.csv'",
+                "ensemble_csv_output_path='tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index.csv'",
+                "original_selected_text_column='selected_text'",
+                "-f"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "ensemble_index_extraction [bert]",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "ensemble_index_extraction",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_bert.yaml",
+                "ensemble_train=False",
+                "ensemble_split='test'",
+                "ensemble_csv_input_path='tweet/input/tweet-sentiment-extraction/corrected_new_test.csv'",
+                "ensemble_csv_output_path='tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index.csv'",
+                "original_selected_text_column='selected_text'",
+                "-f"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "ensemble_SE_Esc",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "ensemble_SE_Esc",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_coverage_correct.yaml",
+                "-f"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "ensemble_SE_Esc [bert]",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "ensemble_SE_Esc",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_coverage_bert.yaml",
+                "ensemble_train=False",
+                "ensemble_split='test'",
+                "ensemble_csv_input_path='tweet/input/tweet-sentiment-extraction/corrected_new_test.csv'",
+                "ensemble_csv_output_path='tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index_Coverage.csv'",
+                "original_selected_text_column='selected_text'",
+                "-f"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
+            "name": "ensemble_SE_Esc_using_Es [bert]",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "ensemble_SE_Esc_using_Es",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_index_extraction_coverage_bert.yaml",
+                "ensemble_train=False",
+                "ensemble_split='test'",
+                "ensemble_csv_input_path='tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index_Coverage.csv'",
+                "ensemble_csv_output_path='tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index_Coverage_using_Es.csv'",
+                "original_selected_text_column='ori_selected_text'",
+                "pred_selected_text_column='selected_text'",
+                "-f"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+    ]
+}
