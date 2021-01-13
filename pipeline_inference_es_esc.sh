@@ -28,6 +28,6 @@ CUDA_VISIBLE_DEVICES=$DEVICE_ID python run.py ensemble_SE_Esc_using_Es with $CON
   ensemble_split='test' \
   ensemble_csv_input_path='tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index.csv' \
   ensemble_csv_output_path='tweet/input/tweet-sentiment-extraction/corrected_new_test_Sentiment_Index_Coverage.csv' \
-  original_selected_text_column='selected_text' \
+  original_selected_text_column='ori_selected_text' \
   pred_selected_text_column='selected_text' \
   -f
