@@ -85,15 +85,7 @@ def ensemble_sentiment(_run, _config):
     df.to_csv(config.ensemble_csv_output_path)
 
 
-def get_selected_text(text, start_idx, end_idx, offsets):
-    selected_text = ""
-    for ix in range(start_idx, end_idx + 1):
-        selected_text += text[offsets[ix][0]: offsets[ix][1]]
-        if (ix + 1) < len(offsets) and offsets[ix][1] < offsets[ix + 1][0]:
-            selected_text += " "
-    if selected_text.strip() == "":
-        return text
-    return selected_text
+
 
 
 @ex.command
@@ -191,12 +183,25 @@ def ensemble_index_extraction(_run, _config):
     df.to_csv(config.ensemble_csv_output_path)
 
 
+def get_selected_text(text, start_idx, end_idx, offsets):
+    if start_idx > end_idx:
+        return text
+    selected_text = ""
+    for ix in range(start_idx, end_idx + 1):
+        selected_text += text[offsets[ix][0]: offsets[ix][1]]
+        if (ix + 1) < len(offsets) and offsets[ix][1] < offsets[ix + 1][0]:
+            selected_text += " "
+    if selected_text.strip() == "":
+        return text
+    return selected_text
+
 def compute_jaccard_score(text, start_idx, end_idx, start_logits, end_logits, offsets):
     start_pred = start_logits
     end_pred = end_logits
 
     try:
         if start_pred > end_pred:
+            print('!!!!!!!!!!!!!!!!!!!!!!!!!')
             pred = text
         else:
             pred = get_selected_text(text, start_pred, end_pred, offsets)
@@ -374,12 +379,12 @@ def ensemble_SE_Esc_using_Es(_run, _config):
         end_idx, start_pred_coverage, average='micro')
 
     start_idx_recall = metrics.recall_score(
-        start_idx, start_pred, average='micro')
+        start_idx, start_pred_coverage, average='micro')
     end_idx_recall = metrics.recall_score(
         end_idx, start_pred_coverage, average='micro')
 
     start_idx_f1_score = metrics.f1_score(
-        start_idx, start_pred, average='micro')
+        start_idx, start_pred_coverage, average='micro')
     end_idx_f1_score = metrics.f1_score(
         end_idx, start_pred_coverage, average='micro')
 
