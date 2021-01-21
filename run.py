@@ -555,6 +555,7 @@ def train(_run, _config):
 def split(_run, _config):
     config = edict(_config)
 
+
     builder = Builder()
     splitter = builder.build_splitter(config)
     df = pd.read_csv(splitter.csv_path)

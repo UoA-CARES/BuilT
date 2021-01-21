@@ -28,7 +28,7 @@ splitter:
     csv_path: "tweet/input/tweet-sentiment-extraction/train.csv"
     n_splits: 5
     shuffle: True
-    random_state: 42
+    random_state: 59
 
 
 transforms:

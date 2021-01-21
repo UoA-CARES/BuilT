@@ -1,5 +1,6 @@
 
 from sklearn import model_selection
+from built.utils.util_functions import seed_everything
 
 class Splitter(object):
     def __init__(self, X, y, n_splits=5, shuffle=True, random_state=42):
@@ -7,6 +8,8 @@ class Splitter(object):
         assert(y is not None)
         assert(len(X) == len(y))
 
+        seed_everything(random_state)
+                
         self.X = X
         self.y = y
         self.n_splits = n_splits
