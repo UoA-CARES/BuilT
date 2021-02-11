@@ -405,21 +405,37 @@ def ensemble_SE_Esc_using_Es(_run, _config):
     print(f'pred: {score}')
 
     jaccard = 0.0
-
+    cnt1 = 0 
+    cnt2 = 0
     for i in range(len(selected_text_ori)):
+        text_len = len(targets['tweet'][i])
+        pre_len = end_pred[i] - start_pred[i]
+
+        s = 0
+        e = 0
+        # print(pre_len / text_len)
+        if pre_len / text_len > 0.1:
+            s = start_pred_coverage[i]
+            e = end_pred_coverage[i]
+            cnt1 += 1
+        else:
+            s = start_pred[i] + 1
+            e = end_pred[i] + 1
+            cnt2 += 1        
+        
         jaccard_score = compute_jaccard_score(
             targets['tweet'][i],
             start_idx[i] + 1,
             end_idx[i] + 1,
-            start_pred_coverage[i],
-            end_pred_coverage[i],
+            s,
+            e,
             targets['offsets'][i])
 
         jaccard += jaccard_score
 
     score = jaccard / len(selected_text_ori)
     print(f'coverage: {score}')
-
+    print(cnt1, cnt2)
     log_dict = {
         'ensemble_score': score,
         'ensemble_start_idx_accuracy': start_idx_accuracy,
