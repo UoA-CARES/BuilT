@@ -21,6 +21,23 @@
             }
         },
         {
+            "name": "[CAM] [Roberta] Train_sentiment_classification",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "with",
+                "${workspaceFolder}/tweet/config/tweet_sentiment_cam.yaml",
+                "-f",
+                // "use_date=True"
+            ],
+            "env": {
+                "TOKENIZERS_PARALLELISM": "True"
+            }
+        },
+        {
             "name": "[Roberta] Train_sentiment_classification",
             "type": "python",
             "request": "launch",

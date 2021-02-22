@@ -51,7 +51,7 @@ model:
     num_classes: 3
 
 train:
-  dir: "train_dirs/tweet_classification/roberta-base"
+  dir: "train_dirs/[TR_CORR]_[SC]_[ROB]/0_fold"
   name: ""
   batch_size: 256
   num_epochs: 1
