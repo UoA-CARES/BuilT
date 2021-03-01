@@ -18,7 +18,7 @@ from sacred import Experiment
 from sacred.utils import apply_backspaces_and_linefeeds
 from built.trainer import Trainer
 from built.builder import Builder
-
+from built.checkpoint_manager import CheckpointManager
 from built.ensembler import Ensembler
 
 from tweet.src.correct_dataset import correct_dataset
@@ -37,6 +37,27 @@ def main(_run, _config):
     config = edict(_config)
     pprint.PrettyPrinter(indent=2).pprint(config)
 
+@ex.command
+def cam_sentiment(_run, _config):
+    config = edict(_config)
+    
+    checkpoint_path = os.path.join(config.train.dir, 'checkpoint')
+    
+    cm = CheckpointManager(checkpoint_path)
+    ckpt = cm.latest()
+    builder = Builder()
+    run = wandb.init(
+        project=f'cam_{config.wandb.project.name}', group=config.wandb.group.name, reinit=True)
+    
+    tr = Trainer(config, builder, run)
+    
+    last_epoch, step, last_accuracy = cm.load(tr.model, tr.optimizer, ckpt)
+    print(f'{checkpoint_path}:{last_epoch} , {last_accuracy}')
+
+    output, targets = tr.forward()
+            
+    
+    
 
 @ex.command
 def ensemble_sentiment(_run, _config):
