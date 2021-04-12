@@ -17,5 +17,11 @@ class LossBase(object):
 class DefaultLoss(LossBase):
     def __call__(self, loss_fn, outputs, targets, data, is_train, device='cpu'):
         if isinstance(outputs, dict):
-            return loss_fn(input=outputs['logits'], target=targets)
-        return loss_fn(input=outputs, target=targets)
+            loss = loss_fn(input=outputs['logits'], target=targets)
+        else:
+            loss = loss_fn(input=outputs, target=targets)
+
+        return loss
+
+
+        

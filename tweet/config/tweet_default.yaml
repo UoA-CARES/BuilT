@@ -57,6 +57,9 @@ train:
   batch_size: 128
   num_epochs: 1
   gradient_accumulation_step: 1
+  continue_from_last_checkpoint: False
+  early_stopper:
+    mode: "max"
 
 evaluation:
   batch_size: 8

@@ -17,6 +17,7 @@ from easydict import EasyDict as edict
 from sacred import Experiment
 from sacred.utils import apply_backspaces_and_linefeeds
 from built.trainer import Trainer
+from built.trainer_base import TrainerBase
 from built.builder import Builder
 from built.checkpoint_manager import CheckpointManager
 from built.ensembler import Ensembler
@@ -582,7 +583,8 @@ def train(_run, _config):
             {'train': False, 'split': 'test', 'csv_path': 'tweet/input/tweet-sentiment-extraction/corrected_new_test.csv'})
         config.train.name = str(i_fold) + '_fold'
 
-        tr = Trainer(config, builder, run)
+        # tr = Trainer(config, builder, run)
+        tr = TrainerBase(config, builder, run)
         tr.run()
         print(f'Training end\n')
         run.finish()
