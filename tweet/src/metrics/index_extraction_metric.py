@@ -51,7 +51,7 @@ def compute_jaccard_score(text, start_idx, end_idx, start_logits, end_logits, of
 
 @Registry.register(category='hooks')
 class TweetIndexExtractionMetric(MetricBase):
-    def __call__(self, outputs, targets, data=None, is_train=False, device='cpu'):
+    def __calc(self, outputs, targets, extra_data=None, is_train=False, device='cpu'):
         start_idx = targets['start_idx'].cpu().detach().numpy()
         end_idx = targets['end_idx'].cpu().detach().numpy()
 
@@ -85,9 +85,9 @@ class TweetIndexExtractionMetric(MetricBase):
         # end_idx_auc = metrics.roc_auc_score(
         #     end_idx, end_pred)
 
-        ids = data['ids']
-        tweet = data['tweet']
-        offsets = data['offsets'].cpu().numpy()
+        ids = extra_data['ids']
+        tweet = extra_data['tweet']
+        offsets = extra_data['offsets'].cpu().numpy()
 
         jaccard = 0.0
 
@@ -104,15 +104,14 @@ class TweetIndexExtractionMetric(MetricBase):
 
         score = jaccard / len(ids)
 
-        return {
-            'score': score,
-            'start_idx_accuracy': start_idx_accuracy,
-            'end_idx_accuracy': end_idx_accuracy,
-            'start_idx_precision': start_idx_precision,
-            'end_idx_precision': end_idx_precision,
-            'start_idx_recall': start_idx_recall,
-            'end_idx_recall': end_idx_recall,
-            'start_idx_f1_score': start_idx_f1_score,
-            'end_idx_f1_score': end_idx_f1_score}
-            # 'start_idx_auc': start_idx_auc,
-            # 'end_idx_auc': end_idx_auc}
+        
+        self.add('score', score)
+        self.add('start_idx_accuracy', start_idx_accuracy)
+        self.add('end_idx_accuracy', end_idx_accuracy)
+        self.add('start_idx_precision', start_idx_precision)
+        self.add('end_idx_precision', end_idx_precision)
+        self.add('start_idx_recall', start_idx_recall)
+        self.add('end_idx_recall', end_idx_recall)
+        self.add('start_idx_f1_score', start_idx_f1_score)
+        self.add('end_idx_f1_score', end_idx_f1_score)
+

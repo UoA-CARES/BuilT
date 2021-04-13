@@ -124,72 +124,72 @@ class TrainerBase(object):
                     
                 return all_outputs, all_targets
 
-    def evaluate_single_epoch(self, dataloader, epoch, split):
-        self.model.eval()
+    # def evaluate_single_epoch(self, dataloader, epoch, split):
+    #     self.model.eval()
 
-        batch_size = self.config.evaluation.batch_size
-        total_size = len(dataloader.dataset)
-        total_step = math.ceil(total_size / batch_size)
+    #     batch_size = self.config.evaluation.batch_size
+    #     total_size = len(dataloader.dataset)
+    #     total_step = math.ceil(total_size / batch_size)
 
-        with torch.no_grad():
-            all_outputs = []
-            all_targets = None
-            aggregated_metric_dict = defaultdict(list)
-            tbar = tqdm.tqdm(enumerate(dataloader), total=total_step, bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
-            for i, (inputs, targets) in tbar:
-                output = self.forward_hook(self.model, inputs, targets, device=self.device)
-                output = self.post_forward_hook(
-                    outputs=output, inputs=inputs, targets=targets, data=None, is_train=True)
+    #     with torch.no_grad():
+    #         all_outputs = []
+    #         all_targets = None
+    #         aggregated_metric_dict = defaultdict(list)
+    #         tbar = tqdm.tqdm(enumerate(dataloader), total=total_step, bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
+    #         for i, (inputs, targets) in tbar:
+    #             output = self.forward_hook(self.model, inputs, targets, device=self.device)
+    #             output = self.post_forward_hook(
+    #                 outputs=output, inputs=inputs, targets=targets, data=None, is_train=True)
 
-                loss = self.loss_fn(output, targets, device=self.device)
+    #             loss = self.loss_fn(output, targets, device=self.device)
 
-                if isinstance(loss, dict):
-                    loss_dict = loss
-                    loss = loss_dict['loss']
-                else:
-                    loss_dict = {'loss': loss}
+    #             if isinstance(loss, dict):
+    #                 loss_dict = loss
+    #                 loss = loss_dict['loss']
+    #             else:
+    #                 loss_dict = {'loss': loss}
 
-                metric_dict = self.metric_fn(
-                    outputs=output, targets=targets, data=inputs, is_train=False)                
+    #             metric_dict = self.metric_fn(
+    #                 outputs=output, targets=targets, data=inputs, is_train=False)                
 
-                log_dict = {key: value.item() for key, value in loss_dict.items()}
-                log_dict['lr'] = self.optimizer.param_groups[0]['lr']
-                log_dict.update(metric_dict)
+    #             log_dict = {key: value.item() for key, value in loss_dict.items()}
+    #             log_dict['lr'] = self.optimizer.param_groups[0]['lr']
+    #             log_dict.update(metric_dict)
 
-                for key, value in log_dict.items():
-                    aggregated_metric_dict[key].append(value)
+    #             for key, value in log_dict.items():
+    #                 aggregated_metric_dict[key].append(value)
 
-                f_epoch = epoch + i / total_step
-                tbar.set_description(f'[ val ] {f_epoch: .2f} epoch')
-                tbar.set_postfix(
-                    lr=self.optimizer.param_groups[0]['lr'], loss=f'{loss.item():.5f}')
+    #             f_epoch = epoch + i / total_step
+    #             tbar.set_description(f'[ val ] {f_epoch: .2f} epoch')
+    #             tbar.set_postfix(
+    #                 lr=self.optimizer.param_groups[0]['lr'], loss=f'{loss.item():.5f}')
                 
-                if isinstance(output, list) or isinstance(output, tuple):
-                    for i in range(len(output)):
-                        if len(all_outputs) < len(output):
-                            all_outputs.append([])
-                        all_outputs[i].append(output[i])
-                else:
-                    all_outputs.append(output)
+    #             if isinstance(output, list) or isinstance(output, tuple):
+    #                 for i in range(len(output)):
+    #                     if len(all_outputs) < len(output):
+    #                         all_outputs.append([])
+    #                     all_outputs[i].append(output[i])
+    #             else:
+    #                 all_outputs.append(output)
                 
-                if isinstance(targets, dict):
-                    if all_targets is None:
-                        all_targets = defaultdict(list)
+    #             if isinstance(targets, dict):
+    #                 if all_targets is None:
+    #                     all_targets = defaultdict(list)
                         
-                    for k in targets:
-                        all_targets[k].append(targets[k])            
-                else:
-                    if all_targets is None:
-                        all_targets = []    
-                    all_targets.append(targets)
+    #                 for k in targets:
+    #                     all_targets[k].append(targets[k])            
+    #             else:
+    #                 if all_targets is None:
+    #                     all_targets = []    
+    #                 all_targets.append(targets)
                     
-                self.logger_fn(self.writer, split=split, outputs=output, labels=targets, data=inputs,
-                                     log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
+    #             self.logger_fn(self.writer, split=split, outputs=output, labels=targets, data=inputs,
+    #                                  log_dict=log_dict, epoch=epoch, step=i, num_steps_in_epoch=total_step)
             
-            aggregated_metric_dict = {f'avg_{key}':np.mean(value) for key, value in aggregated_metric_dict.items()}
-            self.logger_fn(self.writer, split=split, outputs=all_outputs, labels=all_targets,
-                                     log_dict=aggregated_metric_dict, epoch=epoch)
-            return aggregated_metric_dict[f'[{split}]_avg_score']
+    #         aggregated_metric_dict = {f'avg_{key}':np.mean(value) for key, value in aggregated_metric_dict.items()}
+    #         self.logger_fn(self.writer, split=split, outputs=all_outputs, labels=all_targets,
+    #                                  log_dict=aggregated_metric_dict, epoch=epoch)
+    #         return aggregated_metric_dict[f'[{split}]_avg_score']
 
     # def train_single_epoch(self, dataloader, epoch, split):
     #     self.model.train()
@@ -255,6 +255,7 @@ class TrainerBase(object):
         
         total_step = self.calc_steps(dataloader, is_train)
         logger = self.builder.build_logger_fn(self.config, writer=WandbWriter(run=self.wandb_run), epoch=epoch, total_step=total_step)
+        metric = self.builder.build_metric_fn(self.config)
 
         with torch.set_grad_enabled(is_train):
             all_outputs = []
@@ -282,7 +283,7 @@ class TrainerBase(object):
 
                 logger.log('lr', lr, step)
                 logger.log_dict(loss_dict, step)
-                logger.log_dict(self.metric_fn(outputs=outputs, targets=targets, data=inputs, is_train=is_train), step)
+                logger.log_dict(metric.calculate(outputs=outputs, targets=targets, extra_data=inputs, is_train=is_train), step)
                 logger.write(step)
 
                 phase = 'train' if is_train else 'validating'
@@ -378,7 +379,7 @@ class TrainerBase(object):
         self.post_forward_hook = self.builder.build_post_forward_hook(self.config)
 
         # build metric
-        self.metric_fn = self.builder.build_metric_fn(self.config)
+        # self.metric_fn = self.builder.build_metric_fn(self.config)
 
         # build logger
         # self.logger_fn = self.builder.build_logger_fn(self.config)

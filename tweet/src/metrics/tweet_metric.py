@@ -16,7 +16,10 @@ from built.registry import Registry
 
 @Registry.register(category='hooks')
 class TweetMetric(MetricBase):
-    def __call__(self, outputs, targets, data=None, is_train=False, device='cpu'):
+    def __init__(self):
+        super().__init__()
+
+    def calc(self, outputs, targets, extra_data=None, is_train=False, device='cpu'):
         outputs = torch.sigmoid(outputs).cpu().detach().numpy().tolist()
         outputs = np.argmax(outputs, axis=1)
 
@@ -33,9 +36,8 @@ class TweetMetric(MetricBase):
         f1_score = metrics.f1_score(
             targets, outputs, average='micro')
 
-        return {
-            'score': accuracy, 
-            'accuracy': accuracy, 
-            'precision': precision, 
-            'recall': recall, 
-            'f1_score': f1_score}
+        self.add('score', accuracy)
+        self.add('accuracy', accuracy)
+        self.add('precision', precision)
+        self.add('recall', recall)
+        self.add('f1_score', f1_score)
