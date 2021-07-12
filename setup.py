@@ -1,9 +1,14 @@
-import setuptools
+#!/usr/bin/python
+# -*- coding: utf8 -*-
+import os
+from setuptools import setup, find_packages
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+here = os.path.abspath(os.path.dirname(__file__))
 
-setuptools.setup(
+with open(os.path.join(here, 'README.md'), "r", encoding="utf-8") as fh:
+    long_description = fh.read()    
+
+setup(
     name="BuilT",
     version="0.0.1",
     author="JongYoon Lim",
@@ -21,6 +26,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src"),
+    packages=find_packages(where="src"),
     python_requires=">=3.7",
 )
