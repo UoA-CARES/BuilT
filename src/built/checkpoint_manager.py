@@ -43,20 +43,24 @@ class CheckpointManager:
             shutil.copyfile(os.path.join(self.root_dir, checkpoint),
                             os.path.join(self.root_dir, name.format(i)))
 
-    def load(self, model, optimizer, checkpoint):
+    def load(self, model, optimizer, checkpoint, only_state_dict=True):
         print('load checkpoint from', checkpoint)
         checkpoint = torch.load(checkpoint)
         model.load_state_dict(checkpoint['state_dict'], strict=False)
 
+        if only_state_dict:
+            return 
+        
         if optimizer is not None:
             optimizer.load_state_dict(checkpoint['optimizer_dict'])
 
         step = checkpoint['step'] if 'step' in checkpoint else -1
         last_epoch = checkpoint['epoch'] if 'epoch' in checkpoint else -1
+        last_accuracy = checkpoint['accuracy'] if 'epoch' in checkpoint else -1
 
-        return last_epoch, step
+        return last_epoch, step, last_accuracy
 
-    def save(self, model, optimizer, epoch, step=0, keep=None):
+    def save(self, model, optimizer, epoch, accuracy, step=0, keep=None, only_state_dict=True):
         checkpoint_path = os.path.join(
             self.root_dir, f'{self.prefix}{epoch:04d}{self.ext}')
 
@@ -66,12 +70,17 @@ class CheckpointManager:
                 key = key[len('module.'):]
             state_dict[key] = value
 
-        weights_dict = {
-            'state_dict': state_dict,
-            'optimizer_dict': optimizer.state_dict(),
-            'epoch': epoch,
-            'step': step,
-        }
+        if only_state_dict:
+            weights_dict = {'state_dict': state_dict}
+        else:
+            weights_dict = {
+                'state_dict': state_dict,
+                'optimizer_dict': optimizer.state_dict(),
+                'epoch': epoch,
+                'step': step,
+                'accuracy': accuracy,
+            }
+
         torch.save(weights_dict, checkpoint_path)
 
         if keep is not None and keep > 0:

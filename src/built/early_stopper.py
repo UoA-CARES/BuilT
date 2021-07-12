@@ -5,31 +5,35 @@ import torch
 
 
 class EarlyStopper:
-    def __init__(self, patience=7, mode="max", delta=0.001):
+    def __init__(self, patience=7, mode="max", delta=0):
         self.patience = patience
         self.counter = 0
         self.mode = mode
         self.best_score = None
         self.early_stop = False
+        self.comp = None
         self.delta = delta
         if self.mode == "min":
-            self.val_score = np.Inf
+            self.best_score = np.Inf
+            self.comp = self.min_compare
         else:
-            self.val_score = -np.Inf
-
+            self.best_score = -np.Inf
+            self.comp = self.max_compare
+            
+    def min_compare(self, l, r):
+        return l < r
+    
+    def max_compare(self, l, r):
+        return l > r
+            
     def __call__(self, epoch_score):
         assert(epoch_score not in [-np.inf, np.inf, -np.nan, np.nan])
-        if self.mode == "min":
-            score = -1.0 * epoch_score
-        else:
-            score = np.copy(epoch_score)
 
         save_checkpoint = False
-        if self.best_score is None or score >= (self.best_score + self.delta):
+        if self.comp(epoch_score, self.best_score + self.delta):
             print(
-                f'Validation score improved ({self.val_score} --> {epoch_score})')
-            self.best_score = score
-            self.val_score = epoch_score
+                f'Validation score improved ({self.best_score} --> {epoch_score})')
+            self.best_score = epoch_score
             save_checkpoint = True
             self.counter = 0
         else:
