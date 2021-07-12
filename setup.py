@@ -25,7 +25,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "src"},
-    packages=find_packages(where="src"),
+    packages=find_packages(),
     python_requires=">=3.7",
 )
