@@ -52,3 +52,21 @@ def seed_everything(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
+
+# find and placeholders
+def replace_placeholder(config, d):
+    for k, v in d.items():
+        if isinstance(v, dict):
+            d[k] = replace_placeholder(config, v)
+        else:
+            if isinstance(v, str):
+                import re
+                result = re.findall(r'\{([^}]+)\}', v)
+                
+                for r in result:
+                    current_value = d[k]
+                    old = '{' + r + '}'
+                    d[k] = current_value.replace(old, config[r])
+            else:
+                d[k] = v
+    return d
