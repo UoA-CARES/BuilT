@@ -366,7 +366,7 @@ class TrainerBase(object):
             torch.cuda.synchronize()
             s_time = time.time()
 
-            self.process_single_epoch(self.train_dataloader, epoch, is_train=True)
+            self.process_single_epoch(self.train_dataloader, epoch, is_train=True, eval_interval=self.config.eval.eval_interval_between_batch)
 
             torch.cuda.synchronize()
             e_time = time.time() 
