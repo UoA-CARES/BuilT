@@ -64,12 +64,14 @@ class Inference(object):
         total_step = math.ceil(total_size / batch_size)
         return total_step
 
-    def predict(self):
+    def predict(self, model_path=None):
         # load checkpoint
-        ckpt = self.cm.latest()
-        assert(ckpt is not None)
+        if model_path is None:
+            model_path = self.cm.latest()
+        
+        assert(model_path is not None)
 
-        self.cm.load(self.model, None, ckpt)
+        self.cm.load(self.model, None, model_path)
         
         d = self.dataloaders[0]
         dataloader = d['dataloader']
