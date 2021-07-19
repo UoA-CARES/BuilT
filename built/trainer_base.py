@@ -363,12 +363,12 @@ class TrainerBase(object):
         ckpt_score = last_accuracy
 
         for epoch in range(last_epoch, self.config.train.num_epochs - 1):
-            torch.cuda.synchronize()
             s_time = time.time()
-
-            self.process_single_epoch(self.train_dataloader, epoch, is_train=True, eval_interval=self.config.evaluation.eval_interval_between_batch)
-
+            
             torch.cuda.synchronize()
+            self.process_single_epoch(self.train_dataloader, epoch, is_train=True, eval_interval=self.config.evaluation.eval_interval_between_batch)
+            torch.cuda.synchronize()
+
             e_time = time.time() 
             print(f'epoch {epoch} takes {e_time - s_time} seconds.')
         

@@ -43,6 +43,8 @@ class CsvSplitter(Splitter):
     def get_y(self):
         pass
 
-
+    @abc.abstractmethod
+    def len(self):
+        pass
     
 
