@@ -11,9 +11,9 @@ class CheckpointManager:
         if not os.path.exists(train_dir):
             os.makedirs(train_dir)
 
-        self.root_dir = os.path.join(train_dir, 'checkpoint')
-        if not os.path.exists(self.root_dir):
-            os.makedirs(self.root_dir)
+        # self.root_dir = os.path.join(train_dir, 'checkpoint')
+        # if not os.path.exists(self.root_dir):
+        #     os.makedirs(self.root_dir)
 
         self.prefix = prefix
         self.ext = ext
