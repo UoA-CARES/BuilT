@@ -6,14 +6,14 @@ import torch
 
 
 class CheckpointManager:
-    def __init__(self, train_dir, prefix='epoch_', ext='.pth'):
+    def __init__(self, train_dir, prefix='epoch_', ext='.pth', create_dirs=True):
         assert(train_dir is not None)
-        if not os.path.exists(train_dir):
+        if create_dirs and not os.path.exists(train_dir):
             os.makedirs(train_dir)
 
-        # self.root_dir = os.path.join(train_dir, 'checkpoint')
-        # if not os.path.exists(self.root_dir):
-        #     os.makedirs(self.root_dir)
+        self.root_dir = os.path.join(train_dir, 'checkpoint')
+        if create_dirs and not os.path.exists(self.root_dir):
+            os.makedirs(self.root_dir)
 
         self.prefix = prefix
         self.ext = ext

@@ -23,7 +23,7 @@ class Inference(object):
         self.builder = builder        
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')        
         self.working_dir = working_dir       
-        self.cm = CheckpointManager(self.working_dir)
+        self.cm = CheckpointManager(self.working_dir, create_dirs=False)
         self.build_classes()
 
     def build_classes(self):
