@@ -15,13 +15,13 @@ class Splitter(object):
         self.n_splits = n_splits
         self.shuffle = shuffle
         self.random_state = random_state
-        # self.kf = model_selection.StratifiedKFold(n_splits=self.n_splits, shuffle=self.shuffle, random_state=self.random_state)
-        self.kf = model_selection.KFold(
-            n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
+        self.kf = model_selection.StratifiedKFold(n_splits=self.n_splits, shuffle=self.shuffle, random_state=self.random_state)
+        # self.kf = model_selection.KFold(
+        #     n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
     def get_fold(self, n_fold):
         assert(n_fold >= 0 and n_fold < self.n_splits)
-        # for fold, (trn_, val_) in enumerate(self.kf.split(X=self.X, y=self.y)):
-        for fold, (trn_, val_) in enumerate(self.kf.split(X=self.X)):
+        for fold, (trn_, val_) in enumerate(self.kf.split(X=self.X, y=self.y)):
+        # for fold, (trn_, val_) in enumerate(self.kf.split(X=self.X)):
             if fold == n_fold:
                 return trn_, val_
 
