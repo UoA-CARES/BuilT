@@ -45,6 +45,9 @@ class Builder(object):
 
     def build_loss_fn(self, config, **kwargs):
         return Registry.build_from_config('loss', config.loss, kwargs)
+    
+    def build_optimizer_param_fn(self, config, **kwargs):
+        return Registry.build_from_config('optimizer', config.optimizer_parameters, kwargs)
 
     def build_optimizer(self, config, **kwargs):
         return Registry.build_from_config('optimizer', config.optimizer, kwargs)

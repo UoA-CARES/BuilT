@@ -393,16 +393,9 @@ class TrainerBase(object):
         self.post_forward_hook = self.builder.build_post_forward_hook(self.config)
 
         # build optimizer
-        if 'no_bias_decay' in self.config.train and self.config.train.no_bias_decay:
-            param_optimizer = list(self.model.named_parameters())
-            no_decay = self.config.optimizer.no_decay
-            optimizer_parameters = [
-                {'params': [p for n, p in param_optimizer
-                            if not any(nd in n for nd in no_decay)],
-                'weight_decay': self.config.optimizer.weight_decay},
-                {'params': [p for n, p in param_optimizer
-                            if any(nd in n for nd in no_decay)],
-                'weight_decay': 0.0}]
+        if 'use_custom_params' in self.config.optimizer and self.config.optimizer.use_custom_params:
+            get_optim_param_fn = self.builder.build_optimizer_param_fn(self.config)
+            optimizer_parameters = get_optim_param_fn(list(self.model.named_parameters()))
         else:
             optimizer_parameters = self.model.parameters()
 
