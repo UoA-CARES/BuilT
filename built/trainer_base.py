@@ -1,3 +1,4 @@
+from built.evaluation_scheduler import EvaluationScheduler
 import os
 import math
 import time
@@ -28,6 +29,7 @@ class TrainerBase(object):
 
         self.builder = builder
         self.es = EarlyStopper(mode=config.train.early_stopper.mode)        
+        self.eval_scheduler = EvaluationScheduler(config.evaluation.boundary_scores, config.evaluation.intervals)
         self.wandb_run = wandb_run
         self.wandb_conf = wandb_conf
         self.working_dir = working_dir
@@ -311,12 +313,16 @@ class TrainerBase(object):
                 phase = 'train' if is_train else 'validating'
                 tbar.set_postfix(phase=phase, epoch=f'{epoch + 1}', lr=lr, loss=f'{logger.loss:.5f}', score=f'{logger.score:.5f}')
 
-                if is_train and step % eval_interval == 0:
+                schedule_counter = (total_step * (epoch + 1)) + step
+                if is_train and self.eval_scheduler.scheduled(schedule_counter):
                     print('Validation')
-                    score = self.process_single_epoch(self.val_dataloader, epoch, is_train=False)
-                    _, save_ckpt = self.es(score)
-                    if save_ckpt:
-                        self.cm.save(self.model, self.optimizer, epoch+1, score, keep=1, only_state_dict=self.config.train.save_state_dict_only)
+                    val_score = self.process_single_epoch(self.val_dataloader, epoch, is_train=False)
+
+                    _, save_ckpt = self.es(val_score)
+                    if save_ckpt:                        
+                        self.cm.save(self.model, self.optimizer, epoch+1, val_score, keep=1, only_state_dict=self.config.train.save_state_dict_only)
+
+                    self.eval_scheduler.update(schedule_counter, val_score)
                     self.model.train(is_train) 
 
             return logger.score
