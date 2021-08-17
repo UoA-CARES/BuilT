@@ -2,7 +2,7 @@
 [![codecov](https://codecov.io/gh/UoA-CARES/BuilT/branch/master/graph/badge.svg)](https://codecov.io/gh/UoA-CARES/BuilT)
 
 # BuilT(Build a Trainer)
-Easily build a trainer for DNNs using GUI and quickly do experiments for them. 
+Easily build a trainer for your DNN model. 
 
 ## Installation
 ```
