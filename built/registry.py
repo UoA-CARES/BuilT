@@ -17,6 +17,7 @@ from built.logger import DefaultLogger
 from built.models.mnist import Mnist
 
 class Category:
+    """Category class to save a category name and its name of classes"""
     def __init__(self, name):
         self._name = name
         self._class_dict = dict()
@@ -55,7 +56,7 @@ class Category:
 
 
 class Registry:
-
+    """Registry class to regist classes with categories"""
     categories = dict()
 
     # def __repr__(self):

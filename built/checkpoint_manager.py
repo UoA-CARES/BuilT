@@ -6,6 +6,7 @@ import torch
 
 
 class CheckpointManager:
+    """Save and load a model"""
     def __init__(self, train_dir, prefix='epoch_', ext='.pth', create_dirs=True):
         assert(train_dir is not None)
         if create_dirs and not os.path.exists(train_dir):

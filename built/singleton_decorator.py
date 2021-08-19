@@ -1,4 +1,5 @@
 class SingletonDecorator:
+    """A decorator for the Singleton pattern"""
     def __init__(self, clazz):
         self.clazz = clazz
         self.instance = None

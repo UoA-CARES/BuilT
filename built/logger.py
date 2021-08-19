@@ -28,6 +28,7 @@ class TrainMode(Enum):
 #     writer['wandb'].log(self.__log_dict)
 
 class LogWriter(object):
+    """Default writer"""
     __metaclass__ = abc.ABCMeta
     
     @abc.abstractmethod
@@ -40,6 +41,7 @@ class LogWriter(object):
 import wandb
 
 class WandbWriter(LogWriter):
+    """WandB writer"""
     def __init__(self, run=None, project: str=None, group: str=None, reinit=True):
         super().__init__()
         self.run = run
@@ -54,6 +56,7 @@ class WandbWriter(LogWriter):
 
 
 class LoggerBase(object):
+    """Log data in memory and write it using a writer"""
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, writer: LogWriter, epoch: int, total_step: int, is_train: bool):
