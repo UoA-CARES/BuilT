@@ -35,9 +35,21 @@ class LogWriter(object):
     def log(self, log_dict: Dict[str, any]):
         assert log_dict is not None
         
-        # for k, v in log_dict.items():
-            # print(f'{k}: {v}')
+        # do nothing
+        pass
 
+
+class ScreenWriter(LogWriter):
+    """Screen writer"""
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def log(self, log_dict: Dict[str, any]):
+        assert log_dict is not None
+
+        for k, v in log_dict.items():
+            print(f'{k}: {v}')
+        
 import wandb
 
 class WandbWriter(LogWriter):

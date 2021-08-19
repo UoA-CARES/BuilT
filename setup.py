@@ -10,7 +10,7 @@ with open(os.path.join(here, 'README.md'), "r", encoding="utf-8") as fh:
 
 setup(
     name="BuilT",
-    version="0.0.3",
+    version="0.0.4",
     author="JongYoon Lim",
     author_email="jy.lim@auckland.ac.nz",
     description="Easily build your trainer for DNNs.",

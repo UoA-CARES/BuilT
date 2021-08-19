@@ -7,7 +7,8 @@ class EvaluationScheduler(object):
         self.current_eval_interval = self.intervals[0]
 
     def scheduled(self, step):
-        return step >= self.last_eval_step + self.current_eval_interval
+        # step starts from 0, so we need to add 1
+        return step + 1 >= self.last_eval_step + self.current_eval_interval
 
     def update(self, step, score):
         for bs, interval in zip(self.boundary_scores, self.intervals):
@@ -15,7 +16,7 @@ class EvaluationScheduler(object):
                 # if interval < self.current_eval_interval:
                 self.current_eval_interval = interval
                 self.last_eval_step = step
-                print(f'interval={self.current_eval_interval}, last_eval_step={self.last_eval_step}')
+                # print(f'interval={self.current_eval_interval}, last_eval_step={self.last_eval_step}')
                 break
 
 
