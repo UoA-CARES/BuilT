@@ -265,15 +265,16 @@ class TrainerBase(object):
 
         total_size = len(dataloader.dataset)
         total_step = math.ceil(total_size / batch_size)
-        return total_step
+        return total_step, batch_size
 
     def process_single_epoch(self, dataloader: DataLoader, epoch: int, is_train: bool, use_tbar: bool=True) -> float:
         self.model.train(is_train) 
         
-        total_step = self.calc_steps(dataloader, is_train)
+        total_step, batch_size = self.calc_steps(dataloader, is_train)
         logger = self.builder.build_logger_fn(self.config, writer=self.writer, epoch=epoch, total_step=total_step, is_train=is_train)
         metric = self.builder.build_metric_fn(self.config)
-
+        self.eval_scheduler.total_step = total_step
+        
         with torch.set_grad_enabled(is_train):
             all_outputs = []
             all_targets = None
