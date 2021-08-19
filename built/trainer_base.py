@@ -267,7 +267,7 @@ class TrainerBase(object):
         total_step = math.ceil(total_size / batch_size)
         return total_step
 
-    def process_single_epoch(self, dataloader: DataLoader, epoch: int, is_train: bool, eval_interval: int=1, use_tbar: bool=True) -> float:
+    def process_single_epoch(self, dataloader: DataLoader, epoch: int, is_train: bool, use_tbar: bool=True) -> float:
         self.model.train(is_train) 
         
         total_step = self.calc_steps(dataloader, is_train)
@@ -371,7 +371,7 @@ class TrainerBase(object):
         s_time = time.time()
         for epoch in range(last_epoch + 1, self.config.train.num_epochs):
             torch.cuda.synchronize()
-            self.process_single_epoch(self.train_dataloader, epoch, is_train=True, eval_interval=self.config.evaluation.eval_interval_between_batch)
+            self.process_single_epoch(self.train_dataloader, epoch, is_train=True)
             torch.cuda.synchronize()
 
         e_time = time.time() 
