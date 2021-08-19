@@ -26,6 +26,29 @@ BuilT can be installed using pip(https://pypi.org/project/BuilT/).
 pip install built
 ```
 
+## Usage
+
+### Configuration
+### Builder
+
+### Trainer
+### Dataset
+
+### Model
+
+### Loss
+### Optimizer
+
+### Scheduler
+
+### Logger
+
+### Metric
+
+### Inference
+
+### Ensemble
+
 
 
 ## Examples

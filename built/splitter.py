@@ -3,6 +3,7 @@ from sklearn import model_selection
 from built.utils.util_functions import seed_everything
 
 class Splitter(object):
+    """Split dataset into train and validation set"""
     def __init__(self, X, y, n_splits=5, shuffle=True, random_state=42):
         assert(X is not None)
         assert(y is not None)
@@ -29,6 +30,7 @@ import pandas as pd
 import abc
 
 class CsvSplitter(Splitter):
+    """Split csv type data into train and validation set"""
     __metaclass__ = abc.ABCMeta
     
     def __init__(self, X, y, n_splits=5, shuffle=True, random_state=42):

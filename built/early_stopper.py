@@ -5,6 +5,7 @@ import torch
 
 
 class EarlyStopper:
+    """Decide whether or not to stop a training according to the validation score"""
     def __init__(self, patience=7, mode="max", delta=0):
         self.patience = patience
         self.counter = 0

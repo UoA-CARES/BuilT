@@ -17,6 +17,7 @@ from built.models.mnist import Mnist
 from built.splitter import Splitter
 
 class Builder(object):
+    """Create objects from configuration """
     def __init__(self):
         self.load_all_modules_from_dir('.')
         self.regist_defaults()

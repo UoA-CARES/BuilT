@@ -21,6 +21,7 @@ from built.logger import LogWriter, WandbWriter
 from built.utils.util_functions import *
 
 class TrainerBase(object):
+    """Train and evaluate a model according to the configuration"""
     def __init__(self, config, builder, wandb_run=None, wandb_conf=None, working_dir=None, use_accelerator=False):
 
         self.config = config

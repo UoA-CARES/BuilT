@@ -18,6 +18,7 @@ from built.logger import LogWriter, WandbWriter
 
 
 class Inference(object):
+    """Inference test data using a trained model"""
     def __init__(self, config, builder, working_dir=None):
         self.config = config
         self.builder = builder        
