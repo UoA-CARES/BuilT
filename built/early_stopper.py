@@ -32,15 +32,15 @@ class EarlyStopper:
 
         save_checkpoint = False
         if self.comp(epoch_score, self.best_score + self.delta):
-            print(
-                f'Validation score improved ({self.best_score} --> {epoch_score})')
+            # print(
+            #     f'Validation score improved ({self.best_score} --> {epoch_score})')
             self.best_score = epoch_score
             save_checkpoint = True
             self.counter = 0
         else:
             self.counter += 1
-            print('EarlyStopping counter: {} out of {}'.format(
-                self.counter, self.patience))
+            # print('EarlyStopping counter: {} out of {}'.format(
+            #     self.counter, self.patience))
             if self.counter >= self.patience:
                 self.early_stop = True
 

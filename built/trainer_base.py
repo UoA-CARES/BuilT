@@ -265,25 +265,25 @@ class TrainerBase(object):
 
         total_size = len(dataloader.dataset)
         total_step = math.ceil(total_size / batch_size)
-        return total_step
+        return total_step, batch_size
 
-    def process_single_epoch(self, dataloader: DataLoader, epoch: int, is_train: bool, eval_interval: int=1) -> float:
+    def process_single_epoch(self, dataloader: DataLoader, epoch: int, is_train: bool, use_tbar: bool=True) -> float:
         self.model.train(is_train) 
-        # if self.model.training:
-        #     print('training mode')
-        # else:
-        #     print('eval mode')
-        # dataloader = self.accelerator.prepare(dataloader)       
         
-        total_step = self.calc_steps(dataloader, is_train)
+        total_step, batch_size = self.calc_steps(dataloader, is_train)
         logger = self.builder.build_logger_fn(self.config, writer=self.writer, epoch=epoch, total_step=total_step, is_train=is_train)
         metric = self.builder.build_metric_fn(self.config)
-
+        self.eval_scheduler.total_step = total_step
+        
         with torch.set_grad_enabled(is_train):
             all_outputs = []
             all_targets = None
-
-            tbar = tqdm.tqdm(enumerate(dataloader), total=total_step, bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
+            
+            if use_tbar:
+                tbar = tqdm.tqdm(enumerate(dataloader), total=total_step, bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
+            else:
+                tbar = enumerate(dataloader)
+            
             for step, (inputs, targets) in tbar:
                 outputs = self.forward_hook(self.model, inputs, targets, device=self.device)
                 # outputs = self.post_forward_hook(
@@ -311,17 +311,17 @@ class TrainerBase(object):
                 if is_train:
                     self.backward(loss=loss, step=step)
 
-                phase = 'train' if is_train else 'validating'
-                tbar.set_postfix(phase=phase, epoch=f'{epoch + 1}', lr=lr, loss=f'{logger.loss:.5f}', score=f'{logger.score:.5f}')
+                if use_tbar:
+                    tbar.set_postfix(epoch=f'{epoch}', step=step, lr=lr, loss=f'{logger.loss:.5f}', score=f'{logger.score:.5f}')
 
-                schedule_counter = (total_step * (epoch + 1)) + step
+                schedule_counter = (total_step * epoch) + step
                 if is_train and self.eval_scheduler.scheduled(schedule_counter):
-                    print('Validation')
-                    val_score = self.process_single_epoch(self.val_dataloader, epoch, is_train=False)
-
+                    tbar.set_description('evaluation...')
+                    val_score = self.process_single_epoch(self.val_dataloader, epoch, is_train=False, use_tbar=False)
                     _, save_ckpt = self.es(val_score)
                     if save_ckpt:                        
-                        self.cm.save(self.model, self.optimizer, epoch+1, val_score, keep=1, only_state_dict=self.config.train.save_state_dict_only)
+                        tbar.set_description(f'best val_score: {val_score}')
+                        self.cm.save(self.model, self.optimizer, epoch, val_score, keep=1, only_state_dict=self.config.train.save_state_dict_only)
 
                     self.eval_scheduler.update(schedule_counter, val_score)
                     self.model.train(is_train) 
@@ -369,15 +369,14 @@ class TrainerBase(object):
     def train(self, last_epoch, last_accuracy=None):
         ckpt_score = last_accuracy
 
-        for epoch in range(last_epoch, self.config.train.num_epochs - 1):
-            s_time = time.time()
-            
+        s_time = time.time()
+        for epoch in range(last_epoch + 1, self.config.train.num_epochs):
             torch.cuda.synchronize()
-            self.process_single_epoch(self.train_dataloader, epoch, is_train=True, eval_interval=self.config.evaluation.eval_interval_between_batch)
+            self.process_single_epoch(self.train_dataloader, epoch, is_train=True)
             torch.cuda.synchronize()
 
-            e_time = time.time() 
-            print(f'epoch {epoch} takes {e_time - s_time} seconds.')
+        e_time = time.time() 
+        print(f'Total time for training: {e_time - s_time} seconds.')
         
         return self.es.best_score
 
