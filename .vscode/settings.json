@@ -1,4 +1,5 @@
 {
     "python.pythonPath": "/home/anyone/miniconda3/envs/orsum/bin/python",
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "ros.distro": "kinetic"
 }

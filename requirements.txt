@@ -3,6 +3,7 @@ pandas
 PyYAML
 torch
 torchvision
+tensorboard
 wandb
 sklearn
 tqdm
