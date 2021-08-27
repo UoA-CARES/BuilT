@@ -320,8 +320,10 @@ class TrainerBase(object):
                     val_score = self.process_single_epoch(self.val_dataloader, epoch, is_train=False, use_tbar=False)
                     _, save_ckpt = self.es(val_score)
                     if save_ckpt:                        
-                        tbar.set_description(f'best val_score: {val_score}')
+                        tbar.set_description(f'best: {val_score}')
                         self.cm.save(self.model, self.optimizer, epoch, val_score, keep=1, only_state_dict=self.config.train.save_state_dict_only)
+                    else:
+                        tbar.set_description(f'current: {val_score}')
 
                     self.eval_scheduler.update(schedule_counter, val_score)
                     self.model.train(is_train) 
